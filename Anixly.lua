@@ -797,74 +797,96 @@ autoFeaturesContent[2] = createToggleButton("Auto Submit", mainContainer, true, 
 createCollapsibleHeader("AUTO FEATURES", "rbxassetid://6023426919", mainContainer, autoFeaturesContent, order)
 order = order + 3  -- +1 untuk header, +2 untuk konten
 
--- INFORMATION SECTION (Tetap, tidak collapsible)
-local infoHeader = Instance.new("Frame")
-infoHeader.Size = UDim2.new(1, 0, 0, 30)
+-- SECTION INFORMATION (COLLAPSIBLE)
+local infoContent = {}  -- Tabel untuk menyimpan konten INFORMATION
+
+-- Header INFORMATION (collapsible)
+local infoHeader = Instance.new("TextButton")
+infoHeader.Size = UDim2.new(1, 0, 0, 35)
 infoHeader.LayoutOrder = order
-infoHeader.BackgroundTransparency = 1
+infoHeader.BackgroundColor3 = Color3.fromRGB(20, 16, 36)
+infoHeader.Text = ""
+infoHeader.AutoButtonColor = false
 infoHeader.Parent = mainContainer
 order = order + 1
 
+local infoHeaderCorner = Instance.new("UICorner")
+infoHeaderCorner.CornerRadius = UDim.new(0, 8)
+infoHeaderCorner.Parent = infoHeader
+
+local infoHeaderStroke = Instance.new("UIStroke")
+infoHeaderStroke.Color = THEME.mid
+infoHeaderStroke.Thickness = 1
+infoHeaderStroke.Transparency = 0.5
+infoHeaderStroke.Parent = infoHeader
+
+-- Icon INFORMATION
 local infoIcon = Instance.new("ImageLabel")
 infoIcon.Size = UDim2.new(0, 18, 0, 18)
-infoIcon.Position = UDim2.new(0, 5, 0.5, -9)
+infoIcon.Position = UDim2.new(0, 10, 0.5, -9)
 infoIcon.BackgroundTransparency = 1
 infoIcon.Image = "rbxassetid://6023426923"
 infoIcon.ImageColor3 = THEME.accent
 infoIcon.Parent = infoHeader
 
-local infoLabel = Instance.new("TextLabel")
-infoLabel.Size = UDim2.new(1, -35, 1, 0)
-infoLabel.Position = UDim2.new(0, 30, 0, 0)
-infoLabel.BackgroundTransparency = 1
-infoLabel.Text = "INFORMATION"
-infoLabel.TextColor3 = THEME.logText
-infoLabel.Font = Enum.Font.GothamBold
-infoLabel.TextSize = 13
-infoLabel.TextXAlignment = Enum.TextXAlignment.Left
-infoLabel.Parent = infoHeader
+-- Title INFORMATION
+local infoTitle = Instance.new("TextLabel")
+infoTitle.Size = UDim2.new(1, -80, 1, 0)
+infoTitle.Position = UDim2.new(0, 35, 0, 0)
+infoTitle.BackgroundTransparency = 1
+infoTitle.Text = "INFORMATION"
+infoTitle.TextColor3 = THEME.logText
+infoTitle.Font = Enum.Font.GothamBold
+infoTitle.TextSize = 13
+infoTitle.TextXAlignment = Enum.TextXAlignment.Left
+infoTitle.Parent = infoHeader
 
-local infoLine = Instance.new("Frame")
-infoLine.Size = UDim2.new(1, -35, 0, 1)
-infoLine.Position = UDim2.new(0, 30, 1, -2)
-infoLine.BackgroundColor3 = THEME.mid
-infoLine.BorderSizePixel = 0
-infoLine.Parent = infoHeader
+-- Arrow indicator
+local infoArrow = Instance.new("TextLabel")
+infoArrow.Size = UDim2.new(0, 20, 0, 20)
+infoArrow.Position = UDim2.new(1, -25, 0.5, -10)
+infoArrow.BackgroundTransparency = 1
+infoArrow.Text = "▼"
+infoArrow.TextColor3 = THEME.accent
+infoArrow.Font = Enum.Font.GothamBold
+infoArrow.TextSize = 14
+infoArrow.Parent = infoHeader
 
--- Log Frame
--- SECTION INFORMATION (cari bagian ini di kode Anda)
+-- Log Frame (konten INFORMATION)
 local logFrame = Instance.new("Frame")
-logFrame.Size = UDim2.new(1, 0, 0, 120)  -- Tinggi ditambah jadi 120
+logFrame.Size = UDim2.new(1, 0, 0, 150)  -- Tinggi 150 untuk menampung semua
 logFrame.LayoutOrder = order
 logFrame.BackgroundColor3 = Color3.fromRGB(12, 10, 20)
 logFrame.BorderSizePixel = 0
 logFrame.Parent = mainContainer
 order = order + 1
 
+table.insert(infoContent, logFrame)  -- Masukkan logFrame ke dalam tabel konten
+
 local logCorner = Instance.new("UICorner")
 logCorner.CornerRadius = UDim.new(0, 8)
 logCorner.Parent = logFrame
 
--- Neon stroke
+-- Neon stroke untuk log frame
 local logStroke = Instance.new("UIStroke")
 logStroke.Color = THEME.mid
 logStroke.Thickness = 1
 logStroke.Transparency = 0.5
 logStroke.Parent = logFrame
 
--- Label AWALAN (YANG SUDAH ADA)
+-- Label AWALAN (dari game)
 local awalanLabel = Instance.new("TextLabel")
 awalanLabel.Size = UDim2.new(1, -10, 0, 25)
 awalanLabel.Position = UDim2.new(0, 10, 0, 5)
 awalanLabel.BackgroundTransparency = 1
-awalanLabel.Text = "AWALAN: -"
+awalanLabel.Text = "AWALAN: "
 awalanLabel.TextColor3 = THEME.logText
 awalanLabel.Font = Enum.Font.GothamBold
 awalanLabel.TextSize = IsMobile and 12 or 14
 awalanLabel.TextXAlignment = Enum.TextXAlignment.Left
 awalanLabel.Parent = logFrame
 
--- ========== KOLOM PENCARIAN (PASANG DI SINI) ==========
+-- KOLOM PENCARIAN
 local searchLabel = Instance.new("TextLabel")
 searchLabel.Size = UDim2.new(0, 70, 0, 25)
 searchLabel.Position = UDim2.new(0, 10, 0, 30)
@@ -884,7 +906,7 @@ searchBox.Text = ""
 searchBox.TextColor3 = Color3.new(1, 1, 1)
 searchBox.Font = Enum.Font.Gotham
 searchBox.TextSize = 12
-searchBox.PlaceholderText = "1-3 huruf (contoh: ka)"
+searchBox.PlaceholderText = "(contoh: ka)"
 searchBox.PlaceholderColor3 = Color3.fromRGB(100, 90, 120)
 searchBox.ClearTextOnFocus = false
 searchBox.Parent = logFrame
@@ -912,12 +934,11 @@ resultLabel.TextWrapped = true
 resultLabel.TextXAlignment = Enum.TextXAlignment.Left
 resultLabel.TextYAlignment = Enum.TextYAlignment.Top
 resultLabel.Parent = logFrame
--- ========== AKHIR KOLOM PENCARIAN ==========
 
--- Label kata terpilih (YANG SUDAH ADA)
+-- Label kata terpilih (dari auto answer)
 local kataLabel = Instance.new("TextLabel")
-kataLabel.Size = UDim2.new(1, -10, 0, 25)
-kataLabel.Position = UDim2.new(0, 10, 0, 100)  -- Posisi disesuaikan (dari 90 jadi 100)
+kataLabel.Size = UDim2.new(1, -10, 0, 30)
+kataLabel.Position = UDim2.new(0, 10, 0, 110)
 kataLabel.BackgroundTransparency = 1
 kataLabel.Text = "-"
 kataLabel.TextColor3 = Color3.fromRGB(230, 230, 255)
@@ -925,6 +946,28 @@ kataLabel.Font = Enum.Font.GothamBold
 kataLabel.TextSize = IsMobile and 16 or 18
 kataLabel.TextXAlignment = Enum.TextXAlignment.Left
 kataLabel.Parent = logFrame
+
+-- Atur visibility untuk INFORMATION
+local infoExpanded = true  -- Mulai dalam keadaan terbuka
+for _, item in ipairs(infoContent) do
+    item.Visible = infoExpanded
+end
+
+-- Event klik untuk expand/collapse
+infoHeader.MouseButton1Click:Connect(function()
+    playClickSound()
+    infoExpanded = not infoExpanded
+    infoArrow.Text = infoExpanded and "▼" or "▶"
+    
+    for _, item in ipairs(infoContent) do
+        item.Visible = infoExpanded
+    end
+    
+    -- Update canvas size ScrollingFrame
+    task.wait(0.05)
+    local canvasSize = mainContainer.CanvasSize
+    mainContainer.CanvasSize = UDim2.new(0, 0, 0, canvasSize.Y.Offset)
+end)
 
 -- SEMUA KATA SULIT SECTION (Collapsible - sudah ada dari sebelumnya)
 local kataSulitHeader = Instance.new("TextButton")
