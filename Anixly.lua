@@ -31,7 +31,7 @@ end
 local IsRunning = true
 _G[ScriptName] = function()
     IsRunning = false
-    if CoreGui:FindFirstChild("AnixlyHub V1.0.0") then
+    if CoreGui:FindFirstChild("AnixlyHub") then
         CoreGui.Anixly:Destroy()
     end
 end
@@ -132,7 +132,7 @@ local commonWords = {
 
 -- Create GUI
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "AnixlyHub V1.0.0"
+ScreenGui.Name = "AnixlyHub"
 ScreenGui.Parent = CoreGui
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -198,7 +198,7 @@ local TitleLabel = Instance.new("TextLabel")
 TitleLabel.Size = UDim2.new(0, 140, 1, 0)
 TitleLabel.Position = UDim2.new(0, 12, 0, 0)
 TitleLabel.BackgroundTransparency = 1
-TitleLabel.Text = "Anixlyahub V1.0.0"
+TitleLabel.Text = "Anixlyhub V1.0.0"
 TitleLabel.TextColor3 = Color3.new(1, 1, 1)
 TitleLabel.Font = Enum.Font.GothamBold
 TitleLabel.TextSize = TEXT_SIZE_LARGE
@@ -1307,7 +1307,7 @@ order = order + 4  -- +1 untuk header, +3 untuk konten
 -- Build Utility Tab
 local utilOrder = 1
 
--- Noclip toggle
+-- Noclip toggle (YANG SUDAH ADA)
 createToggleButton("NOCLIP", utilContainer, false, function(state)
     noclipEnabled = state
     if noclipEnabled then
@@ -1326,6 +1326,134 @@ createToggleButton("NOCLIP", utilContainer, false, function(state)
         end
     end
 end, utilOrder)
+utilOrder = utilOrder + 1
+
+-- ===== INFINITY JUMP (DI BAWAH NOCLIP) =====
+local infinityJumpEnabled = false
+local infinityJumpConnection
+
+local infinityJumpFrame = Instance.new("Frame")
+infinityJumpFrame.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
+infinityJumpFrame.LayoutOrder = utilOrder
+infinityJumpFrame.BackgroundColor3 = Color3.fromRGB(16, 15, 24)
+infinityJumpFrame.BorderSizePixel = 0
+infinityJumpFrame.Parent = utilContainer
+utilOrder = utilOrder + 1
+
+local infinityJumpCorner = Instance.new("UICorner")
+infinityJumpCorner.CornerRadius = UDim.new(0, 8)
+infinityJumpCorner.Parent = infinityJumpFrame
+
+-- Neon stroke
+local infinityJumpStroke = Instance.new("UIStroke")
+infinityJumpStroke.Color = THEME.mid
+infinityJumpStroke.Thickness = 1
+infinityJumpStroke.Transparency = 0.6
+infinityJumpStroke.Parent = infinityJumpFrame
+
+-- Label
+local infinityJumpLabel = Instance.new("TextLabel")
+infinityJumpLabel.Size = UDim2.new(1, -60, 1, 0)
+infinityJumpLabel.Position = UDim2.new(0, 10, 0, 0)
+infinityJumpLabel.BackgroundTransparency = 1
+infinityJumpLabel.Text = "Infinity Jump"
+infinityJumpLabel.TextColor3 = Color3.fromRGB(210, 200, 230)
+infinityJumpLabel.Font = Enum.Font.GothamBold
+infinityJumpLabel.TextSize = TEXT_SIZE_NORMAL
+infinityJumpLabel.TextXAlignment = Enum.TextXAlignment.Left
+infinityJumpLabel.Parent = infinityJumpFrame
+
+-- Toggle switch
+local infinityToggle = Instance.new("Frame")
+infinityToggle.Size = UDim2.new(0, 44, 0, 22)
+infinityToggle.Position = UDim2.new(1, -50, 0.5, -11)
+infinityToggle.BackgroundColor3 = Color3.fromRGB(180, 40, 50)
+infinityToggle.BorderSizePixel = 0
+infinityToggle.Parent = infinityJumpFrame
+
+local infinityToggleCorner = Instance.new("UICorner")
+infinityToggleCorner.CornerRadius = UDim.new(1, 0)
+infinityToggleCorner.Parent = infinityToggle
+
+-- Glow untuk toggle
+local infinityToggleGlow = Instance.new("UIStroke")
+infinityToggleGlow.Color = Color3.fromRGB(255, 40, 50)
+infinityToggleGlow.Thickness = 2
+infinityToggleGlow.Transparency = 0.5
+infinityToggleGlow.Parent = infinityToggle
+
+-- Knob
+local infinityKnob = Instance.new("Frame")
+infinityKnob.Size = UDim2.new(0, 16, 0, 16)
+infinityKnob.Position = UDim2.new(0, 3, 0.5, -8)
+infinityKnob.BackgroundColor3 = Color3.new(1, 1, 1)
+infinityKnob.BorderSizePixel = 0
+infinityKnob.Parent = infinityToggle
+
+local infinityKnobCorner = Instance.new("UICorner")
+infinityKnobCorner.CornerRadius = UDim.new(1, 0)
+infinityKnobCorner.Parent = infinityKnob
+
+-- Button
+local infinityBtn = Instance.new("TextButton")
+infinityBtn.Size = UDim2.new(1, 0, 1, 0)
+infinityBtn.BackgroundTransparency = 1
+infinityBtn.Text = ""
+infinityBtn.Parent = infinityJumpFrame
+
+-- Fungsi Infinity Jump
+local function toggleInfinityJump(state)
+    infinityJumpEnabled = state
+    
+    if infinityJumpEnabled then
+        -- Aktifkan infinity jump
+        infinityJumpConnection = UserInputService.JumpRequest:Connect(function()
+            if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("Humanoid") then
+                local humanoid = LocalPlayer.Character.Humanoid
+                if humanoid then
+                    humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+                    -- Beri efek sedikit dorongan ke atas
+                    local rootPart = LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+                    if rootPart then
+                        rootPart.Velocity = Vector3.new(rootPart.Velocity.X, 50, rootPart.Velocity.Z)
+                    end
+                end
+            end
+        end)
+        
+        -- Ubah tampilan toggle
+        infinityToggle.BackgroundColor3 = Color3.fromRGB(30, 180, 110)
+        infinityToggleGlow.Color = Color3.fromRGB(30, 255, 110)
+        infinityKnob.Position = UDim2.new(1, -19, 0.5, -8)
+        print("✅ Infinity Jump AKTIF")
+    else
+        -- Matikan infinity jump
+        if infinityJumpConnection then
+            infinityJumpConnection:Disconnect()
+            infinityJumpConnection = nil
+        end
+        
+        -- Ubah tampilan toggle
+        infinityToggle.BackgroundColor3 = Color3.fromRGB(180, 40, 50)
+        infinityToggleGlow.Color = Color3.fromRGB(255, 40, 50)
+        infinityKnob.Position = UDim2.new(0, 3, 0.5, -8)
+        print("❌ Infinity Jump NONAKTIF")
+    end
+end
+
+infinityBtn.MouseButton1Click:Connect(function()
+    playClickSound()
+    toggleInfinityJump(not infinityJumpEnabled)
+end)
+-- ===== AKHIR INFINITY JUMP =====
+
+-- Respawn button dengan icon (YANG SUDAH ADA)
+local respawnBtn = Instance.new("TextButton")
+respawnBtn.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
+respawnBtn.LayoutOrder = utilOrder
+respawnBtn.BackgroundColor3 = Color3.fromRGB(18, 16, 26)
+respawnBtn.Text = ""
+respawnBtn.Parent = utilContainer
 utilOrder = utilOrder + 1
 
 -- Respawn button dengan icon
@@ -1418,40 +1546,101 @@ rejoinBtn.MouseButton1Click:Connect(function()
     TeleportService:Teleport(game.PlaceId, LocalPlayer)
 end)
 
--- Build Teleport Tab (Coming Soon) dengan icon
-local tpPlaceholderFrame = Instance.new("Frame")
-tpPlaceholderFrame.Size = UDim2.new(1, 0, 0, 100)
-tpPlaceholderFrame.BackgroundTransparency = 1
-tpPlaceholderFrame.LayoutOrder = 1
-tpPlaceholderFrame.Parent = tpContainer
+-- TELEPORT TAB (dengan button Claim Bambu)
+local tpContainer = createTabContainer()
+tpContainer.ScrollingDirection = Enum.ScrollingDirection.Y
 
-local tpIcon = Instance.new("ImageLabel")
-tpIcon.Size = UDim2.new(0, 40, 0, 40)
-tpIcon.Position = UDim2.new(0.5, -20, 0.2, 0)
-tpIcon.BackgroundTransparency = 1
-tpIcon.Image = "rbxassetid://6023426935"
-tpIcon.ImageColor3 = Color3.fromRGB(150, 150, 150)
-tpIcon.Parent = tpPlaceholderFrame
+-- TP Tab Layout
+local tpLayout = Instance.new("UIListLayout")
+tpLayout.Padding = UDim.new(0, 8)
+tpLayout.SortOrder = Enum.SortOrder.LayoutOrder
+tpLayout.Parent = tpContainer
+tpContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
+tpContainer.AutomaticCanvasSize = Enum.AutomaticSize.Y
+tpContainer.ScrollBarThickness = IsMobile and 3 or 2
+tpContainer.ScrollBarImageColor3 = THEME.accent
+tpContainer.ScrollBarImageTransparency = 0
+tpContainer.Parent = contentArea
 
-local tpPlaceholder = Instance.new("TextLabel")
-tpPlaceholder.Size = UDim2.new(1, 0, 0, 30)
-tpPlaceholder.Position = UDim2.new(0, 0, 0.6, 0)
-tpPlaceholder.BackgroundTransparency = 1
-tpPlaceholder.Text = "TELEPORT FEATURES"
-tpPlaceholder.TextColor3 = Color3.fromRGB(150, 150, 150)
-tpPlaceholder.Font = Enum.Font.GothamBold
-tpPlaceholder.TextSize = 16
-tpPlaceholder.Parent = tpPlaceholderFrame
+local tpPadding = Instance.new("UIPadding")
+tpPadding.PaddingLeft = UDim.new(0, 6)
+tpPadding.PaddingRight = UDim.new(0, 6)
+tpPadding.PaddingTop = UDim.new(0, 8)
+tpPadding.PaddingBottom = UDim.new(0, 10)
+tpPadding.Parent = tpContainer
 
-local tpComingSoon = Instance.new("TextLabel")
-tpComingSoon.Size = UDim2.new(1, 0, 0, 20)
-tpComingSoon.Position = UDim2.new(0, 0, 0.8, 0)
-tpComingSoon.BackgroundTransparency = 1
-tpComingSoon.Text = "(Coming Soon)"
-tpComingSoon.TextColor3 = Color3.fromRGB(120, 120, 120)
-tpComingSoon.Font = Enum.Font.Gotham
-tpComingSoon.TextSize = 14
-tpComingSoon.Parent = tpPlaceholderFrame
+-- Fungsi untuk membuat button teleport
+local function createTPButton(text, iconId, callback, order)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
+    btn.LayoutOrder = order
+    btn.BackgroundColor3 = Color3.fromRGB(18, 16, 26)
+    btn.Text = ""
+    btn.Parent = tpContainer
+    
+    -- Icon
+    local btnIcon = Instance.new("ImageLabel")
+    btnIcon.Size = UDim2.new(0, 18, 0, 18)
+    btnIcon.Position = UDim2.new(0, 10, 0.5, -9)
+    btnIcon.BackgroundTransparency = 1
+    btnIcon.Image = iconId or "rbxassetid://6023426935"  -- Default icon location
+    btnIcon.ImageColor3 = Color3.fromRGB(200, 190, 220)
+    btnIcon.Parent = btn
+    
+    -- Label
+    local btnLabel = Instance.new("TextLabel")
+    btnLabel.Size = UDim2.new(1, -35, 1, 0)
+    btnLabel.Position = UDim2.new(0, 35, 0, 0)
+    btnLabel.BackgroundTransparency = 1
+    btnLabel.Text = text
+    btnLabel.TextColor3 = Color3.fromRGB(200, 190, 220)
+    btnLabel.Font = Enum.Font.GothamBold
+    btnLabel.TextSize = TEXT_SIZE_NORMAL
+    btnLabel.TextXAlignment = Enum.TextXAlignment.Left
+    btnLabel.Parent = btn
+    
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 8)
+    btnCorner.Parent = btn
+    
+    local btnStroke = Instance.new("UIStroke")
+    btnStroke.Color = Color3.fromRGB(70, 35, 130)
+    btnStroke.Thickness = 1
+    btnStroke.Transparency = 0.4
+    btnStroke.Parent = btn
+    
+    btn.MouseButton1Click:Connect(function()
+        playClickSound()
+        callback()
+    end)
+    
+    return btn
+end
+
+-- ===== TELEPORT BUTTONS =====
+local tpOrder = 1
+
+-- Button Claim Bambu (sesuai kode Anda)
+createTPButton("Claim Bambu", "rbxassetid://6023426935", function()
+    -- Kode yang Anda berikan
+    local player = game.Players.LocalPlayer
+    local character = player.Character or player.CharacterAdded:Wait()
+    
+    -- Cari target di workspace
+    local target = workspace:FindFirstChild("ClaimBambuPart")
+    
+    if target then
+        if character:FindFirstChild("HumanoidRootPart") then
+            character.HumanoidRootPart.CFrame = target.CFrame + Vector3.new(0, 3, 0)
+            print("✅ Teleport ke ClaimBambuPart")
+        else
+            print("❌ HumanoidRootPart tidak ditemukan")
+        end
+    else
+        print("❌ ClaimBambuPart tidak ditemukan di workspace")
+    end
+end, tpOrder)
+tpOrder = tpOrder + 1
 
 -- Typing function
 local function typeWord(word, length)
