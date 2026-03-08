@@ -810,6 +810,7 @@ local wordCategories = {
     KS = {},
     CY = {},
     UI = {},
+    LY = {},
     ["SEMUA KATA SULIT"] = {}
 }
 
@@ -821,6 +822,7 @@ local categoryToggles = {
     KS = false,
     CY = false,
     UI = false,
+    LY = false,
     ["SEMUA KATA SULIT"] = false
 }
 
@@ -836,6 +838,43 @@ mainPadding.PaddingRight = UDim.new(0, 5)
 mainPadding.PaddingTop = UDim.new(0, 5)
 mainPadding.PaddingBottom = UDim.new(0, 10)
 mainPadding.Parent = mainContainer
+
+-- Fungsi untuk membuat Section Header
+local function createSectionHeader(title, iconId, order)
+    local header = Instance.new("Frame")
+    header.Size = UDim2.new(1, -4, 0, 30)
+    header.LayoutOrder = order
+    header.BackgroundTransparency = 1
+    header.Parent = mainContainer
+    
+    local icon = Instance.new("ImageLabel")
+    icon.Size = UDim2.new(0, 20, 0, 20)
+    icon.Position = UDim2.new(0, 5, 0.5, -10)
+    icon.BackgroundTransparency = 1
+    icon.Image = iconId
+    icon.ImageColor3 = THEMES[CurrentTheme].accent
+    icon.Parent = header
+    
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, -35, 1, 0)
+    label.Position = UDim2.new(0, 30, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Text = title
+    label.TextColor3 = THEMES[CurrentTheme].logText
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = 12
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = header
+    
+    local line = Instance.new("Frame")
+    line.Size = UDim2.new(1, -35, 0, 1)
+    line.Position = UDim2.new(0, 30, 1, -2)
+    line.BackgroundColor3 = THEMES[CurrentTheme].mid
+    line.BorderSizePixel = 0
+    line.Parent = header
+    
+    return header
+end
 
 -- Speed Settings Frame
 local function createSpeedSettings(parent, order)
@@ -889,7 +928,7 @@ local function createSpeedSettings(parent, order)
     headerText.Size = UDim2.new(1, -30, 1, 0)
     headerText.Position = UDim2.new(0, 28, 0, 0)
     headerText.BackgroundTransparency = 1
-    headerText.Text = "SPEED SETTINGS"
+    headerText.Text = "Delay Settings"
     headerText.TextColor3 = Color3.fromRGB(180, 140, 255)
     headerText.Font = Enum.Font.GothamBold
     headerText.TextSize = 10
@@ -912,7 +951,7 @@ local function createSpeedSettings(parent, order)
         },
         {
             icon = "rbxassetid://6023426925", -- Icon clock
-            label = "DELAY GILIRAN",
+            label = "Delay Turn",
             minV = 0.1,
             maxV = 5,
             defMin = 1.5,
@@ -924,7 +963,7 @@ local function createSpeedSettings(parent, order)
         },
         {
             icon = "rbxassetid://6023426929", -- Icon backspace
-            label = "BACKSPACE",
+            label = "Backspace",
             minV = 0.01,
             maxV = 1,
             defMin = 0.02,
@@ -968,7 +1007,7 @@ local function createSpeedSettings(parent, order)
         icon.Parent = row
         
         local iconLabel = Instance.new("TextLabel")
-        iconLabel.Size = UDim2.new(0, 60, 0, 14)
+        iconLabel.Size = UDim2.new(0, 70, 0, 14)
         iconLabel.Position = UDim2.new(0, 28, 0, 4)
         iconLabel.BackgroundTransparency = 1
         iconLabel.Text = s.label
@@ -1230,26 +1269,46 @@ local function createToggleButton(text, parent, defaultState, callback, order)
     return frame
 end
 
+-- Membuat Section dan Menambahkan Komponen dengan urutan yang benar
+local currentOrder = 1
+
+-- Section 1: Delay Settings
+createSectionHeader("DELAY SETTINGS", "rbxassetid://6023426941", currentOrder)
+currentOrder = currentOrder + 1
+
 -- Add speed settings
-createSpeedSettings(mainContainer, 1)
+createSpeedSettings(mainContainer, currentOrder)
+currentOrder = currentOrder + 1
+
+-- Section 2: Auto Features
+createSectionHeader("AUTO FEATURES", "rbxassetid://6023426919", currentOrder)
+currentOrder = currentOrder + 1
 
 -- Add toggles dalam urutan yang benar
-createToggleButton("AUTO TULIS", mainContainer, false, function(state)
+createToggleButton("Auto Answer", mainContainer, false, function(state)
     autoTypeEnabled = state
-end, 2)
+end, currentOrder)
+currentOrder = currentOrder + 1
 
-createToggleButton("AUTO ENTER", mainContainer, true, function(state)
+createToggleButton("Auto Submit", mainContainer, true, function(state)
     autoEnterEnabled = state
-end, 3)
+end, currentOrder)
+currentOrder = currentOrder + 1
 
-createToggleButton("HUMAN MODE", mainContainer, false, function(state)  -- Dipindah ke sini
+createToggleButton("Human Mode", mainContainer, false, function(state)
     humanModeEnabled = state
-end, 4)
+end, currentOrder)
+currentOrder = currentOrder + 1
+
+-- Section 3: Word Database
+createSectionHeader("WORD DATABASE", "rbxassetid://6023426945", currentOrder)
+currentOrder = currentOrder + 1
 
 -- Kata Sulit Dropdown
 local kataSulitBtn = Instance.new("TextButton")
 kataSulitBtn.Size = UDim2.new(1, -4, 0, COMPONENT_HEIGHT)
-kataSulitBtn.LayoutOrder = 5  -- Diubah dari 4 jadi 5
+kataSulitBtn.LayoutOrder = currentOrder
+currentOrder = currentOrder + 1
 kataSulitBtn.BackgroundColor3 = Color3.fromRGB(65, 20, 145)
 kataSulitBtn.Text = ""
 kataSulitBtn.TextColor3 = Color3.new(1, 1, 1)
@@ -1297,7 +1356,8 @@ kataDropdown.BackgroundColor3 = Color3.fromRGB(14, 13, 22)
 kataDropdown.ClipsDescendants = true
 kataDropdown.BorderSizePixel = 0
 kataDropdown.Parent = mainContainer
-kataDropdown.LayoutOrder = 6  -- Diubah dari 5 jadi 6
+kataDropdown.LayoutOrder = currentOrder
+currentOrder = currentOrder + 1
 
 local kataDropdownStroke = Instance.new("UIStroke")
 kataDropdownStroke.Color = Color3.fromRGB(80, 35, 160)
@@ -1317,7 +1377,7 @@ local function updateCategoryButtons()
         end
     end
     
-    local categories = {"IF", "X", "NG", "AI", "CY", "UI", "KS", "SEMUA KATA SULIT"}
+    local categories = {"IF", "X", "NG", "AI", "CY", "UI", "KS", "LY", "SEMUA KATA SULIT"}
     
     for i, cat in ipairs(categories) do
         local isAllOn = categoryToggles["SEMUA KATA SULIT"] and cat ~= "SEMUA KATA SULIT"
@@ -1423,7 +1483,7 @@ kataSulitBtn.MouseButton1Click:Connect(function()
     kataBtnText.Text = dropdownOpen and "SET KATA SULIT ▲" or "SET KATA SULIT ▼"
     
     kataDropdown:TweenSize(
-        UDim2.new(1, -4, 0, dropdownOpen and 8 * categoryHeight + 10 or 0),
+        UDim2.new(1, -4, 0, dropdownOpen and 9 * categoryHeight + 10 or 0),
         Enum.EasingDirection.Out,
         Enum.EasingStyle.Quart,
         0.3,
@@ -1433,10 +1493,15 @@ kataSulitBtn.MouseButton1Click:Connect(function()
     updateCategoryButtons()
 end)
 
+-- Section 4: Information
+createSectionHeader("INFORMATION", "rbxassetid://6023426923", currentOrder)
+currentOrder = currentOrder + 1
+
 -- Log Frame
 local logFrame = Instance.new("Frame")
 logFrame.Size = UDim2.new(1, -4, 0, IsMobile and 55 or 50)
-logFrame.LayoutOrder = 10
+logFrame.LayoutOrder = currentOrder
+currentOrder = currentOrder + 1
 logFrame.BackgroundColor3 = Color3.fromRGB(12, 10, 20)
 logFrame.BorderSizePixel = 0
 logFrame.Parent = mainContainer
@@ -1741,7 +1806,8 @@ task.spawn(function()
         ["SEMUA KATA SULIT"] = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/sulit.txt",
         CY = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/CY.txt",
         UI = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/UI.txt",
-        KS = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/KS.txt"
+        KS = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/KS.txt", 
+        LY = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/LY.txt"
     }
     
     for cat, url in pairs(urls) do
@@ -2162,13 +2228,13 @@ local function createUtilButton(text, iconId, callback, order)
     return btn
 end
 
-createUtilButton("Respawn", "rbxassetid://6023426933", function()
+createUtilButton("Respawn", "rbxassetid://6023426939", function()
     if LocalPlayer.Character then
         LocalPlayer.Character:BreakJoints()
     end
 end, 3)
 
-createUtilButton("Rejoin Server", "rbxassetid://6023426939", function()
+createUtilButton("Rejoin Server", "rbxassetid://6023426921", function()
     TeleportService:Teleport(game.PlaceId, LocalPlayer)
 end, 4)
 
