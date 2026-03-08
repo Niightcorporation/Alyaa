@@ -740,7 +740,7 @@ end
 -- Sidebar Tab Buttons
 local tabButtons = {}
 
-local function createTabButton(icon, label, order)
+local function createTabButton(iconId, label, order)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(1, 0, 0, IsMobile and 48 or 52)
     btn.LayoutOrder = order
@@ -758,16 +758,15 @@ local function createTabButton(icon, label, order)
     btnStroke.Transparency = 0.6
     btnStroke.Parent = btn
     
-    -- Icon (pake teks dulu, nanti bisa diganti image)
-    local iconLabel = Instance.new("TextLabel")
-    iconLabel.Size = UDim2.new(1, 0, 0, 28)
-    iconLabel.Position = UDim2.new(0, 0, 0, 5)
-    iconLabel.BackgroundTransparency = 1
-    iconLabel.Text = icon
-    iconLabel.TextColor3 = Color3.fromRGB(120, 110, 150)
-    iconLabel.Font = Enum.Font.GothamBold
-    iconLabel.TextSize = IsMobile and 18 or 22
-    iconLabel.Parent = btn
+    -- Icon (PASTIKAN INI ImageLabel, BUKAN TextLabel)
+    local icon = Instance.new("ImageLabel")
+    icon.Size = UDim2.new(0, IsMobile and 22 or 28, 0, IsMobile and 22 or 28)
+    icon.Position = UDim2.new(0.5, - (IsMobile and 11 or 14), 0.25, 0)
+    icon.BackgroundTransparency = 1
+    icon.Image = iconId
+    icon.ImageColor3 = Color3.fromRGB(120, 110, 150)
+    icon.Name = "Icon"  -- Beri nama biar gampang dicari
+    icon.Parent = btn
     
     -- Label
     local labelText = Instance.new("TextLabel")
@@ -778,9 +777,10 @@ local function createTabButton(icon, label, order)
     labelText.TextColor3 = Color3.fromRGB(120, 110, 150)
     labelText.Font = Enum.Font.GothamBold
     labelText.TextSize = IsMobile and 9 or 10
+    labelText.Name = "Label"
     labelText.Parent = btn
     
-    table.insert(tabButtons, {btn = btn, stroke = btnStroke, icon = iconLabel, label = labelText})
+    table.insert(tabButtons, {btn = btn, stroke = btnStroke, icon = icon, label = labelText})
     return btn
 end
 
@@ -789,8 +789,15 @@ local function highlightTab(activeBtn)
         tab.btn.BackgroundColor3 = Color3.fromRGB(20, 18, 32)
         tab.stroke.Color = Color3.fromRGB(50, 30, 90)
         tab.stroke.Transparency = 0.6
-        tab.icon.TextColor3 = Color3.fromRGB(120, 110, 150)
-        tab.label.TextColor3 = Color3.fromRGB(120, 110, 150)
+        
+        -- PASTIKAN icon adalah ImageLabel
+        if tab.icon and tab.icon:IsA("ImageLabel") then
+            tab.icon.ImageColor3 = Color3.fromRGB(120, 110, 150)
+        end
+        
+        if tab.label and tab.label:IsA("TextLabel") then
+            tab.label.TextColor3 = Color3.fromRGB(120, 110, 150)
+        end
     end
     
     local theme = THEMES[CurrentTheme]
@@ -803,8 +810,15 @@ local function highlightTab(activeBtn)
         if tab.btn == activeBtn then
             tab.stroke.Color = accentColor
             tab.stroke.Transparency = 0.1
-            tab.icon.TextColor3 = Color3.new(1, 1, 1)
-            tab.label.TextColor3 = Color3.new(1, 1, 1)
+            
+            -- PASTIKAN icon adalah ImageLabel
+            if tab.icon and tab.icon:IsA("ImageLabel") then
+                tab.icon.ImageColor3 = Color3.new(1, 1, 1)
+            end
+            
+            if tab.label and tab.label:IsA("TextLabel") then
+                tab.label.TextColor3 = Color3.new(1, 1, 1)
+            end
         end
     end
 end
