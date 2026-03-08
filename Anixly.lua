@@ -1492,7 +1492,7 @@ skinHeaderStroke.Thickness = 1
 skinHeaderStroke.Transparency = 0.5
 skinHeaderStroke.Parent = skinHeader
 
--- Icon
+-- Icon Header
 local skinIcon = Instance.new("ImageLabel")
 skinIcon.Size = UDim2.new(0, 18, 0, 18)
 skinIcon.Position = UDim2.new(0, 10, 0.5, -9)
@@ -1501,23 +1501,19 @@ skinIcon.Image = "rbxassetid://6023426945"  -- Icon folder
 skinIcon.ImageColor3 = THEME.accent
 skinIcon.Parent = skinHeader
 
--- Title
-local skinBtnText = Instance.new("TextLabel")
-skinBtnText.Size = UDim2.new(1, -60, 1, 0)
-skinBtnText.Position = UDim2.new(0, 28, 0, 0)
-skinBtnText.BackgroundTransparency = 1
-skinBtnText.Text = "SKIN BAMBU: (pilih) ▼"
-skinBtnText.TextColor3 = Color3.new(1, 1, 1)
-skinBtnText.Font = Enum.Font.GothamBold
-skinBtnText.TextSize = TEXT_SIZE_NORMAL
-skinBtnText.TextXAlignment = Enum.TextXAlignment.Left
-skinBtnText.Parent = skinBtn
+-- Title Header
+local skinTitle = Instance.new("TextLabel")
+skinTitle.Size = UDim2.new(1, -80, 1, 0)
+skinTitle.Position = UDim2.new(0, 35, 0, 0)
+skinTitle.BackgroundTransparency = 1
+skinTitle.Text = "SKIN BAMBU"
+skinTitle.TextColor3 = THEME.logText
+skinTitle.Font = Enum.Font.GothamBold
+skinTitle.TextSize = 13
+skinTitle.TextXAlignment = Enum.TextXAlignment.Left
+skinTitle.Parent = skinHeader
 
-local skinBtnCorner = Instance.new("UICorner")
-skinBtnCorner.CornerRadius = UDim.new(0, 8)
-skinBtnCorner.Parent = skinBtn
-
--- Arrow
+-- Arrow Header
 local skinArrow = Instance.new("TextLabel")
 skinArrow.Size = UDim2.new(0, 20, 0, 20)
 skinArrow.Position = UDim2.new(1, -25, 0.5, -10)
@@ -1528,9 +1524,9 @@ skinArrow.Font = Enum.Font.GothamBold
 skinArrow.TextSize = 14
 skinArrow.Parent = skinHeader
 
--- Frame utama skin
+-- ===== FRAME UTAMA SKIN (TINGGI 200) =====
 local skinFrame = Instance.new("Frame")
-skinFrame.Size = UDim2.new(1, 0, 0, 150)  -- Tinggi cukup
+skinFrame.Size = UDim2.new(1, 0, 0, 200)  -- TINGGI 200
 skinFrame.LayoutOrder = utilOrder
 skinFrame.BackgroundColor3 = Color3.fromRGB(16, 15, 24)
 skinFrame.BorderSizePixel = 0
@@ -1560,6 +1556,11 @@ skinBtn.Font = Enum.Font.GothamBold
 skinBtn.TextSize = TEXT_SIZE_NORMAL
 skinBtn.Parent = skinFrame
 
+local skinBtnCorner = Instance.new("UICorner")
+skinBtnCorner.CornerRadius = UDim.new(0, 8)
+skinBtnCorner.Parent = skinBtn
+
+-- Icon di button
 local skinBtnIcon = Instance.new("ImageLabel")
 skinBtnIcon.Size = UDim2.new(0, 16, 0, 16)
 skinBtnIcon.Position = UDim2.new(0, 8, 0.5, -8)
@@ -1567,6 +1568,18 @@ skinBtnIcon.BackgroundTransparency = 1
 skinBtnIcon.Image = "rbxassetid://6023426945"
 skinBtnIcon.ImageColor3 = Color3.new(1, 1, 1)
 skinBtnIcon.Parent = skinBtn
+
+-- Text di button
+local skinBtnText = Instance.new("TextLabel")
+skinBtnText.Size = UDim2.new(1, -60, 1, 0)
+skinBtnText.Position = UDim2.new(0, 28, 0, 0)
+skinBtnText.BackgroundTransparency = 1
+skinBtnText.Text = "SKIN BAMBU: (pilih) ▼"
+skinBtnText.TextColor3 = Color3.new(1, 1, 1)
+skinBtnText.Font = Enum.Font.GothamBold
+skinBtnText.TextSize = TEXT_SIZE_NORMAL
+skinBtnText.TextXAlignment = Enum.TextXAlignment.Left
+skinBtnText.Parent = skinBtn
 
 -- Dropdown content
 local skinDropdown = Instance.new("Frame")
@@ -1586,7 +1599,7 @@ skinDropdownStroke.Parent = skinDropdown
 -- Status info
 local skinInfo = Instance.new("TextLabel")
 skinInfo.Size = UDim2.new(1, -20, 0, 20)
-skinInfo.Position = UDim2.new(0, 10, 0, COMPONENT_HEIGHT + 85)
+skinInfo.Position = UDim2.new(0, 10, 0, 165)  -- Posisi 165 (200 - 35)
 skinInfo.BackgroundTransparency = 1
 skinInfo.Text = "Status: belum pilih skin"
 skinInfo.TextColor3 = Color3.fromRGB(160, 100, 255)
@@ -1701,6 +1714,7 @@ local function applySkin(skinName)
     fixAttachments(backWeapon)
     
     print("[Skin] Applied: " .. skinName)
+    skinInfo.Text = "Status: Skin " .. skinName .. " terpasang"
 end
 
 -- Fungsi update dropdown
@@ -1776,7 +1790,7 @@ local function updateSkinDropdown()
         selectBtn.MouseButton1Click:Connect(function()
             playClickSound()
             currentSkin = skinData.name
-            skinBtn.Text = "🎋  SKIN BAMBU: " .. skinData.label .. " ▼"
+            skinBtnText.Text = "SKIN BAMBU: " .. skinData.label .. " ▼"
             skinInfo.Text = "Status: Terpilih " .. skinData.label .. " | " .. skinData.rarity
             skinInfo.TextColor3 = RARITY_COLORS[skinData.rarity] or THEME.logText
             applySkin(skinData.name)
@@ -1789,8 +1803,12 @@ end
 skinBtn.MouseButton1Click:Connect(function()
     playClickSound()
     skinOpen = not skinOpen
-    local skinName = currentSkin and currentSkin:gsub("^Bambu", "") or "(pilih)"
-    skinBtn.Text = "🎋  SKIN BAMBU: " .. skinName .. (skinOpen and " ▲" or " ▼")
+    
+    if skinOpen then
+        skinBtnText.Text = skinBtnText.Text:gsub("▼", "▲")
+    else
+        skinBtnText.Text = skinBtnText.Text:gsub("▲", "▼")
+    end
     
     skinDropdown:TweenSize(
         UDim2.new(1, -20, 0, skinOpen and #SKINS * skinItemHeight + 8 or 0),
