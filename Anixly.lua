@@ -787,7 +787,7 @@ local function highlightTab(activeBtn)
     end
 end
 
--- Teleport Tab
+-- Teleport Tab (Kosong)
 local tpContainer = createTabContainer()
 tpContainer.ScrollingDirection = Enum.ScrollingDirection.Y
 
@@ -810,95 +810,15 @@ tpPadding.PaddingTop = UDim.new(0, 8)
 tpPadding.PaddingBottom = UDim.new(0, 10)
 tpPadding.Parent = tpContainer
 
--- TP Buttons
-local function createTPButton(text, location, order)
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, 0, 0, IsMobile and 42 or 38)
-    btn.LayoutOrder = order
-    btn.BackgroundColor3 = Color3.fromRGB(18, 16, 26)
-    btn.Text = ""
-    btn.TextColor3 = Color3.fromRGB(200, 190, 220)
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = TEXT_SIZE_NORMAL
-    btn.Parent = tpContainer
-    
-    -- Icon
-    local icon = Instance.new("ImageLabel")
-    icon.Size = UDim2.new(0, 18, 0, 18)
-    icon.Position = UDim2.new(0, 8, 0.5, -9)
-    icon.BackgroundTransparency = 1
-    icon.Image = "rbxassetid://6023426935" -- Icon lokasi
-    icon.ImageColor3 = Color3.fromRGB(200, 190, 220)
-    icon.Parent = btn
-    
-    -- Text
-    local btnLabel = Instance.new("TextLabel")
-    btnLabel.Size = UDim2.new(1, -30, 1, 0)
-    btnLabel.Position = UDim2.new(0, 30, 0, 0)
-    btnLabel.BackgroundTransparency = 1
-    btnLabel.Text = text
-    btnLabel.TextColor3 = Color3.fromRGB(200, 190, 220)
-    btnLabel.Font = Enum.Font.GothamBold
-    btnLabel.TextSize = TEXT_SIZE_NORMAL
-    btnLabel.TextXAlignment = Enum.TextXAlignment.Left
-    btnLabel.Parent = btn
-    
-    local btnCorner = Instance.new("UICorner")
-    btnCorner.CornerRadius = UDim.new(0, 9)
-    btnCorner.Parent = btn
-    
-    local btnStroke = Instance.new("UIStroke")
-    btnStroke.Color = Color3.fromRGB(70, 35, 130)
-    btnStroke.Thickness = 1
-    btnStroke.Transparency = 0.4
-    btnStroke.Parent = btn
-    
-    btn.MouseButton1Click:Connect(function()
-        playClickSound()
-        
-        -- Cari lokasi
-        local target = workspace:FindFirstChild(location)
-        if not target then
-            print("⚠️ " .. location .. " tidak ditemukan!")
-            return
-        end
-        
-        -- Cari part untuk teleport
-        local targetPart
-        for _, obj in ipairs(target:GetDescendants()) do
-            if obj:IsA("BasePart") then
-                targetPart = obj
-                break
-            end
-        end
-        
-        -- Jika tidak ada part, gunakan target itu sendiri jika dia BasePart
-        if not targetPart and target:IsA("BasePart") then
-            targetPart = target
-        end
-        
-        if not targetPart then
-            print("⚠️ Tidak ada BasePart di " .. location .. "!")
-            return
-        end
-        
-        -- Teleport
-        local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
-        if root then
-            root.CFrame = CFrame.new(targetPart.Position + Vector3.new(0, 5, 0))
-            print("⚡ Teleport ke " .. text)
-        end
-    end)
-    
-    return btn
-end
-
--- Tambahkan button teleport
-createTPButton("Bambu Lava", "ParkourBambu2", 1)
-createTPButton("Lobby", "MainSpawn", 2)
-createTPButton("Arena 1", "Arena1", 3)
-createTPButton("Arena 2", "Arena2", 4)
-createTPButton("Shop", "ShopArea", 5)
+-- Placeholder text (opsional, bisa dihapus)
+local placeholder = Instance.new("TextLabel")
+placeholder.Size = UDim2.new(1, 0, 0, 50)
+placeholder.BackgroundTransparency = 1
+placeholder.Text = "🚀 Fitur Teleport akan segera hadir..."
+placeholder.TextColor3 = Color3.fromRGB(150, 150, 150)
+placeholder.Font = Enum.Font.Gotham
+placeholder.TextSize = 14
+placeholder.Parent = tpContainer
 
 -- Icon IDs: 
 -- Main: bolt
