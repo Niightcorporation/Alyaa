@@ -496,7 +496,7 @@ local MinIcon = Instance.new("ImageLabel")
 MinIcon.Size = UDim2.new(1, -4, 1, -4)
 MinIcon.Position = UDim2.new(0, 2, 0, 2)
 MinIcon.BackgroundTransparency = 1
-MinIcon.Image = "https://files.catbox.moe/lw0byv.jpg" -- ID logo Alya (ganti dengan ID yang sesuai)
+MinIcon.Image = "☕" -- ID logo Alya (ganti dengan ID yang sesuai)
 MinIcon.ImageColor3 = Color3.fromRGB(255, 255, 255)
 MinIcon.Parent = MinimizeBtn
 
@@ -579,7 +579,7 @@ MiniIcon.Name = "AnixlyMiniIcon"
 MiniIcon.Size = UDim2.new(0, IsMobile and 45 or 60, 0, IsMobile and 45 or 60)
 MiniIcon.Position = UDim2.new(0, 10, 0.5, -30)
 MiniIcon.BackgroundColor3 = Color3.fromRGB(55, 15, 130)
-MiniIcon.Image = "https://files.catbox.moe/lw0byv.jpg" -- Logo Alya untuk minimized state
+MiniIcon.Image = "☕" -- Logo Alya untuk minimized state
 MiniIcon.Visible = false
 MiniIcon.BorderSizePixel = 0
 MiniIcon.Parent = ScreenGui
@@ -787,50 +787,16 @@ local function highlightTab(activeBtn)
     end
 end
 
--- Teleport Tab (Kosong)
-local tpContainer = createTabContainer()
-tpContainer.ScrollingDirection = Enum.ScrollingDirection.Y
-
--- TP Tab Layout
-local tpLayout = Instance.new("UIListLayout")
-tpLayout.Padding = UDim.new(0, 8)
-tpLayout.SortOrder = Enum.SortOrder.LayoutOrder
-tpLayout.Parent = tpContainer
-tpContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
-tpContainer.AutomaticCanvasSize = Enum.AutomaticSize.Y
-tpContainer.ScrollBarThickness = IsMobile and 3 or 2
-tpContainer.ScrollBarImageColor3 = Color3.fromRGB(150, 80, 255)
-tpContainer.ScrollBarImageTransparency = 0
-tpContainer.ScrollingDirection = Enum.ScrollingDirection.Y
-
-local tpPadding = Instance.new("UIPadding")
-tpPadding.PaddingLeft = UDim.new(0, 6)
-tpPadding.PaddingRight = UDim.new(0, 6)
-tpPadding.PaddingTop = UDim.new(0, 8)
-tpPadding.PaddingBottom = UDim.new(0, 10)
-tpPadding.Parent = tpContainer
-
--- Placeholder text (opsional, bisa dihapus)
-local placeholder = Instance.new("TextLabel")
-placeholder.Size = UDim2.new(1, 0, 0, 50)
-placeholder.BackgroundTransparency = 1
-placeholder.Text = "🚀 Fitur Teleport akan segera hadir..."
-placeholder.TextColor3 = Color3.fromRGB(150, 150, 150)
-placeholder.Font = Enum.Font.Gotham
-placeholder.TextSize = 14
-placeholder.Parent = tpContainer
-
 -- Icon IDs: 
 -- Main: bolt
 -- Utility: gear
 -- Teleport: location
 local mainTab = createTabButton("rbxassetid://6023426941", "MAIN", 1) -- Icon bolt
 local utilTab = createTabButton("rbxassetid://6023426937", "UTILITY", 2) -- Icon gear
-local tpTab = createTabButton("rbxassetid://6023426935", "TELEPORT", 3) -- Icon location
 
 -- Speed Settings Variables
 local autoTypeEnabled = false
-local autoEnterEnabled = true
+local autoEnterEnabled = false
 local typeDelay = 0.03
 local enterDelay = 0.08
 local turnDelay = 1.5
@@ -1587,7 +1553,7 @@ kataSulitBtn.MouseButton1Click:Connect(function()
 end)
 
 -- Section 4: Delay Settings (TERAKHIR)
-createSectionHeader("DELAY SETTINGS", "rbxassetid://6023426941", currentOrder)
+createSectionHeader("DELAY SETTINGS", "rbxassetid://6023426925", currentOrder)
 currentOrder = currentOrder + 1
 
 -- Add speed settings
@@ -2302,12 +2268,6 @@ end)
 utilTab.MouseButton1Click:Connect(function()
     switchTab(utilContainer)
     highlightTab(utilTab)
-    playClickSound()
-end)
-
-tpTab.MouseButton1Click:Connect(function()
-    switchTab(tpContainer)
-    highlightTab(tpTab)
     playClickSound()
 end)
 
