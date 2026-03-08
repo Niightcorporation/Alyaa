@@ -500,7 +500,7 @@ local CloseBtn = Instance.new("TextButton")
 CloseBtn.Size = UDim2.new(0, controlSize, 0, controlSize)
 CloseBtn.Position = UDim2.new(1, -(controlSize + 6), 0.5, -controlSize / 2)
 CloseBtn.BackgroundColor3 = Color3.fromRGB(240, 50, 60)
-CloseBtn.Text = "✕"
+CloseBtn.Image = "rbxassetid://6023426923"
 CloseBtn.TextColor3 = Color3.new(1, 1, 1)
 CloseBtn.Font = Enum.Font.GothamBold
 CloseBtn.TextSize = IsMobile and 14 or 16
@@ -810,9 +810,9 @@ local function highlightTab(activeBtn)
 end
 
 -- Tab Buttons: Main, Utility, Teleport
-local mainTab = createTabButton("⚡", "MAIN", 1)
-local utilTab = createTabButton("🛠️", "UTILITY", 2)
-local tpTab = createTabButton("🌍", "TELEPORT", 3)  -- Tab Teleport dengan icon globe
+local mainTab = createTabButton("rbxassetid://6023426941", "MAIN", 1)
+local utilTab = createTabButton("rbxassetid://6023426937", "UTILITY", 2)
+local tpTab = createTabButton("rbxassetid://6023426935", "TELEPORT", 3)  -- Tab Teleport dengan icon globe
 
 -- Speed Settings Variables
 local autoTypeEnabled = false
@@ -952,7 +952,7 @@ local function createSpeedSettings(parent, order)
     headerIcon.Size = UDim2.new(0, 16, 0, 16)
     headerIcon.Position = UDim2.new(0, 8, 0.5, -8)
     headerIcon.BackgroundTransparency = 1
-    headerIcon.Text = "⚡"
+    headerIcon.Image = "rbxassetid://6023426941"
     headerIcon.TextColor3 = Color3.fromRGB(180, 140, 255)
     headerIcon.Font = Enum.Font.GothamBold
     headerIcon.TextSize = 14
@@ -984,7 +984,7 @@ local function createSpeedSettings(parent, order)
             cbMax = function(v) enterDelay = v end
         },
         {
-            icon = "⏱️",
+            icon = "rbxassetid://6023426925",
             label = "Delay Turn",
             minV = 0.1,
             maxV = 5,
@@ -996,7 +996,7 @@ local function createSpeedSettings(parent, order)
             cbMax = function(v) turnDelay = v end
         },
         {
-            icon = "⌫",
+            icon = "rbxassetid://6023426929",
             label = "Backspace",
             minV = 0.01,
             maxV = 1,
@@ -1327,8 +1327,8 @@ createToggleButton("Human Mode", mainContainer, false, function(state)
 end, currentOrder)
 currentOrder = currentOrder + 1
 
--- Section 2: Information
-createSectionHeader("INFORMATION", "📊", currentOrder)
+-- Section 2: Information (KEDUA)
+createSectionHeader("INFORMATION", "rbxassetid://6023426923", currentOrder)
 currentOrder = currentOrder + 1
 
 -- Log Frame
@@ -1356,7 +1356,7 @@ local logIcon = Instance.new("TextLabel")
 logIcon.Size = UDim2.new(0, 18, 0, 18)
 logIcon.Position = UDim2.new(0, 8, 0, 4)
 logIcon.BackgroundTransparency = 1
-logIcon.Text = "📝"
+logIcon.Image = "rbxassetid://6023426923"
 logIcon.TextColor3 = Color3.fromRGB(160, 100, 255)
 logIcon.Font = Enum.Font.GothamBold
 logIcon.TextSize = 16
@@ -1386,8 +1386,8 @@ kataLabel.TextSize = IsMobile and 14 or 16
 kataLabel.TextXAlignment = Enum.TextXAlignment.Left
 kataLabel.Parent = logFrame
 
--- Section 3: Include Word
-createSectionHeader("INCLUDE WORD", "📁", currentOrder)
+-- Section 3: Include Word (KETIGA)
+createSectionHeader("INCLUDE WORD", "rbxassetid://6023426945", currentOrder)
 currentOrder = currentOrder + 1
 
 -- Kata Sulit Dropdown
@@ -1406,7 +1406,7 @@ local kataIcon = Instance.new("TextLabel")
 kataIcon.Size = UDim2.new(0, 18, 0, 18)
 kataIcon.Position = UDim2.new(0, 8, 0.5, -9)
 kataIcon.BackgroundTransparency = 1
-kataIcon.Text = "📁"
+kataIcon.Image = "rbxassetid://6023426945" -- Icon folder
 kataIcon.TextColor3 = Color3.new(1, 1, 1)
 kataIcon.Font = Enum.Font.GothamBold
 kataIcon.TextSize = 16
@@ -1583,8 +1583,8 @@ kataSulitBtn.MouseButton1Click:Connect(function()
     updateCategoryButtons()
 end)
 
--- Section 4: Delay Settings
-createSectionHeader("DELAY SETTINGS", "⏱️", currentOrder)
+-- Section 4: Delay Settings (TERAKHIR)
+createSectionHeader("DELAY SETTINGS", "rbxassetid://6023426925", currentOrder)
 currentOrder = currentOrder + 1
 
 -- Add speed settings
@@ -2074,7 +2074,7 @@ local themeIcon = Instance.new("TextLabel")
 themeIcon.Size = UDim2.new(0, 18, 0, 18)
 themeIcon.Position = UDim2.new(0, 8, 0.5, -9)
 themeIcon.BackgroundTransparency = 1
-themeIcon.Text = "🎨"
+themeIcon.Image = "rbxassetid://6023426921" -- Icon paint
 themeIcon.TextColor3 = Color3.new(1, 1, 1)
 themeIcon.Font = Enum.Font.GothamBold
 themeIcon.TextSize = 16
@@ -2275,13 +2275,13 @@ local function createUtilButton(text, icon, callback, order)
     return btn
 end
 
-createUtilButton("Respawn", "🔄", function()
+createUtilButton("Respawn", "rbxassetid://6023426939", function()
     if LocalPlayer.Character then
         LocalPlayer.Character:BreakJoints()
     end
 end, 3)
 
-createUtilButton("Rejoin", "🔄", function()
+createUtilButton("Rejoin Server", "rbxassetid://6023426921", function()
     TeleportService:Teleport(game.PlaceId, LocalPlayer)
 end, 4)
 
