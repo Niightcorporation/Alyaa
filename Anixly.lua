@@ -132,7 +132,7 @@ local commonWords = {
 
 -- Create GUI
 local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "Anixly"
+ScreenGui.Name = "AnixlyHub V1.0.0"
 ScreenGui.Parent = CoreGui
 ScreenGui.ResetOnSpawn = false
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
@@ -791,9 +791,14 @@ local order = 1
 local autoFeaturesContent = {}
 
 -- Buat toggle buttons dan simpan dalam tabel (3 toggle sekarang)
-autoFeaturesContent[1] = createToggleButton("Auto Answer", mainContainer, false, function(state) autoTypeEnabled = state end, order + 1)
-autoFeaturesContent[2] = createToggleButton("Auto Submit", mainContainer, true, function(state) autoEnterEnabled = state end, order + 2)
-autoFeaturesContent[3] = createToggleButton("Human Mode", mainContainer, false, function(state) humanModeEnabled = state end, order + 3)  
+autoFeaturesContent[1] = createToggleButton("Auto Answer", mainContainer, false, function(state) autoTypeEnabled = state end, order)
+order = order + 1
+
+autoFeaturesContent[2] = createToggleButton("Auto Submit", mainContainer, true, function(state) autoEnterEnabled = state end, order)
+order = order + 1
+
+autoFeaturesContent[3] = createToggleButton("Human Mode", mainContainer, false, function(state) humanModeEnabled = state end, order)
+order = order + 1
 
 -- Header untuk AUTO FEATURES dengan EMOJI
 local autoHeader = Instance.new("TextButton")
@@ -948,7 +953,7 @@ local awalanLabel = Instance.new("TextLabel")
 awalanLabel.Size = UDim2.new(1, -10, 0, 25)
 awalanLabel.Position = UDim2.new(0, 10, 0, 5)
 awalanLabel.BackgroundTransparency = 1
-awalanLabel.Text = "AWALAN: "
+awalanLabel.Text = "AWALAN: -"
 awalanLabel.TextColor3 = THEME.logText
 awalanLabel.Font = Enum.Font.GothamBold
 awalanLabel.TextSize = IsMobile and 12 or 14
@@ -956,7 +961,6 @@ awalanLabel.TextXAlignment = Enum.TextXAlignment.Left
 awalanLabel.Parent = logFrame
 
 -- KOLOM PENCARIAN
--- KOLOM PENCARIAN (dengan tampilan lebih banyak kata)
 local searchLabel = Instance.new("TextLabel")
 searchLabel.Size = UDim2.new(0, 70, 0, 25)
 searchLabel.Position = UDim2.new(0, 10, 0, 30)
@@ -993,7 +997,7 @@ searchStroke.Parent = searchBox
 
 -- Hasil pencarian (ScrollingFrame agar bisa menampilkan banyak kata)
 local resultFrame = Instance.new("ScrollingFrame")
-resultFrame.Size = UDim2.new(1, -20, 0, 80)  -- Tinggi ditambah jadi 80
+resultFrame.Size = UDim2.new(1, -20, 0, 80)
 resultFrame.Position = UDim2.new(0, 10, 0, 60)
 resultFrame.BackgroundColor3 = Color3.fromRGB(20, 18, 30)
 resultFrame.BorderSizePixel = 0
@@ -1028,10 +1032,10 @@ resultLabel.TextYAlignment = Enum.TextYAlignment.Top
 resultLabel.AutomaticSize = Enum.AutomaticSize.Y
 resultLabel.Parent = resultFrame
 
--- Label kata terpilih (dari auto answer) - posisi disesuaikan
+-- Label kata terpilih (dari auto answer)
 local kataLabel = Instance.new("TextLabel")
 kataLabel.Size = UDim2.new(1, -10, 0, 30)
-kataLabel.Position = UDim2.new(0, 10, 0, 150)  -- Posisi turun karena resultFrame lebih tinggi
+kataLabel.Position = UDim2.new(0, 10, 0, 150)
 kataLabel.BackgroundTransparency = 1
 kataLabel.Text = "-"
 kataLabel.TextColor3 = Color3.fromRGB(230, 230, 255)
@@ -1041,7 +1045,7 @@ kataLabel.TextXAlignment = Enum.TextXAlignment.Left
 kataLabel.Parent = logFrame
 
 -- Atur visibility untuk INFORMATION
-local infoExpanded = true  -- Mulai dalam keadaan terbuka
+local infoExpanded = true
 for _, item in ipairs(infoContent) do
     item.Visible = infoExpanded
 end
@@ -1470,6 +1474,97 @@ local function typeWord(word, length)
     if autoEnterEnabled then
         task.wait(backspaceDelay + math.random() * (deleteDelay - backspaceDelay))
         VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
+        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
+    end
+end
+
+-- Typing function dengan HUMAN MODE (lebih lambat dan alami)
+local function typeWord(word, length)
+    if not IsRunning then return end
+    
+    wordLength = length or #word
+    
+    if humanModeEnabled then
+        -- HUMAN MODE: Lebih lambat dengan variasi dan kesalahan
+        local mistakes = math.random(0, 1)  -- 0 atau 1 kesalahan
+        local mistakeCount = 0
+        
+        -- Delay awal seperti mikir
+        task.wait(math.random() * 0.5 + 0.3)  -- 0.3 - 0.8 detik
+        
+        for i = 1, #word do
+            if not IsRunning then return end
+            
+            -- Simulasi jeda antar huruf (variasi)
+            task.wait(math.random() * 0.15 + 0.08)  -- 0.08 - 0.23 detik per huruf
+            
+            -- Simulasi typo (kadang-kadang)
+            if mistakeCount < mistakes and math.random() < 0.15 then
+                mistakeCount = mistakeCount + 1
+                
+                -- Ketik huruf salah
+                local wrongChars = "qwertyuiopasdfghjklzxcvbnm"
+                local wrongChar = wrongChars:sub(math.random(1, #wrongChars), math.random(1, #wrongChars))
+                local wrongKey = Enum.KeyCode[wrongChar:upper()]
+                
+                if wrongKey then
+                    VirtualInputManager:SendKeyEvent(true, wrongKey, false, game)
+                    task.wait(0.05)
+                    VirtualInputManager:SendKeyEvent(false, wrongKey, false, game)
+                end
+                
+                task.wait(math.random() * 0.2 + 0.1)  -- Jeda sadar salah
+                
+                -- Hapus huruf salah (backspace)
+                for _ = 1, #wrongChar do
+                    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Backspace, false, game)
+                    task.wait(0.06)
+                    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Backspace, false, game)
+                    task.wait(0.04)
+                end
+                
+                task.wait(math.random() * 0.15 + 0.1)  -- Jeda sebelum ngetik ulang
+            end
+            
+            -- Ketik huruf yang benar
+            local char = word:sub(i, i):upper()
+            local keyCode = Enum.KeyCode[char]
+            
+            if keyCode then
+                VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
+                task.wait(0.04)
+                VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
+            end
+        end
+        
+        -- Delay sebelum enter (seperti ngecek)
+        task.wait(math.random() * 0.3 + 0.2)  -- 0.2 - 0.5 detik
+        
+    else
+        -- MODE CEPAT (seperti biasa)
+        for i = 1, #word do
+            local char = word:sub(i, i):upper()
+            local keyCode = Enum.KeyCode[char]
+            
+            if keyCode then
+                VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
+                task.wait(0.01)
+                VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
+                task.wait(typeDelay + math.random() * (enterDelay - typeDelay))
+            end
+        end
+    end
+    
+    if autoEnterEnabled then
+        -- Delay sebelum enter
+        if humanModeEnabled then
+            task.wait(math.random() * 0.2 + 0.15)  -- 0.15 - 0.35 detik
+        else
+            task.wait(backspaceDelay + math.random() * (deleteDelay - backspaceDelay))
+        end
+        
+        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
+        task.wait(0.03)
         VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
     end
 end
