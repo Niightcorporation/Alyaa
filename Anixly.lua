@@ -31,7 +31,7 @@ end
 local IsRunning = true
 _G[ScriptName] = function()
     IsRunning = false
-    if CoreGui:FindFirstChild("Anixly") then
+    if CoreGui:FindFirstChild("AnixlyHub V1.0.0") then
         CoreGui.Anixly:Destroy()
     end
 end
@@ -198,7 +198,7 @@ local TitleLabel = Instance.new("TextLabel")
 TitleLabel.Size = UDim2.new(0, 140, 1, 0)
 TitleLabel.Position = UDim2.new(0, 12, 0, 0)
 TitleLabel.BackgroundTransparency = 1
-TitleLabel.Text = "Anixly"
+TitleLabel.Text = "Anixlyahub V1.0.0"
 TitleLabel.TextColor3 = Color3.new(1, 1, 1)
 TitleLabel.Font = Enum.Font.GothamBold
 TitleLabel.TextSize = TEXT_SIZE_LARGE
@@ -244,7 +244,7 @@ MiniIcon.Name = "AnixlyMiniIcon"
 MiniIcon.Size = UDim2.new(0, IsMobile and 45 or 60, 0, IsMobile and 45 or 60)
 MiniIcon.Position = UDim2.new(0, 10, 0.5, -30)
 MiniIcon.BackgroundColor3 = THEME.headerBg
-MiniIcon.Image = "rbxassetid://110893481851143"  -- Icon anime girl
+MiniIcon.Image = "rbxassetid://104611871098677"  -- Icon anime girl
 MiniIcon.ImageColor3 = Color3.new(1, 1, 1)
 MiniIcon.ScaleType = Enum.ScaleType.Fit
 MiniIcon.Visible = false
