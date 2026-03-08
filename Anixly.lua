@@ -496,7 +496,7 @@ local MinIcon = Instance.new("ImageLabel")
 MinIcon.Size = UDim2.new(1, -4, 1, -4)
 MinIcon.Position = UDim2.new(0, 2, 0, 2)
 MinIcon.BackgroundTransparency = 1
-MinIcon.Image = "rbxassetid://18460757764" -- ID logo Alya (ganti dengan ID yang sesuai)
+MinIcon.Image = "https://files.catbox.moe/lw0byv.jpg" -- ID logo Alya (ganti dengan ID yang sesuai)
 MinIcon.ImageColor3 = Color3.fromRGB(255, 255, 255)
 MinIcon.Parent = MinimizeBtn
 
@@ -579,7 +579,7 @@ MiniIcon.Name = "AnixlyMiniIcon"
 MiniIcon.Size = UDim2.new(0, IsMobile and 45 or 60, 0, IsMobile and 45 or 60)
 MiniIcon.Position = UDim2.new(0, 10, 0.5, -30)
 MiniIcon.BackgroundColor3 = Color3.fromRGB(55, 15, 130)
-MiniIcon.Image = "rbxassetid://18460757764" -- Logo Alya untuk minimized state
+MiniIcon.Image = "https://files.catbox.moe/lw0byv.jpg" -- Logo Alya untuk minimized state
 MiniIcon.Visible = false
 MiniIcon.BorderSizePixel = 0
 MiniIcon.Parent = ScreenGui
@@ -713,6 +713,7 @@ utilPadding.Parent = utilContainer
 local function switchTab(activeContainer)
     mainContainer.Visible = false
     utilContainer.Visible = false
+    nitpContainer.Visible = false
     activeContainer.Visible = true
 end
 
@@ -786,11 +787,126 @@ local function highlightTab(activeBtn)
     end
 end
 
+-- Teleport Tab
+local tpContainer = createTabContainer()
+tpContainer.ScrollingDirection = Enum.ScrollingDirection.Y
+
+-- TP Tab Layout
+local tpLayout = Instance.new("UIListLayout")
+tpLayout.Padding = UDim.new(0, 8)
+tpLayout.SortOrder = Enum.SortOrder.LayoutOrder
+tpLayout.Parent = tpContainer
+tpContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
+tpContainer.AutomaticCanvasSize = Enum.AutomaticSize.Y
+tpContainer.ScrollBarThickness = IsMobile and 3 or 2
+tpContainer.ScrollBarImageColor3 = Color3.fromRGB(150, 80, 255)
+tpContainer.ScrollBarImageTransparency = 0
+tpContainer.ScrollingDirection = Enum.ScrollingDirection.Y
+
+local tpPadding = Instance.new("UIPadding")
+tpPadding.PaddingLeft = UDim.new(0, 6)
+tpPadding.PaddingRight = UDim.new(0, 6)
+tpPadding.PaddingTop = UDim.new(0, 8)
+tpPadding.PaddingBottom = UDim.new(0, 10)
+tpPadding.Parent = tpContainer
+
+-- TP Buttons
+local function createTPButton(text, location, order)
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, 0, 0, IsMobile and 42 or 38)
+    btn.LayoutOrder = order
+    btn.BackgroundColor3 = Color3.fromRGB(18, 16, 26)
+    btn.Text = ""
+    btn.TextColor3 = Color3.fromRGB(200, 190, 220)
+    btn.Font = Enum.Font.GothamBold
+    btn.TextSize = TEXT_SIZE_NORMAL
+    btn.Parent = tpContainer
+    
+    -- Icon
+    local icon = Instance.new("ImageLabel")
+    icon.Size = UDim2.new(0, 18, 0, 18)
+    icon.Position = UDim2.new(0, 8, 0.5, -9)
+    icon.BackgroundTransparency = 1
+    icon.Image = "rbxassetid://6023426935" -- Icon lokasi
+    icon.ImageColor3 = Color3.fromRGB(200, 190, 220)
+    icon.Parent = btn
+    
+    -- Text
+    local btnLabel = Instance.new("TextLabel")
+    btnLabel.Size = UDim2.new(1, -30, 1, 0)
+    btnLabel.Position = UDim2.new(0, 30, 0, 0)
+    btnLabel.BackgroundTransparency = 1
+    btnLabel.Text = text
+    btnLabel.TextColor3 = Color3.fromRGB(200, 190, 220)
+    btnLabel.Font = Enum.Font.GothamBold
+    btnLabel.TextSize = TEXT_SIZE_NORMAL
+    btnLabel.TextXAlignment = Enum.TextXAlignment.Left
+    btnLabel.Parent = btn
+    
+    local btnCorner = Instance.new("UICorner")
+    btnCorner.CornerRadius = UDim.new(0, 9)
+    btnCorner.Parent = btn
+    
+    local btnStroke = Instance.new("UIStroke")
+    btnStroke.Color = Color3.fromRGB(70, 35, 130)
+    btnStroke.Thickness = 1
+    btnStroke.Transparency = 0.4
+    btnStroke.Parent = btn
+    
+    btn.MouseButton1Click:Connect(function()
+        playClickSound()
+        
+        -- Cari lokasi
+        local target = workspace:FindFirstChild(location)
+        if not target then
+            print("⚠️ " .. location .. " tidak ditemukan!")
+            return
+        end
+        
+        -- Cari part untuk teleport
+        local targetPart
+        for _, obj in ipairs(target:GetDescendants()) do
+            if obj:IsA("BasePart") then
+                targetPart = obj
+                break
+            end
+        end
+        
+        -- Jika tidak ada part, gunakan target itu sendiri jika dia BasePart
+        if not targetPart and target:IsA("BasePart") then
+            targetPart = target
+        end
+        
+        if not targetPart then
+            print("⚠️ Tidak ada BasePart di " .. location .. "!")
+            return
+        end
+        
+        -- Teleport
+        local root = LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart")
+        if root then
+            root.CFrame = CFrame.new(targetPart.Position + Vector3.new(0, 5, 0))
+            print("⚡ Teleport ke " .. text)
+        end
+    end)
+    
+    return btn
+end
+
+-- Tambahkan button teleport
+createTPButton("Bambu Lava", "ParkourBambu2", 1)
+createTPButton("Lobby", "MainSpawn", 2)
+createTPButton("Arena 1", "Arena1", 3)
+createTPButton("Arena 2", "Arena2", 4)
+createTPButton("Shop", "ShopArea", 5)
+
 -- Icon IDs: 
 -- Main: bolt
 -- Utility: gear
+-- Teleport: location
 local mainTab = createTabButton("rbxassetid://6023426941", "MAIN", 1) -- Icon bolt
 local utilTab = createTabButton("rbxassetid://6023426937", "UTILITY", 2) -- Icon gear
+local tpTab = createTabButton("rbxassetid://6023426935", "TELEPORT", 3) -- Icon location
 
 -- Speed Settings Variables
 local autoTypeEnabled = false
@@ -815,6 +931,8 @@ local wordCategories = {
     CY = {},
     UI = {},
     LY = {},
+    RS = {},
+    NS = {},
     ["SEMUA KATA SULIT"] = {}
 }
 
@@ -827,6 +945,8 @@ local categoryToggles = {
     CY = false,
     UI = false,
     LY = false,
+    RS = false,
+    NS = false,
     ["SEMUA KATA SULIT"] = false
 }
 
@@ -942,8 +1062,8 @@ local function createSpeedSettings(parent, order)
     -- Sliders
     local sliders = {
         {
-            icon = "rbxassetid://6023426919", -- Icon keyboard
-            label = "NULIS",
+            icon = "⌨", -- Icon keyboard
+            label = "Write",
             minV = 0.01,
             maxV = 1,
             defMin = 0.03,
@@ -1353,8 +1473,8 @@ kataLabel.TextSize = IsMobile and 14 or 16
 kataLabel.TextXAlignment = Enum.TextXAlignment.Left
 kataLabel.Parent = logFrame
 
--- Section 3: Word Database (KETIGA)
-createSectionHeader("WORD DATABASE", "rbxassetid://6023426945", currentOrder)
+-- Section 3: Include Word (KETIGA)
+createSectionHeader("INCLUDE WORD", "rbxassetid://6023426945", currentOrder)
 currentOrder = currentOrder + 1
 
 -- Kata Sulit Dropdown
@@ -1430,7 +1550,7 @@ local function updateCategoryButtons()
         end
     end
     
-    local categories = {"IF", "X", "NG", "AI", "CY", "UI", "KS", "LY", "SEMUA KATA SULIT"}
+    local categories = {"IF", "X", "NG", "AI", "CY", "UI", "KS", "LY", "RS", "NS", "SEMUA KATA SULIT"}
     
     for i, cat in ipairs(categories) do
         local isAllOn = categoryToggles["SEMUA KATA SULIT"] and cat ~= "SEMUA KATA SULIT"
@@ -1791,7 +1911,7 @@ local autoType = function()
             usedWords[chosen] = true
             
             task.wait(1)
-            awalanLabel.Text = "AWALAN: -"
+            awalanLabel.Text = "AWALAN: "
             kataLabel.Text = "-"
         end
     end
@@ -1811,7 +1931,9 @@ task.spawn(function()
         CY = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/CY.txt",
         UI = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/UI.txt",
         KS = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/KS.txt", 
-        LY = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/LY.txt"
+        LY = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/LY.txt",
+        RS = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/RS.txt",
+        NS = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/NS.txt"
     }
     
     for cat, url in pairs(urls) do
@@ -2260,6 +2382,12 @@ end)
 utilTab.MouseButton1Click:Connect(function()
     switchTab(utilContainer)
     highlightTab(utilTab)
+    playClickSound()
+end)
+
+tpTab.MouseButton1Click:Connect(function()
+    switchTab(tpContainer)
+    highlightTab(tpTab)
     playClickSound()
 end)
 
