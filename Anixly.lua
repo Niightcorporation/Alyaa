@@ -480,25 +480,16 @@ end
 -- Window Controls
 local controlSize = IsMobile and 18 or 26
 
--- Minimize Button dengan logo Alya
+-- Minimize Button dengan logo Alya (sementara pakai emoji dulu)
 local MinimizeBtn = Instance.new("TextButton")
 MinimizeBtn.Size = UDim2.new(0, controlSize, 0, controlSize)
 MinimizeBtn.Position = UDim2.new(1, -(controlSize * 2 + 10), 0.5, -controlSize / 2)
 MinimizeBtn.BackgroundColor3 = Color3.fromRGB(250, 190, 0)
-MinimizeBtn.Text = ""
+MinimizeBtn.Text = "☕"
 MinimizeBtn.TextColor3 = Color3.fromRGB(30, 20, 0)
 MinimizeBtn.Font = Enum.Font.GothamBold
-MinimizeBtn.TextSize = IsMobile and 11 or 16
+MinimizeBtn.TextSize = IsMobile and 14 or 16
 MinimizeBtn.Parent = Header
-
--- Logo Alya untuk minimize (tsundere rushidere)
-local MinIcon = Instance.new("ImageLabel")
-MinIcon.Size = UDim2.new(1, -4, 1, -4)
-MinIcon.Position = UDim2.new(0, 2, 0, 2)
-MinIcon.BackgroundTransparency = 1
-MinIcon.Image = "☕" -- ID logo Alya (ganti dengan ID yang sesuai)
-MinIcon.ImageColor3 = Color3.fromRGB(255, 255, 255)
-MinIcon.Parent = MinimizeBtn
 
 local MinCorner = Instance.new("UICorner")
 MinCorner.CornerRadius = UDim.new(1, 0)
@@ -509,19 +500,11 @@ local CloseBtn = Instance.new("TextButton")
 CloseBtn.Size = UDim2.new(0, controlSize, 0, controlSize)
 CloseBtn.Position = UDim2.new(1, -(controlSize + 6), 0.5, -controlSize / 2)
 CloseBtn.BackgroundColor3 = Color3.fromRGB(240, 50, 60)
-CloseBtn.Text = ""
+CloseBtn.Text = "✕"
 CloseBtn.TextColor3 = Color3.new(1, 1, 1)
 CloseBtn.Font = Enum.Font.GothamBold
-CloseBtn.TextSize = IsMobile and 14 or 11
+CloseBtn.TextSize = IsMobile and 14 or 16
 CloseBtn.Parent = Header
-
-local CloseIcon = Instance.new("ImageLabel")
-CloseIcon.Size = UDim2.new(1, -4, 1, -4)
-CloseIcon.Position = UDim2.new(0, 2, 0, 2)
-CloseIcon.BackgroundTransparency = 1
-CloseIcon.Image = "rbxassetid://6023426923" -- Icon close
-CloseIcon.ImageColor3 = Color3.new(1, 1, 1)
-CloseIcon.Parent = CloseBtn
 
 local CloseCorner = Instance.new("UICorner")
 CloseCorner.CornerRadius = UDim.new(1, 0)
@@ -573,13 +556,16 @@ SidebarPadding.PaddingLeft = UDim.new(0, IsMobile and 4 or 7)
 SidebarPadding.PaddingRight = UDim.new(0, IsMobile and 4 or 7)
 SidebarPadding.Parent = Sidebar
 
--- Mini Icon (for minimized state) - juga pakai logo Alya
-local MiniIcon = Instance.new("ImageButton")
+-- Mini Icon (for minimized state)
+local MiniIcon = Instance.new("TextButton")
 MiniIcon.Name = "AnixlyMiniIcon"
 MiniIcon.Size = UDim2.new(0, IsMobile and 45 or 60, 0, IsMobile and 45 or 60)
 MiniIcon.Position = UDim2.new(0, 10, 0.5, -30)
 MiniIcon.BackgroundColor3 = Color3.fromRGB(55, 15, 130)
-MiniIcon.Image = "☕" -- Logo Alya untuk minimized state
+MiniIcon.Text = "☕"
+MiniIcon.TextColor3 = Color3.new(1, 1, 1)
+MiniIcon.Font = Enum.Font.GothamBold
+MiniIcon.TextSize = IsMobile and 24 or 32
 MiniIcon.Visible = false
 MiniIcon.BorderSizePixel = 0
 MiniIcon.Parent = ScreenGui
@@ -677,7 +663,7 @@ local function createTabContainer()
     return container
 end
 
--- Main Tab (Speed Settings)
+-- Main Tab
 local mainContainer = createTabContainer()
 mainContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
 mainContainer.AutomaticCanvasSize = Enum.AutomaticSize.Y
@@ -709,18 +695,52 @@ utilPadding.PaddingTop = UDim.new(0, 8)
 utilPadding.PaddingBottom = UDim.new(0, 10)
 utilPadding.Parent = utilContainer
 
--- Tab Switching
+-- TELEPORT TAB (KOSONG)
+local tpContainer = createTabContainer()
+tpContainer.ScrollingDirection = Enum.ScrollingDirection.Y
+
+-- TP Tab Layout
+local tpLayout = Instance.new("UIListLayout")
+tpLayout.Padding = UDim.new(0, 8)
+tpLayout.SortOrder = Enum.SortOrder.LayoutOrder
+tpLayout.Parent = tpContainer
+tpContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
+tpContainer.AutomaticCanvasSize = Enum.AutomaticSize.Y
+tpContainer.ScrollBarThickness = IsMobile and 3 or 2
+tpContainer.ScrollBarImageColor3 = Color3.fromRGB(150, 80, 255)
+tpContainer.ScrollBarImageTransparency = 0
+tpContainer.ScrollingDirection = Enum.ScrollingDirection.Y
+
+local tpPadding = Instance.new("UIPadding")
+tpPadding.PaddingLeft = UDim.new(0, 6)
+tpPadding.PaddingRight = UDim.new(0, 6)
+tpPadding.PaddingTop = UDim.new(0, 8)
+tpPadding.PaddingBottom = UDim.new(0, 10)
+tpPadding.Parent = tpContainer
+
+-- Placeholder text untuk Teleport tab (bisa dihapus nanti)
+local tpPlaceholder = Instance.new("TextLabel")
+tpPlaceholder.Size = UDim2.new(1, 0, 0, 50)
+tpPlaceholder.BackgroundTransparency = 1
+tpPlaceholder.Text = "🚀 TELEPORT FEATURES\n(Coming Soon)"
+tpPlaceholder.TextColor3 = Color3.fromRGB(150, 150, 150)
+tpPlaceholder.Font = Enum.Font.GothamBold
+tpPlaceholder.TextSize = 16
+tpPlaceholder.TextWrapped = true
+tpPlaceholder.Parent = tpContainer
+
+-- Tab Switching (UPDATE dengan tpContainer)
 local function switchTab(activeContainer)
     mainContainer.Visible = false
     utilContainer.Visible = false
-    nitpContainer.Visible = false
+    tpContainer.Visible = false
     activeContainer.Visible = true
 end
 
 -- Sidebar Tab Buttons
 local tabButtons = {}
 
-local function createTabButton(iconId, label, order)
+local function createTabButton(icon, label, order)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(1, 0, 0, IsMobile and 48 or 52)
     btn.LayoutOrder = order
@@ -738,14 +758,16 @@ local function createTabButton(iconId, label, order)
     btnStroke.Transparency = 0.6
     btnStroke.Parent = btn
     
-    -- Icon
-    local icon = Instance.new("ImageLabel")
-    icon.Size = UDim2.new(0, IsMobile and 22 or 28, 0, IsMobile and 22 or 28)
-    icon.Position = UDim2.new(0.5, - (IsMobile and 11 or 14), 0.25, 0)
-    icon.BackgroundTransparency = 1
-    icon.Image = iconId
-    icon.ImageColor3 = Color3.fromRGB(120, 110, 150)
-    icon.Parent = btn
+    -- Icon (pake teks dulu, nanti bisa diganti image)
+    local iconLabel = Instance.new("TextLabel")
+    iconLabel.Size = UDim2.new(1, 0, 0, 28)
+    iconLabel.Position = UDim2.new(0, 0, 0, 5)
+    iconLabel.BackgroundTransparency = 1
+    iconLabel.Text = icon
+    iconLabel.TextColor3 = Color3.fromRGB(120, 110, 150)
+    iconLabel.Font = Enum.Font.GothamBold
+    iconLabel.TextSize = IsMobile and 18 or 22
+    iconLabel.Parent = btn
     
     -- Label
     local labelText = Instance.new("TextLabel")
@@ -758,7 +780,7 @@ local function createTabButton(iconId, label, order)
     labelText.TextSize = IsMobile and 9 or 10
     labelText.Parent = btn
     
-    table.insert(tabButtons, {btn = btn, stroke = btnStroke, icon = icon, label = labelText})
+    table.insert(tabButtons, {btn = btn, stroke = btnStroke, icon = iconLabel, label = labelText})
     return btn
 end
 
@@ -767,7 +789,7 @@ local function highlightTab(activeBtn)
         tab.btn.BackgroundColor3 = Color3.fromRGB(20, 18, 32)
         tab.stroke.Color = Color3.fromRGB(50, 30, 90)
         tab.stroke.Transparency = 0.6
-        tab.icon.ImageColor3 = Color3.fromRGB(120, 110, 150)
+        tab.icon.TextColor3 = Color3.fromRGB(120, 110, 150)
         tab.label.TextColor3 = Color3.fromRGB(120, 110, 150)
     end
     
@@ -781,18 +803,16 @@ local function highlightTab(activeBtn)
         if tab.btn == activeBtn then
             tab.stroke.Color = accentColor
             tab.stroke.Transparency = 0.1
-            tab.icon.ImageColor3 = Color3.new(1, 1, 1)
+            tab.icon.TextColor3 = Color3.new(1, 1, 1)
             tab.label.TextColor3 = Color3.new(1, 1, 1)
         end
     end
 end
 
--- Icon IDs: 
--- Main: bolt
--- Utility: gear
--- Teleport: location
-local mainTab = createTabButton("rbxassetid://6023426941", "MAIN", 1) -- Icon bolt
-local utilTab = createTabButton("rbxassetid://6023426937", "UTILITY", 2) -- Icon gear
+-- Tab Buttons: Main, Utility, Teleport
+local mainTab = createTabButton("⚡", "MAIN", 1)
+local utilTab = createTabButton("🛠️", "UTILITY", 2)
+local tpTab = createTabButton("🌍", "TELEPORT", 3)  -- Tab Teleport dengan icon globe
 
 -- Speed Settings Variables
 local autoTypeEnabled = false
@@ -850,20 +870,22 @@ mainPadding.PaddingBottom = UDim.new(0, 10)
 mainPadding.Parent = mainContainer
 
 -- Fungsi untuk membuat Section Header
-local function createSectionHeader(title, iconId, order)
+local function createSectionHeader(title, icon, order)
     local header = Instance.new("Frame")
     header.Size = UDim2.new(1, -4, 0, 30)
     header.LayoutOrder = order
     header.BackgroundTransparency = 1
     header.Parent = mainContainer
     
-    local icon = Instance.new("ImageLabel")
-    icon.Size = UDim2.new(0, 20, 0, 20)
-    icon.Position = UDim2.new(0, 5, 0.5, -10)
-    icon.BackgroundTransparency = 1
-    icon.Image = iconId
-    icon.ImageColor3 = THEMES[CurrentTheme].accent
-    icon.Parent = header
+    local iconLabel = Instance.new("TextLabel")
+    iconLabel.Size = UDim2.new(0, 20, 0, 20)
+    iconLabel.Position = UDim2.new(0, 5, 0.5, -10)
+    iconLabel.BackgroundTransparency = 1
+    iconLabel.Text = icon
+    iconLabel.TextColor3 = THEMES[CurrentTheme].accent
+    iconLabel.Font = Enum.Font.GothamBold
+    iconLabel.TextSize = 16
+    iconLabel.Parent = header
     
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(1, -35, 1, 0)
@@ -926,12 +948,14 @@ local function createSpeedSettings(parent, order)
     headerCover.BorderSizePixel = 0
     headerCover.Parent = header
     
-    local headerIcon = Instance.new("ImageLabel")
+    local headerIcon = Instance.new("TextLabel")
     headerIcon.Size = UDim2.new(0, 16, 0, 16)
     headerIcon.Position = UDim2.new(0, 8, 0.5, -8)
     headerIcon.BackgroundTransparency = 1
-    headerIcon.Image = "rbxassetid://6023426941" -- Icon bolt
-    headerIcon.ImageColor3 = Color3.fromRGB(180, 140, 255)
+    headerIcon.Text = "⚡"
+    headerIcon.TextColor3 = Color3.fromRGB(180, 140, 255)
+    headerIcon.Font = Enum.Font.GothamBold
+    headerIcon.TextSize = 14
     headerIcon.Parent = header
     
     local headerText = Instance.new("TextLabel")
@@ -948,7 +972,7 @@ local function createSpeedSettings(parent, order)
     -- Sliders
     local sliders = {
         {
-            icon = "⌨", -- Icon keyboard
+            icon = "⌨",
             label = "Write",
             minV = 0.01,
             maxV = 1,
@@ -960,7 +984,7 @@ local function createSpeedSettings(parent, order)
             cbMax = function(v) enterDelay = v end
         },
         {
-            icon = "rbxassetid://6023426925", -- Icon clock
+            icon = "⏱️",
             label = "Delay Turn",
             minV = 0.1,
             maxV = 5,
@@ -972,7 +996,7 @@ local function createSpeedSettings(parent, order)
             cbMax = function(v) turnDelay = v end
         },
         {
-            icon = "rbxassetid://6023426929", -- Icon backspace
+            icon = "⌫",
             label = "Backspace",
             minV = 0.01,
             maxV = 1,
@@ -1008,12 +1032,14 @@ local function createSpeedSettings(parent, order)
         rowCorner.CornerRadius = UDim.new(0, 7)
         rowCorner.Parent = row
         
-        local icon = Instance.new("ImageLabel")
+        local icon = Instance.new("TextLabel")
         icon.Size = UDim2.new(0, 16, 0, 16)
         icon.Position = UDim2.new(0, 8, 0, 4)
         icon.BackgroundTransparency = 1
-        icon.Image = s.icon
-        icon.ImageColor3 = Color3.fromRGB(170, 155, 210)
+        icon.Text = s.icon
+        icon.TextColor3 = Color3.fromRGB(170, 155, 210)
+        icon.Font = Enum.Font.GothamBold
+        icon.TextSize = 14
         icon.Parent = row
         
         local iconLabel = Instance.new("TextLabel")
@@ -1159,8 +1185,7 @@ local function createSpeedSettings(parent, order)
             end
         end)
         
-        local inputChangedConn
-        inputChangedConn = UserInputService.InputChanged:Connect(function(input)
+        UserInputService.InputChanged:Connect(function(input)
             if input.UserInputType ~= Enum.UserInputType.MouseMovement and 
                input.UserInputType ~= Enum.UserInputType.Touch then
                 return
@@ -1279,14 +1304,14 @@ local function createToggleButton(text, parent, defaultState, callback, order)
     return frame
 end
 
--- Membuat Section dan Menambahkan Komponen dengan urutan yang benar (SESUAI PERMINTAAN)
+-- Membuat Section dan Menambahkan Komponen dengan urutan yang benar
 local currentOrder = 1
 
--- Section 1: Auto Features (PERTAMA)
-createSectionHeader("AUTO FEATURES", "rbxassetid://6023426919", currentOrder)
+-- Section 1: Auto Features
+createSectionHeader("AUTO FEATURES", "⚡", currentOrder)
 currentOrder = currentOrder + 1
 
--- Add toggles dalam urutan yang benar
+-- Add toggles
 createToggleButton("Auto Answer", mainContainer, false, function(state)
     autoTypeEnabled = state
 end, currentOrder)
@@ -1302,8 +1327,8 @@ createToggleButton("Human Mode", mainContainer, false, function(state)
 end, currentOrder)
 currentOrder = currentOrder + 1
 
--- Section 2: Information (KEDUA)
-createSectionHeader("INFORMATION", "rbxassetid://6023426923", currentOrder)
+-- Section 2: Information
+createSectionHeader("INFORMATION", "📊", currentOrder)
 currentOrder = currentOrder + 1
 
 -- Log Frame
@@ -1327,12 +1352,14 @@ logStroke.Parent = logFrame
 
 UI_Elements.logStroke = logStroke
 
-local logIcon = Instance.new("ImageLabel")
+local logIcon = Instance.new("TextLabel")
 logIcon.Size = UDim2.new(0, 18, 0, 18)
 logIcon.Position = UDim2.new(0, 8, 0, 4)
 logIcon.BackgroundTransparency = 1
-logIcon.Image = "rbxassetid://6023426923"
-logIcon.ImageColor3 = Color3.fromRGB(160, 100, 255)
+logIcon.Text = "📝"
+logIcon.TextColor3 = Color3.fromRGB(160, 100, 255)
+logIcon.Font = Enum.Font.GothamBold
+logIcon.TextSize = 16
 logIcon.Parent = logFrame
 
 local awalanLabel = Instance.new("TextLabel")
@@ -1359,8 +1386,8 @@ kataLabel.TextSize = IsMobile and 14 or 16
 kataLabel.TextXAlignment = Enum.TextXAlignment.Left
 kataLabel.Parent = logFrame
 
--- Section 3: Include Word (KETIGA)
-createSectionHeader("INCLUDE WORD", "rbxassetid://6023426945", currentOrder)
+-- Section 3: Include Word
+createSectionHeader("INCLUDE WORD", "📁", currentOrder)
 currentOrder = currentOrder + 1
 
 -- Kata Sulit Dropdown
@@ -1375,12 +1402,14 @@ kataSulitBtn.Font = Enum.Font.GothamBold
 kataSulitBtn.TextSize = TEXT_SIZE_NORMAL
 kataSulitBtn.Parent = mainContainer
 
-local kataIcon = Instance.new("ImageLabel")
+local kataIcon = Instance.new("TextLabel")
 kataIcon.Size = UDim2.new(0, 18, 0, 18)
 kataIcon.Position = UDim2.new(0, 8, 0.5, -9)
 kataIcon.BackgroundTransparency = 1
-kataIcon.Image = "rbxassetid://6023426945" -- Icon folder
-kataIcon.ImageColor3 = Color3.new(1, 1, 1)
+kataIcon.Text = "📁"
+kataIcon.TextColor3 = Color3.new(1, 1, 1)
+kataIcon.Font = Enum.Font.GothamBold
+kataIcon.TextSize = 16
 kataIcon.Parent = kataSulitBtn
 
 local kataBtnText = Instance.new("TextLabel")
@@ -1469,12 +1498,14 @@ local function updateCategoryButtons()
         btn.TextXAlignment = Enum.TextXAlignment.Left
         btn.Parent = kataDropdown
         
-        local checkIcon = Instance.new("ImageLabel")
+        local checkIcon = Instance.new("TextLabel")
         checkIcon.Size = UDim2.new(0, 14, 0, 14)
         checkIcon.Position = UDim2.new(0, 6, 0.5, -7)
         checkIcon.BackgroundTransparency = 1
-        checkIcon.Image = isOn and "rbxassetid://6023426927" or "rbxassetid://6023426917" -- Check icon or empty
-        checkIcon.ImageColor3 = isOn and Color3.new(1, 1, 1) or Color3.fromRGB(100, 90, 130)
+        checkIcon.Text = isOn and "✓" or "○"
+        checkIcon.TextColor3 = isOn and Color3.new(1, 1, 1) or Color3.fromRGB(100, 90, 130)
+        checkIcon.Font = Enum.Font.GothamBold
+        checkIcon.TextSize = 12
         checkIcon.Parent = btn
         
         local catText = Instance.new("TextLabel")
@@ -1542,7 +1573,7 @@ kataSulitBtn.MouseButton1Click:Connect(function()
     kataBtnText.Text = dropdownOpen and "SET KATA SULIT ▲" or "SET KATA SULIT ▼"
     
     kataDropdown:TweenSize(
-        UDim2.new(1, -4, 0, dropdownOpen and 9 * categoryHeight + 10 or 0),
+        UDim2.new(1, -4, 0, dropdownOpen and 11 * categoryHeight + 10 or 0),
         Enum.EasingDirection.Out,
         Enum.EasingStyle.Quart,
         0.3,
@@ -1552,8 +1583,8 @@ kataSulitBtn.MouseButton1Click:Connect(function()
     updateCategoryButtons()
 end)
 
--- Section 4: Delay Settings (TERAKHIR)
-createSectionHeader("DELAY SETTINGS", "rbxassetid://6023426925", currentOrder)
+-- Section 4: Delay Settings
+createSectionHeader("DELAY SETTINGS", "⏱️", currentOrder)
 currentOrder = currentOrder + 1
 
 -- Add speed settings
@@ -1797,7 +1828,7 @@ local autoType = function()
             usedWords[chosen] = true
             
             task.wait(1)
-            awalanLabel.Text = "AWALAN: "
+            awalanLabel.Text = "AWALAN: -"
             kataLabel.Text = "-"
         end
     end
@@ -2039,12 +2070,14 @@ themeBtn.Font = Enum.Font.GothamBold
 themeBtn.TextSize = TEXT_SIZE_NORMAL
 themeBtn.Parent = utilContainer
 
-local themeIcon = Instance.new("ImageLabel")
+local themeIcon = Instance.new("TextLabel")
 themeIcon.Size = UDim2.new(0, 18, 0, 18)
 themeIcon.Position = UDim2.new(0, 8, 0.5, -9)
 themeIcon.BackgroundTransparency = 1
-themeIcon.Image = "rbxassetid://6023426921" -- Icon paint
-themeIcon.ImageColor3 = Color3.new(1, 1, 1)
+themeIcon.Text = "🎨"
+themeIcon.TextColor3 = Color3.new(1, 1, 1)
+themeIcon.Font = Enum.Font.GothamBold
+themeIcon.TextSize = 16
 themeIcon.Parent = themeBtn
 
 local themeBtnText = Instance.new("TextLabel")
@@ -2192,7 +2225,7 @@ separator.LayoutOrder = 2
 separator.Parent = utilContainer
 
 -- Util buttons
-local function createUtilButton(text, iconId, callback, order)
+local function createUtilButton(text, icon, callback, order)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(1, 0, 0, IsMobile and 42 or 38)
     btn.LayoutOrder = order
@@ -2203,12 +2236,14 @@ local function createUtilButton(text, iconId, callback, order)
     btn.TextSize = TEXT_SIZE_NORMAL
     btn.Parent = utilContainer
     
-    local btnIcon = Instance.new("ImageLabel")
+    local btnIcon = Instance.new("TextLabel")
     btnIcon.Size = UDim2.new(0, 18, 0, 18)
     btnIcon.Position = UDim2.new(0, 8, 0.5, -9)
     btnIcon.BackgroundTransparency = 1
-    btnIcon.Image = iconId
-    btnIcon.ImageColor3 = Color3.fromRGB(200, 190, 220)
+    btnIcon.Text = icon
+    btnIcon.TextColor3 = Color3.fromRGB(200, 190, 220)
+    btnIcon.Font = Enum.Font.GothamBold
+    btnIcon.TextSize = 16
     btnIcon.Parent = btn
     
     local btnLabel = Instance.new("TextLabel")
@@ -2240,13 +2275,13 @@ local function createUtilButton(text, iconId, callback, order)
     return btn
 end
 
-createUtilButton("Respawn", "rbxassetid://6023426939", function()
+createUtilButton("Respawn", "🔄", function()
     if LocalPlayer.Character then
         LocalPlayer.Character:BreakJoints()
     end
 end, 3)
 
-createUtilButton("Rejoin Server", "rbxassetid://6023426921", function()
+createUtilButton("Rejoin", "🔄", function()
     TeleportService:Teleport(game.PlaceId, LocalPlayer)
 end, 4)
 
@@ -2258,7 +2293,7 @@ end, 5)
 -- Apply initial theme
 applyTheme(CurrentTheme)
 
--- Tab click handlers
+-- Tab click handlers (UPDATE dengan tpTab)
 mainTab.MouseButton1Click:Connect(function()
     switchTab(mainContainer)
     highlightTab(mainTab)
@@ -2268,6 +2303,12 @@ end)
 utilTab.MouseButton1Click:Connect(function()
     switchTab(utilContainer)
     highlightTab(utilTab)
+    playClickSound()
+end)
+
+tpTab.MouseButton1Click:Connect(function()
+    switchTab(tpContainer)
+    highlightTab(tpTab)
     playClickSound()
 end)
 
