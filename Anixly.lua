@@ -1,7 +1,10 @@
 --[[
+	WARNING: Heads up! This script has not been verified by ScriptBlox. Use at your own risk!
+]]
+
+--[[
     Anixly - Sambung kata
     Fitur Lengkap dengan UI Keren
-    Credit: Anixly - Ares
 ]]
 
 -- Services
@@ -477,7 +480,7 @@ end
 -- Window Controls
 local controlSize = IsMobile and 18 or 26
 
--- Minimize Button
+-- Minimize Button dengan logo Alya
 local MinimizeBtn = Instance.new("TextButton")
 MinimizeBtn.Size = UDim2.new(0, controlSize, 0, controlSize)
 MinimizeBtn.Position = UDim2.new(1, -(controlSize * 2 + 10), 0.5, -controlSize / 2)
@@ -488,12 +491,13 @@ MinimizeBtn.Font = Enum.Font.GothamBold
 MinimizeBtn.TextSize = IsMobile and 11 or 16
 MinimizeBtn.Parent = Header
 
+-- Logo Alya untuk minimize (tsundere rushidere)
 local MinIcon = Instance.new("ImageLabel")
 MinIcon.Size = UDim2.new(1, -4, 1, -4)
 MinIcon.Position = UDim2.new(0, 2, 0, 2)
 MinIcon.BackgroundTransparency = 1
-MinIcon.Image = "rbxassetid://6023426955" -- Icon minimize
-MinIcon.ImageColor3 = Color3.fromRGB(30, 20, 0)
+MinIcon.Image = "rbxassetid://18460757764" -- ID logo Alya (ganti dengan ID yang sesuai)
+MinIcon.ImageColor3 = Color3.fromRGB(255, 255, 255)
 MinIcon.Parent = MinimizeBtn
 
 local MinCorner = Instance.new("UICorner")
@@ -569,13 +573,13 @@ SidebarPadding.PaddingLeft = UDim.new(0, IsMobile and 4 or 7)
 SidebarPadding.PaddingRight = UDim.new(0, IsMobile and 4 or 7)
 SidebarPadding.Parent = Sidebar
 
--- Mini Icon (for minimized state)
+-- Mini Icon (for minimized state) - juga pakai logo Alya
 local MiniIcon = Instance.new("ImageButton")
 MiniIcon.Name = "AnixlyMiniIcon"
-MiniIcon.Size = UDim2.new(0, IsMobile and 35 or 52, 0, IsMobile and 35 or 52)
-MiniIcon.Position = UDim2.new(0, 10, 0.5, -26)
+MiniIcon.Size = UDim2.new(0, IsMobile and 45 or 60, 0, IsMobile and 45 or 60)
+MiniIcon.Position = UDim2.new(0, 10, 0.5, -30)
 MiniIcon.BackgroundColor3 = Color3.fromRGB(55, 15, 130)
-MiniIcon.Image = "rbxassetid://98546844795211"
+MiniIcon.Image = "rbxassetid://18460757764" -- Logo Alya untuk minimized state
 MiniIcon.Visible = false
 MiniIcon.BorderSizePixel = 0
 MiniIcon.Parent = ScreenGui
@@ -1269,18 +1273,10 @@ local function createToggleButton(text, parent, defaultState, callback, order)
     return frame
 end
 
--- Membuat Section dan Menambahkan Komponen dengan urutan yang benar
+-- Membuat Section dan Menambahkan Komponen dengan urutan yang benar (SESUAI PERMINTAAN)
 local currentOrder = 1
 
--- Section 1: Delay Settings
-createSectionHeader("DELAY SETTINGS", "rbxassetid://6023426941", currentOrder)
-currentOrder = currentOrder + 1
-
--- Add speed settings
-createSpeedSettings(mainContainer, currentOrder)
-currentOrder = currentOrder + 1
-
--- Section 2: Auto Features
+-- Section 1: Auto Features (PERTAMA)
 createSectionHeader("AUTO FEATURES", "rbxassetid://6023426919", currentOrder)
 currentOrder = currentOrder + 1
 
@@ -1300,7 +1296,64 @@ createToggleButton("Human Mode", mainContainer, false, function(state)
 end, currentOrder)
 currentOrder = currentOrder + 1
 
--- Section 3: Word Database
+-- Section 2: Information (KEDUA)
+createSectionHeader("INFORMATION", "rbxassetid://6023426923", currentOrder)
+currentOrder = currentOrder + 1
+
+-- Log Frame
+local logFrame = Instance.new("Frame")
+logFrame.Size = UDim2.new(1, -4, 0, IsMobile and 55 or 50)
+logFrame.LayoutOrder = currentOrder
+currentOrder = currentOrder + 1
+logFrame.BackgroundColor3 = Color3.fromRGB(12, 10, 20)
+logFrame.BorderSizePixel = 0
+logFrame.Parent = mainContainer
+
+local logCorner = Instance.new("UICorner")
+logCorner.CornerRadius = UDim.new(0, 9)
+logCorner.Parent = logFrame
+
+local logStroke = Instance.new("UIStroke")
+logStroke.Color = Color3.fromRGB(80, 40, 140)
+logStroke.Thickness = 1
+logStroke.Transparency = 0.4
+logStroke.Parent = logFrame
+
+UI_Elements.logStroke = logStroke
+
+local logIcon = Instance.new("ImageLabel")
+logIcon.Size = UDim2.new(0, 18, 0, 18)
+logIcon.Position = UDim2.new(0, 8, 0, 4)
+logIcon.BackgroundTransparency = 1
+logIcon.Image = "rbxassetid://6023426923"
+logIcon.ImageColor3 = Color3.fromRGB(160, 100, 255)
+logIcon.Parent = logFrame
+
+local awalanLabel = Instance.new("TextLabel")
+awalanLabel.Size = UDim2.new(1, -30, 0, 22)
+awalanLabel.Position = UDim2.new(0, 28, 0, 4)
+awalanLabel.BackgroundTransparency = 1
+awalanLabel.Text = "AWALAN: -"
+awalanLabel.TextColor3 = Color3.fromRGB(160, 100, 255)
+awalanLabel.Font = Enum.Font.GothamBold
+awalanLabel.TextSize = IsMobile and 10 or 11
+awalanLabel.TextXAlignment = Enum.TextXAlignment.Left
+awalanLabel.Parent = logFrame
+
+UI_Elements.LogAwalan = awalanLabel
+
+local kataLabel = Instance.new("TextLabel")
+kataLabel.Size = UDim2.new(1, -12, 0, 24)
+kataLabel.Position = UDim2.new(0, 8, 0, 26)
+kataLabel.BackgroundTransparency = 1
+kataLabel.Text = "-"
+kataLabel.TextColor3 = Color3.fromRGB(230, 230, 255)
+kataLabel.Font = Enum.Font.GothamBold
+kataLabel.TextSize = IsMobile and 14 or 16
+kataLabel.TextXAlignment = Enum.TextXAlignment.Left
+kataLabel.Parent = logFrame
+
+-- Section 3: Word Database (KETIGA)
 createSectionHeader("WORD DATABASE", "rbxassetid://6023426945", currentOrder)
 currentOrder = currentOrder + 1
 
@@ -1493,62 +1546,13 @@ kataSulitBtn.MouseButton1Click:Connect(function()
     updateCategoryButtons()
 end)
 
--- Section 4: Information
-createSectionHeader("INFORMATION", "rbxassetid://6023426923", currentOrder)
+-- Section 4: Delay Settings (TERAKHIR)
+createSectionHeader("DELAY SETTINGS", "rbxassetid://6023426941", currentOrder)
 currentOrder = currentOrder + 1
 
--- Log Frame
-local logFrame = Instance.new("Frame")
-logFrame.Size = UDim2.new(1, -4, 0, IsMobile and 55 or 50)
-logFrame.LayoutOrder = currentOrder
+-- Add speed settings
+createSpeedSettings(mainContainer, currentOrder)
 currentOrder = currentOrder + 1
-logFrame.BackgroundColor3 = Color3.fromRGB(12, 10, 20)
-logFrame.BorderSizePixel = 0
-logFrame.Parent = mainContainer
-
-local logCorner = Instance.new("UICorner")
-logCorner.CornerRadius = UDim.new(0, 9)
-logCorner.Parent = logFrame
-
-local logStroke = Instance.new("UIStroke")
-logStroke.Color = Color3.fromRGB(80, 40, 140)
-logStroke.Thickness = 1
-logStroke.Transparency = 0.4
-logStroke.Parent = logFrame
-
-UI_Elements.logStroke = logStroke
-
-local logIcon = Instance.new("ImageLabel")
-logIcon.Size = UDim2.new(0, 18, 0, 18)
-logIcon.Position = UDim2.new(0, 8, 0, 4)
-logIcon.BackgroundTransparency = 1
-logIcon.Image = "rbxassetid://6023426923"
-logIcon.ImageColor3 = Color3.fromRGB(160, 100, 255)
-logIcon.Parent = logFrame
-
-local awalanLabel = Instance.new("TextLabel")
-awalanLabel.Size = UDim2.new(1, -30, 0, 22)
-awalanLabel.Position = UDim2.new(0, 28, 0, 4)
-awalanLabel.BackgroundTransparency = 1
-awalanLabel.Text = "AWALAN: -"
-awalanLabel.TextColor3 = Color3.fromRGB(160, 100, 255)
-awalanLabel.Font = Enum.Font.GothamBold
-awalanLabel.TextSize = IsMobile and 10 or 11
-awalanLabel.TextXAlignment = Enum.TextXAlignment.Left
-awalanLabel.Parent = logFrame
-
-UI_Elements.LogAwalan = awalanLabel
-
-local kataLabel = Instance.new("TextLabel")
-kataLabel.Size = UDim2.new(1, -12, 0, 24)
-kataLabel.Position = UDim2.new(0, 8, 0, 26)
-kataLabel.BackgroundTransparency = 1
-kataLabel.Text = "-"
-kataLabel.TextColor3 = Color3.fromRGB(230, 230, 255)
-kataLabel.Font = Enum.Font.GothamBold
-kataLabel.TextSize = IsMobile and 14 or 16
-kataLabel.TextXAlignment = Enum.TextXAlignment.Left
-kataLabel.Parent = logFrame
 
 -- Word lists
 local usedWords = {}
