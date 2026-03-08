@@ -1,7 +1,10 @@
 --[[
+	WARNING: Heads up! This script has not been verified by ScriptBlox. Use at your own risk!
+]]
+
+--[[
     Anixly - Sambung kata
-    Fitur Lengkap dengan UI Keren (Versi Stabil)
-    Theme: Tokyo Night Only + Neon UI + Anime Icon
+    Fitur Lengkap dengan UI Keren
 ]]
 
 -- Services
@@ -162,7 +165,7 @@ local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 16)
 MainCorner.Parent = MainFrame
 
--- Header
+-- Header (HEADER DOT DIHAPUS)
 local Header = Instance.new("Frame")
 Header.Name = "Header"
 Header.Size = UDim2.new(1, 0, 0, HEADER_HEIGHT)
@@ -190,20 +193,9 @@ HeaderLine.BackgroundColor3 = THEME.accent
 HeaderLine.BorderSizePixel = 0
 HeaderLine.Parent = Header
 
-local HeaderDot = Instance.new("Frame")
-HeaderDot.Size = UDim2.new(0, 7, 0, 7)
-HeaderDot.Position = UDim2.new(0, 10, 0.5, -3.5)
-HeaderDot.BackgroundColor3 = THEME.accent
-HeaderDot.BorderSizePixel = 0
-HeaderDot.Parent = Header
-
-local DotCorner = Instance.new("UICorner")
-DotCorner.CornerRadius = UDim.new(1, 0)
-DotCorner.Parent = HeaderDot
-
 local TitleLabel = Instance.new("TextLabel")
 TitleLabel.Size = UDim2.new(0, 140, 1, 0)
-TitleLabel.Position = UDim2.new(0, 22, 0, 0)
+TitleLabel.Position = UDim2.new(0, 12, 0, 0)
 TitleLabel.BackgroundTransparency = 1
 TitleLabel.Text = "Anixly"
 TitleLabel.TextColor3 = Color3.new(1, 1, 1)
@@ -251,7 +243,7 @@ MiniIcon.Name = "AnixlyMiniIcon"
 MiniIcon.Size = UDim2.new(0, IsMobile and 45 or 60, 0, IsMobile and 45 or 60)
 MiniIcon.Position = UDim2.new(0, 10, 0.5, -30)
 MiniIcon.BackgroundColor3 = THEME.headerBg
-MiniIcon.Image = "rbxassetid://14081040144"  -- Icon anime girl
+MiniIcon.Image = "rbxassetid://110893481851143"  -- Icon anime girl
 MiniIcon.ImageColor3 = Color3.new(1, 1, 1)
 MiniIcon.ScaleType = Enum.ScaleType.Fit
 MiniIcon.Visible = false
@@ -554,49 +546,80 @@ tpTab.MouseButton1Click:Connect(function()
     switchTab(tpContainer, tpTab)
 end)
 
--- Section Header Function dengan efek neon
-local function createSectionHeader(title, order)
-    local header = Instance.new("Frame")
-    header.Size = UDim2.new(1, 0, 0, 30)
+-- Fungsi untuk membuat Section Header dengan tombol expand/collapse
+local function createCollapsibleHeader(title, iconId, container, contentList, order)
+    local header = Instance.new("TextButton")
+    header.Size = UDim2.new(1, 0, 0, 35)
     header.LayoutOrder = order
-    header.BackgroundTransparency = 1
-    header.Parent = mainContainer
+    header.BackgroundColor3 = Color3.fromRGB(20, 16, 36)
+    header.Text = ""
+    header.AutoButtonColor = false
+    header.Parent = container
     
-    -- Glow untuk teks
-    local glow = Instance.new("ImageLabel")
-    glow.Size = UDim2.new(1, 20, 1, 10)
-    glow.Position = UDim2.new(0, -10, 0, -5)
-    glow.BackgroundTransparency = 1
-    glow.Image = "rbxassetid://3570695787"
-    glow.ImageColor3 = THEME.accent
-    glow.ImageTransparency = 0.7
-    glow.ZIndex = 0
-    glow.Parent = header
+    local headerCorner = Instance.new("UICorner")
+    headerCorner.CornerRadius = UDim.new(0, 8)
+    headerCorner.Parent = header
     
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, -10, 1, 0)
-    label.Position = UDim2.new(0, 10, 0, 0)
-    label.BackgroundTransparency = 1
-    label.Text = title
-    label.TextColor3 = THEME.logText
-    label.Font = Enum.Font.GothamBold
-    label.TextSize = 14
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Parent = header
+    local headerStroke = Instance.new("UIStroke")
+    headerStroke.Color = THEME.mid
+    headerStroke.Thickness = 1
+    headerStroke.Transparency = 0.5
+    headerStroke.Parent = header
     
-    local line = Instance.new("Frame")
-    line.Size = UDim2.new(1, -10, 0, 1)
-    line.Position = UDim2.new(0, 10, 1, -2)
-    line.BackgroundColor3 = THEME.mid
-    line.BorderSizePixel = 0
-    line.Parent = header
+    -- Icon
+    local icon = Instance.new("ImageLabel")
+    icon.Size = UDim2.new(0, 18, 0, 18)
+    icon.Position = UDim2.new(0, 10, 0.5, -9)
+    icon.BackgroundTransparency = 1
+    icon.Image = iconId
+    icon.ImageColor3 = THEME.accent
+    icon.Parent = header
     
-    -- Neon effect untuk line
-    local lineGlow = Instance.new("UIStroke")
-    lineGlow.Color = THEME.accent
-    lineGlow.Thickness = 2
-    lineGlow.Transparency = 0.8
-    lineGlow.Parent = line
+    -- Title
+    local titleLabel = Instance.new("TextLabel")
+    titleLabel.Size = UDim2.new(1, -80, 1, 0)
+    titleLabel.Position = UDim2.new(0, 35, 0, 0)
+    titleLabel.BackgroundTransparency = 1
+    titleLabel.Text = title
+    titleLabel.TextColor3 = THEME.logText
+    titleLabel.Font = Enum.Font.GothamBold
+    titleLabel.TextSize = 13
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
+    titleLabel.Parent = header
+    
+    -- Arrow indicator
+    local arrow = Instance.new("TextLabel")
+    arrow.Size = UDim2.new(0, 20, 0, 20)
+    arrow.Position = UDim2.new(1, -25, 0.5, -10)
+    arrow.BackgroundTransparency = 1
+    arrow.Text = "▼"
+    arrow.TextColor3 = THEME.accent
+    arrow.Font = Enum.Font.GothamBold
+    arrow.TextSize = 14
+    arrow.Parent = header
+    
+    local expanded = true
+    local content = contentList
+    
+    -- Sembunyikan/tampilkan konten
+    for _, item in ipairs(content) do
+        item.Visible = expanded
+    end
+    
+    header.MouseButton1Click:Connect(function()
+        playClickSound()
+        expanded = not expanded
+        arrow.Text = expanded and "▼" or "▶"
+        
+        for _, item in ipairs(content) do
+            item.Visible = expanded
+        end
+        
+        -- Update canvas size
+        task.wait(0.05)
+        local canvasSize = container.CanvasSize
+        container.CanvasSize = UDim2.new(0, 0, 0, canvasSize.Y.Offset)
+    end)
     
     return header
 end
@@ -760,23 +783,55 @@ local function createDelayInput(label, defaultValue, callback, order)
     return frame
 end
 
--- Build Main Tab
+-- Build Main Tab dengan Collapsible Sections
 local order = 1
 
--- SECTION 1: AUTO FEATURES
-createSectionHeader("AUTO FEATURES", order)
+-- AUTO FEATURES SECTION (Collapsible)
+local autoFeaturesContent = {}
+
+-- Buat toggle buttons dan simpan dalam tabel
+autoFeaturesContent[1] = createToggleButton("Auto Answer", mainContainer, false, function(state) autoTypeEnabled = state end, order + 1)
+autoFeaturesContent[2] = createToggleButton("Auto Submit", mainContainer, true, function(state) autoEnterEnabled = state end, order + 2)
+
+-- Header untuk AUTO FEATURES
+createCollapsibleHeader("AUTO FEATURES", "rbxassetid://6023426919", mainContainer, autoFeaturesContent, order)
+order = order + 3  -- +1 untuk header, +2 untuk konten
+
+-- INFORMATION SECTION (Tetap, tidak collapsible)
+local infoHeader = Instance.new("Frame")
+infoHeader.Size = UDim2.new(1, 0, 0, 30)
+infoHeader.LayoutOrder = order
+infoHeader.BackgroundTransparency = 1
+infoHeader.Parent = mainContainer
 order = order + 1
 
-createToggleButton("Auto Answer", mainContainer, false, function(state) autoTypeEnabled = state end, order)
-order = order + 1
+local infoIcon = Instance.new("ImageLabel")
+infoIcon.Size = UDim2.new(0, 18, 0, 18)
+infoIcon.Position = UDim2.new(0, 5, 0.5, -9)
+infoIcon.BackgroundTransparency = 1
+infoIcon.Image = "rbxassetid://6023426923"
+infoIcon.ImageColor3 = THEME.accent
+infoIcon.Parent = infoHeader
 
-createToggleButton("Auto Submit", mainContainer, true, function(state) autoEnterEnabled = state end, order)
-order = order + 1
+local infoLabel = Instance.new("TextLabel")
+infoLabel.Size = UDim2.new(1, -35, 1, 0)
+infoLabel.Position = UDim2.new(0, 30, 0, 0)
+infoLabel.BackgroundTransparency = 1
+infoLabel.Text = "INFORMATION"
+infoLabel.TextColor3 = THEME.logText
+infoLabel.Font = Enum.Font.GothamBold
+infoLabel.TextSize = 13
+infoLabel.TextXAlignment = Enum.TextXAlignment.Left
+infoLabel.Parent = infoHeader
 
--- SECTION 2: INFORMATION
-createSectionHeader("INFORMATION", order)
-order = order + 1
+local infoLine = Instance.new("Frame")
+infoLine.Size = UDim2.new(1, -35, 0, 1)
+infoLine.Position = UDim2.new(0, 30, 1, -2)
+infoLine.BackgroundColor3 = THEME.mid
+infoLine.BorderSizePixel = 0
+infoLine.Parent = infoHeader
 
+-- Log Frame
 local logFrame = Instance.new("Frame")
 logFrame.Size = UDim2.new(1, 0, 0, 70)
 logFrame.LayoutOrder = order
@@ -818,11 +873,56 @@ kataLabel.TextSize = IsMobile and 16 or 18
 kataLabel.TextXAlignment = Enum.TextXAlignment.Left
 kataLabel.Parent = logFrame
 
--- SECTION 3: SEMUA KATA SULIT
-createSectionHeader("SEMUA KATA SULIT", order)
+-- SEMUA KATA SULIT SECTION (Collapsible - sudah ada dari sebelumnya)
+local kataSulitHeader = Instance.new("TextButton")
+kataSulitHeader.Size = UDim2.new(1, 0, 0, 35)
+kataSulitHeader.LayoutOrder = order
+kataSulitHeader.BackgroundColor3 = Color3.fromRGB(20, 16, 36)
+kataSulitHeader.Text = ""
+kataSulitHeader.AutoButtonColor = false
+kataSulitHeader.Parent = mainContainer
 order = order + 1
 
--- Kata Sulit Dropdown dengan efek neon
+local kataHeaderCorner = Instance.new("UICorner")
+kataHeaderCorner.CornerRadius = UDim.new(0, 8)
+kataHeaderCorner.Parent = kataSulitHeader
+
+local kataHeaderStroke = Instance.new("UIStroke")
+kataHeaderStroke.Color = THEME.mid
+kataHeaderStroke.Thickness = 1
+kataHeaderStroke.Transparency = 0.5
+kataHeaderStroke.Parent = kataSulitHeader
+
+local kataIcon = Instance.new("ImageLabel")
+kataIcon.Size = UDim2.new(0, 18, 0, 18)
+kataIcon.Position = UDim2.new(0, 10, 0.5, -9)
+kataIcon.BackgroundTransparency = 1
+kataIcon.Image = "rbxassetid://6023426945"
+kataIcon.ImageColor3 = THEME.accent
+kataIcon.Parent = kataSulitHeader
+
+local kataTitle = Instance.new("TextLabel")
+kataTitle.Size = UDim2.new(1, -80, 1, 0)
+kataTitle.Position = UDim2.new(0, 35, 0, 0)
+kataTitle.BackgroundTransparency = 1
+kataTitle.Text = "SEMUA KATA SULIT"
+kataTitle.TextColor3 = THEME.logText
+kataTitle.Font = Enum.Font.GothamBold
+kataTitle.TextSize = 13
+kataTitle.TextXAlignment = Enum.TextXAlignment.Left
+kataTitle.Parent = kataSulitHeader
+
+local kataArrow = Instance.new("TextLabel")
+kataArrow.Size = UDim2.new(0, 20, 0, 20)
+kataArrow.Position = UDim2.new(1, -25, 0.5, -10)
+kataArrow.BackgroundTransparency = 1
+kataArrow.Text = "▼"
+kataArrow.TextColor3 = THEME.accent
+kataArrow.Font = Enum.Font.GothamBold
+kataArrow.TextSize = 14
+kataArrow.Parent = kataSulitHeader
+
+-- Kata Sulit Dropdown Button
 local kataSulitBtn = Instance.new("TextButton")
 kataSulitBtn.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
 kataSulitBtn.LayoutOrder = order
@@ -834,33 +934,25 @@ kataSulitBtn.Font = Enum.Font.GothamBold
 kataSulitBtn.TextSize = TEXT_SIZE_NORMAL
 kataSulitBtn.Parent = mainContainer
 
-local kataCorner = Instance.new("UICorner")
-kataCorner.CornerRadius = UDim.new(0, 8)
-kataCorner.Parent = kataSulitBtn
+local kataBtnCorner = Instance.new("UICorner")
+kataBtnCorner.CornerRadius = UDim.new(0, 8)
+kataBtnCorner.Parent = kataSulitBtn
 
--- Neon stroke untuk button
 local kataBtnStroke = Instance.new("UIStroke")
 kataBtnStroke.Color = THEME.accent
 kataBtnStroke.Thickness = 1.5
 kataBtnStroke.Transparency = 0.3
 kataBtnStroke.Parent = kataSulitBtn
 
-local kataGradient = Instance.new("UIGradient")
-kataGradient.Color = ColorSequence.new({
-    ColorSequenceKeypoint.new(0, Color3.fromRGB(90, 30, 190)),
-    ColorSequenceKeypoint.new(1, Color3.fromRGB(50, 15, 120))
-})
-kataGradient.Parent = kataSulitBtn
-
 -- Kata Sulit Dropdown Content
 local kataDropdown = Instance.new("Frame")
 kataDropdown.Size = UDim2.new(1, 0, 0, 0)
+kataDropdown.LayoutOrder = order
+order = order + 1
 kataDropdown.BackgroundColor3 = Color3.fromRGB(14, 13, 22)
 kataDropdown.ClipsDescendants = true
 kataDropdown.BorderSizePixel = 0
 kataDropdown.Parent = mainContainer
-kataDropdown.LayoutOrder = order
-order = order + 1
 
 local kataDropdownStroke = Instance.new("UIStroke")
 kataDropdownStroke.Color = THEME.mid
@@ -970,6 +1062,23 @@ local function updateCategoryButtons()
     end
 end
 
+local kataExpanded = true
+local kataContent = {kataSulitBtn, kataDropdown}
+
+for _, item in ipairs(kataContent) do
+    item.Visible = kataExpanded
+end
+
+kataSulitHeader.MouseButton1Click:Connect(function()
+    playClickSound()
+    kataExpanded = not kataExpanded
+    kataArrow.Text = kataExpanded and "▼" or "▶"
+    
+    for _, item in ipairs(kataContent) do
+        item.Visible = kataExpanded
+    end
+end)
+
 kataSulitBtn.MouseButton1Click:Connect(function()
     playClickSound()
     dropdownOpen = not dropdownOpen
@@ -986,18 +1095,20 @@ kataSulitBtn.MouseButton1Click:Connect(function()
     updateCategoryButtons()
 end)
 
--- SECTION 4: DELAY SETTINGS
-createSectionHeader("DELAY SETTINGS", order)
+-- DELAY SETTINGS SECTION (Collapsible)
+local delaySettingsContent = {}
+
+-- Buat delay inputs dan simpan dalam tabel
+delaySettingsContent[1] = createDelayInput("Write Delay", typeDelay, function(v) typeDelay = v; enterDelay = v end, order)
+order = order + 1
+delaySettingsContent[2] = createDelayInput("Turn Delay", turnDelay, function(v) turnDelay = v end, order)
+order = order + 1
+delaySettingsContent[3] = createDelayInput("Backspace Delay", backspaceDelay, function(v) backspaceDelay = v; deleteDelay = v end, order)
 order = order + 1
 
-createDelayInput("Write Delay", typeDelay, function(v) typeDelay = v; enterDelay = v end, order)
-order = order + 1
-
-createDelayInput("Turn Delay", turnDelay, function(v) turnDelay = v end, order)
-order = order + 1
-
-createDelayInput("Backspace Delay", backspaceDelay, function(v) backspaceDelay = v; deleteDelay = v end, order)
-order = order + 1
+-- Header untuk DELAY SETTINGS
+createCollapsibleHeader("DELAY SETTINGS", "rbxassetid://6023426925", mainContainer, delaySettingsContent, order)
+order = order + 4  -- +1 untuk header, +3 untuk konten
 
 -- Build Utility Tab
 local utilOrder = 1
@@ -1407,4 +1518,4 @@ end)
 -- Show main tab by default
 switchTab(mainContainer, mainTab)
 
-print("✅ Anixly Loaded dengan Neon UI & Anime Icon!")
+print("✅ Anixly Loaded dengan Collapsible Sections & Header Dot Dihapus!")
