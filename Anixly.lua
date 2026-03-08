@@ -832,8 +832,9 @@ infoLine.BorderSizePixel = 0
 infoLine.Parent = infoHeader
 
 -- Log Frame
+-- SECTION INFORMATION (cari bagian ini di kode Anda)
 local logFrame = Instance.new("Frame")
-logFrame.Size = UDim2.new(1, 0, 0, 70)
+logFrame.Size = UDim2.new(1, 0, 0, 120)  -- Tinggi ditambah jadi 120
 logFrame.LayoutOrder = order
 logFrame.BackgroundColor3 = Color3.fromRGB(12, 10, 20)
 logFrame.BorderSizePixel = 0
@@ -844,13 +845,14 @@ local logCorner = Instance.new("UICorner")
 logCorner.CornerRadius = UDim.new(0, 8)
 logCorner.Parent = logFrame
 
--- Neon stroke untuk log frame
+-- Neon stroke
 local logStroke = Instance.new("UIStroke")
 logStroke.Color = THEME.mid
 logStroke.Thickness = 1
 logStroke.Transparency = 0.5
 logStroke.Parent = logFrame
 
+-- Label AWALAN (YANG SUDAH ADA)
 local awalanLabel = Instance.new("TextLabel")
 awalanLabel.Size = UDim2.new(1, -10, 0, 25)
 awalanLabel.Position = UDim2.new(0, 10, 0, 5)
@@ -862,9 +864,60 @@ awalanLabel.TextSize = IsMobile and 12 or 14
 awalanLabel.TextXAlignment = Enum.TextXAlignment.Left
 awalanLabel.Parent = logFrame
 
+-- ========== KOLOM PENCARIAN (PASANG DI SINI) ==========
+local searchLabel = Instance.new("TextLabel")
+searchLabel.Size = UDim2.new(0, 70, 0, 25)
+searchLabel.Position = UDim2.new(0, 10, 0, 30)
+searchLabel.BackgroundTransparency = 1
+searchLabel.Text = "Cari Kata:"
+searchLabel.TextColor3 = Color3.fromRGB(180, 170, 210)
+searchLabel.Font = Enum.Font.GothamBold
+searchLabel.TextSize = 12
+searchLabel.TextXAlignment = Enum.TextXAlignment.Left
+searchLabel.Parent = logFrame
+
+local searchBox = Instance.new("TextBox")
+searchBox.Size = UDim2.new(1, -90, 0, 28)
+searchBox.Position = UDim2.new(0, 80, 0, 28)
+searchBox.BackgroundColor3 = Color3.fromRGB(30, 25, 45)
+searchBox.Text = ""
+searchBox.TextColor3 = Color3.new(1, 1, 1)
+searchBox.Font = Enum.Font.Gotham
+searchBox.TextSize = 12
+searchBox.PlaceholderText = "1-3 huruf (contoh: ka)"
+searchBox.PlaceholderColor3 = Color3.fromRGB(100, 90, 120)
+searchBox.ClearTextOnFocus = false
+searchBox.Parent = logFrame
+
+local searchCorner = Instance.new("UICorner")
+searchCorner.CornerRadius = UDim.new(0, 6)
+searchCorner.Parent = searchBox
+
+local searchStroke = Instance.new("UIStroke")
+searchStroke.Color = THEME.primary
+searchStroke.Thickness = 1
+searchStroke.Transparency = 0.5
+searchStroke.Parent = searchBox
+
+-- Hasil pencarian
+local resultLabel = Instance.new("TextLabel")
+resultLabel.Size = UDim2.new(1, -20, 0, 40)
+resultLabel.Position = UDim2.new(0, 10, 0, 60)
+resultLabel.BackgroundTransparency = 1
+resultLabel.Text = "Hasil: -"
+resultLabel.TextColor3 = THEME.logText
+resultLabel.Font = Enum.Font.Gotham
+resultLabel.TextSize = 12
+resultLabel.TextWrapped = true
+resultLabel.TextXAlignment = Enum.TextXAlignment.Left
+resultLabel.TextYAlignment = Enum.TextYAlignment.Top
+resultLabel.Parent = logFrame
+-- ========== AKHIR KOLOM PENCARIAN ==========
+
+-- Label kata terpilih (YANG SUDAH ADA)
 local kataLabel = Instance.new("TextLabel")
-kataLabel.Size = UDim2.new(1, -10, 0, 35)
-kataLabel.Position = UDim2.new(0, 10, 0, 30)
+kataLabel.Size = UDim2.new(1, -10, 0, 25)
+kataLabel.Position = UDim2.new(0, 10, 0, 100)  -- Posisi disesuaikan (dari 90 jadi 100)
 kataLabel.BackgroundTransparency = 1
 kataLabel.Text = "-"
 kataLabel.TextColor3 = Color3.fromRGB(230, 230, 255)
@@ -923,14 +976,15 @@ kataArrow.TextSize = 14
 kataArrow.Parent = kataSulitHeader
 
 -- Kata Sulit Dropdown Button
+-- Kata Sulit Dropdown Button (teks dibuat normal)
 local kataSulitBtn = Instance.new("TextButton")
 kataSulitBtn.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
 kataSulitBtn.LayoutOrder = order
 order = order + 1
 kataSulitBtn.BackgroundColor3 = Color3.fromRGB(65, 20, 145)
 kataSulitBtn.Text = "SET KATA SULIT ▼"
-kataSulitBtn.TextColor3 = Color3.new(1, 1, 1)
-kataSulitBtn.Font = Enum.Font.GothamBold
+kataSulitBtn.TextColor3 = Color3.fromRGB(220, 220, 255)
+kataSulitBtn.Font = Enum.Font.Gotham  
 kataSulitBtn.TextSize = TEXT_SIZE_NORMAL
 kataSulitBtn.Parent = mainContainer
 
@@ -939,8 +993,8 @@ kataBtnCorner.CornerRadius = UDim.new(0, 8)
 kataBtnCorner.Parent = kataSulitBtn
 
 local kataBtnStroke = Instance.new("UIStroke")
-kataBtnStroke.Color = THEME.accent
-kataBtnStroke.Thickness = 1.5
+kataBtnStroke.Color = THEME.mid
+kataBtnStroke.Thickness = 1
 kataBtnStroke.Transparency = 0.3
 kataBtnStroke.Parent = kataSulitBtn
 
@@ -1377,6 +1431,63 @@ local function autoType()
     task.wait(0.5)
     isTyping = false
 end
+
+-- Fungsi pencarian kata (letakkan di bagian bawah, sebelum remote handler)
+local allIndonesianWords = commonWords  -- Gunakan commonWords sebagai database awal
+
+local function searchWords(prefix)
+    if #prefix < 1 or #prefix > 3 then
+        resultLabel.Text = "Hasil: (minimal 1, maksimal 3 huruf)"
+        return
+    end
+    
+    local results = {}
+    prefix = prefix:lower()
+    
+    for _, word in ipairs(allIndonesianWords) do
+        if word:sub(1, #prefix) == prefix then
+            table.insert(results, word)
+            if #results >= 20 then break end
+        end
+    end
+    
+    if #results > 0 then
+        resultLabel.Text = "Hasil (" .. #results .. "+): " .. table.concat(results, ", ")
+    else
+        resultLabel.Text = "Hasil: Tidak ada kata dengan awalan '" .. prefix .. "'"
+    end
+end
+
+-- Koneksi ke TextBox
+searchBox:GetPropertyChangedSignal("Text"):Connect(function()
+    local text = searchBox.Text:gsub("%s+", "")
+    if #text >= 1 and #text <= 3 then
+        searchWords(text)
+    else
+        resultLabel.Text = "Hasil: (1-3 huruf saja)"
+    end
+end)
+
+-- Load kata dari URL (opsional)
+task.spawn(function()
+    local success, response = pcall(function()
+        return game:HttpGet("https://raw.githubusercontent.com/geovedi/indonesian-wordlist/master/00-indonesian-wordlist.lst")
+    end)
+    
+    if success and type(response) == "string" and #response > 1000 then
+        local newWords = {}
+        for line in string.gmatch(response, "[^\r\n]+") do
+            local word = (line:gsub("%s+", "")):lower()
+            if #word > 1 and string.match(word, "^%a+$") then
+                table.insert(newWords, word)
+            end
+        end
+        if #newWords > 1000 then
+            allIndonesianWords = newWords
+            print("✅ Database kata Indonesia dimuat! (" .. #newWords .. " kata)")
+        end
+    end
+end)
 
 -- Load word categories
 task.spawn(function()
