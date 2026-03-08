@@ -1,7 +1,7 @@
 --[[
     Anixly - Sambung kata
     Fitur Lengkap dengan UI Keren (Versi Stabil)
-    Theme: Tokyo Night Only + Minimize Feature
+    Theme: Tokyo Night Only + Minimize Feature + Icons
 ]]
 
 -- Services
@@ -67,13 +67,12 @@ local TEXT_SIZE_LARGE = IsMobile and 13 or 15
 
 -- Variables
 local autoTypeEnabled = false
-local autoEnterEnabled = true
-local typeDelay = 0.03
-local enterDelay = 0.08
-local turnDelay = 1.5
-local backspaceDelay = 0.02
-local deleteDelay = 0.06
-local humanModeEnabled = false
+local autoEnterEnabled = false
+local typeDelay = 0.30
+local enterDelay = 0.15
+local turnDelay = 2.0
+local backspaceDelay = 0.10
+local deleteDelay = 0.11
 local noclipEnabled = false
 local noclipConnection
 
@@ -110,9 +109,6 @@ local usedWords = {}
 local currentWord = ""
 local wordLength = 0
 local isTyping = false
-
--- Random words for human mode
-local randomWords = {"wkwk", "receh", "noob", "lemah", "kasian", "santuy", "ezz", "lol", "mudah"}
 
 -- Common words
 local commonWords = {
@@ -460,22 +456,19 @@ setupContainerLayout(mainContainer)
 setupContainerLayout(utilContainer)
 setupContainerLayout(tpContainer)
 
--- Sidebar Tab Buttons
+-- Sidebar Tab Buttons dengan ICON
 local tabButtons = {}
 
-local function createTabButton(text, order)
+local function createTabButton(iconId, label, order)
     local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, 0, 0, IsMobile and 45 or 48)
+    btn.Size = UDim2.new(1, 0, 0, IsMobile and 48 or 52)
     btn.LayoutOrder = order
     btn.BackgroundColor3 = Color3.fromRGB(20, 18, 32)
-    btn.Text = text
-    btn.TextColor3 = Color3.fromRGB(150, 150, 150)
-    btn.Font = Enum.Font.GothamBold
-    btn.TextSize = TEXT_SIZE_NORMAL
+    btn.Text = ""
     btn.Parent = Sidebar
     
     local btnCorner = Instance.new("UICorner")
-    btnCorner.CornerRadius = UDim.new(0, 8)
+    btnCorner.CornerRadius = UDim.new(0, 9)
     btnCorner.Parent = btn
     
     local btnStroke = Instance.new("UIStroke")
@@ -484,13 +477,61 @@ local function createTabButton(text, order)
     btnStroke.Transparency = 0.6
     btnStroke.Parent = btn
     
-    table.insert(tabButtons, {btn = btn, stroke = btnStroke})
+    -- Icon
+    local icon = Instance.new("ImageLabel")
+    icon.Size = UDim2.new(0, IsMobile and 22 or 28, 0, IsMobile and 22 or 28)
+    icon.Position = UDim2.new(0.5, - (IsMobile and 11 or 14), 0.25, 0)
+    icon.BackgroundTransparency = 1
+    icon.Image = iconId
+    icon.ImageColor3 = Color3.fromRGB(120, 110, 150)
+    icon.Name = "Icon"
+    icon.Parent = btn
+    
+    -- Label
+    local labelText = Instance.new("TextLabel")
+    labelText.Size = UDim2.new(1, 0, 0, 15)
+    labelText.Position = UDim2.new(0, 0, 0.7, 0)
+    labelText.BackgroundTransparency = 1
+    labelText.Text = label
+    labelText.TextColor3 = Color3.fromRGB(120, 110, 150)
+    labelText.Font = Enum.Font.GothamBold
+    labelText.TextSize = IsMobile and 9 or 10
+    labelText.Name = "Label"
+    labelText.Parent = btn
+    
+    table.insert(tabButtons, {btn = btn, stroke = btnStroke, icon = icon, label = labelText})
     return btn
 end
 
-local mainTab = createTabButton("MAIN", 1)
-local utilTab = createTabButton("UTILITY", 2)
-local tpTab = createTabButton("TELEPORT", 3)
+-- Tab Buttons dengan Icon:
+-- MAIN: Icon bolt (6023426941)
+-- UTILITY: Icon gear (6023426937)
+-- TELEPORT: Icon location (6023426935)
+local mainTab = createTabButton("rbxassetid://6023426941", "MAIN", 1)
+local utilTab = createTabButton("rbxassetid://6023426937", "UTILITY", 2)
+local tpTab = createTabButton("rbxassetid://6023426935", "TELEPORT", 3)
+
+-- Highlight Tab Function
+local function highlightTab(activeBtn)
+    for _, tab in pairs(tabButtons) do
+        tab.btn.BackgroundColor3 = Color3.fromRGB(20, 18, 32)
+        tab.stroke.Color = Color3.fromRGB(50, 30, 90)
+        tab.stroke.Transparency = 0.6
+        tab.icon.ImageColor3 = Color3.fromRGB(120, 110, 150)
+        tab.label.TextColor3 = Color3.fromRGB(120, 110, 150)
+    end
+    
+    activeBtn.BackgroundColor3 = THEME.activeTab
+    
+    for _, tab in pairs(tabButtons) do
+        if tab.btn == activeBtn then
+            tab.stroke.Color = THEME.accent
+            tab.stroke.Transparency = 0.1
+            tab.icon.ImageColor3 = Color3.new(1, 1, 1)
+            tab.label.TextColor3 = Color3.new(1, 1, 1)
+        end
+    end
+end
 
 -- Tab Switching
 local function switchTab(activeContainer, activeBtn)
@@ -498,22 +539,7 @@ local function switchTab(activeContainer, activeBtn)
     utilContainer.Visible = false
     tpContainer.Visible = false
     activeContainer.Visible = true
-    
-    for _, tab in pairs(tabButtons) do
-        tab.btn.BackgroundColor3 = Color3.fromRGB(20, 18, 32)
-        tab.btn.TextColor3 = Color3.fromRGB(150, 150, 150)
-        tab.stroke.Color = Color3.fromRGB(50, 30, 90)
-        tab.stroke.Transparency = 0.6
-    end
-    
-    activeBtn.BackgroundColor3 = THEME.activeTab
-    activeBtn.TextColor3 = Color3.new(1, 1, 1)
-    for _, tab in pairs(tabButtons) do
-        if tab.btn == activeBtn then
-            tab.stroke.Color = THEME.accent
-            tab.stroke.Transparency = 0.1
-        end
-    end
+    highlightTab(activeBtn)
 end
 
 -- Click handlers
@@ -703,7 +729,7 @@ local function createDelayInput(label, defaultValue, callback, order)
     return frame
 end
 
--- Build Main Tab dengan 4 Section
+-- Build Main Tab dengan 4 Section (Human Mode dihapus)
 local order = 1
 
 -- SECTION 1: AUTO FEATURES
@@ -714,9 +740,6 @@ createToggleButton("Auto Answer", mainContainer, false, function(state) autoType
 order = order + 1
 
 createToggleButton("Auto Submit", mainContainer, true, function(state) autoEnterEnabled = state end, order)
-order = order + 1
-
-createToggleButton("Human Mode", mainContainer, false, function(state) humanModeEnabled = state end, order)
 order = order + 1
 
 -- SECTION 2: INFORMATION
@@ -871,23 +894,17 @@ kataSulitBtn.MouseButton1Click:Connect(function()
     updateCategoryButtons()
 end)
 
--- SECTION 4: DELAY SETTINGS (dengan TextBox)
+-- SECTION 4: DELAY SETTINGS (3 Input saja: Write, Turn, Backspace)
 createSectionHeader("DELAY SETTINGS", order)
 order = order + 1
 
-createDelayInput("Type Delay", typeDelay, function(v) typeDelay = v end, order)
-order = order + 1
-
-createDelayInput("Enter Delay", enterDelay, function(v) enterDelay = v end, order)
+createDelayInput("Write Delay", typeDelay, function(v) typeDelay = v; enterDelay = v end, order)
 order = order + 1
 
 createDelayInput("Turn Delay", turnDelay, function(v) turnDelay = v end, order)
 order = order + 1
 
-createDelayInput("Backspace Delay", backspaceDelay, function(v) backspaceDelay = v end, order)
-order = order + 1
-
-createDelayInput("Delete Delay", deleteDelay, function(v) deleteDelay = v end, order)
+createDelayInput("Backspace Delay", backspaceDelay, function(v) backspaceDelay = v; deleteDelay = v end, order)
 order = order + 1
 
 -- Build Utility Tab
@@ -914,17 +931,34 @@ createToggleButton("NOCLIP", utilContainer, false, function(state)
 end, utilOrder)
 utilOrder = utilOrder + 1
 
--- Respawn button
+-- Respawn button dengan icon
 local respawnBtn = Instance.new("TextButton")
 respawnBtn.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
 respawnBtn.LayoutOrder = utilOrder
 respawnBtn.BackgroundColor3 = Color3.fromRGB(18, 16, 26)
-respawnBtn.Text = "RESPAWN"
-respawnBtn.TextColor3 = Color3.fromRGB(200, 190, 220)
-respawnBtn.Font = Enum.Font.GothamBold
-respawnBtn.TextSize = TEXT_SIZE_NORMAL
+respawnBtn.Text = ""
 respawnBtn.Parent = utilContainer
 utilOrder = utilOrder + 1
+
+-- Icon untuk respawn
+local respawnIcon = Instance.new("ImageLabel")
+respawnIcon.Size = UDim2.new(0, 18, 0, 18)
+respawnIcon.Position = UDim2.new(0, 10, 0.5, -9)
+respawnIcon.BackgroundTransparency = 1
+respawnIcon.Image = "rbxassetid://6023426939"
+respawnIcon.ImageColor3 = Color3.fromRGB(200, 190, 220)
+respawnIcon.Parent = respawnBtn
+
+local respawnLabel = Instance.new("TextLabel")
+respawnLabel.Size = UDim2.new(1, -35, 1, 0)
+respawnLabel.Position = UDim2.new(0, 35, 0, 0)
+respawnLabel.BackgroundTransparency = 1
+respawnLabel.Text = "RESPAWN"
+respawnLabel.TextColor3 = Color3.fromRGB(200, 190, 220)
+respawnLabel.Font = Enum.Font.GothamBold
+respawnLabel.TextSize = TEXT_SIZE_NORMAL
+respawnLabel.TextXAlignment = Enum.TextXAlignment.Left
+respawnLabel.Parent = respawnBtn
 
 local respawnCorner = Instance.new("UICorner")
 respawnCorner.CornerRadius = UDim.new(0, 8)
@@ -943,17 +977,34 @@ respawnBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Rejoin button
+-- Rejoin button dengan icon
 local rejoinBtn = Instance.new("TextButton")
 rejoinBtn.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
 rejoinBtn.LayoutOrder = utilOrder
 rejoinBtn.BackgroundColor3 = Color3.fromRGB(18, 16, 26)
-rejoinBtn.Text = "REJOIN SERVER"
-rejoinBtn.TextColor3 = Color3.fromRGB(200, 190, 220)
-rejoinBtn.Font = Enum.Font.GothamBold
-rejoinBtn.TextSize = TEXT_SIZE_NORMAL
+rejoinBtn.Text = ""
 rejoinBtn.Parent = utilContainer
 utilOrder = utilOrder + 1
+
+-- Icon untuk rejoin
+local rejoinIcon = Instance.new("ImageLabel")
+rejoinIcon.Size = UDim2.new(0, 18, 0, 18)
+rejoinIcon.Position = UDim2.new(0, 10, 0.5, -9)
+rejoinIcon.BackgroundTransparency = 1
+rejoinIcon.Image = "rbxassetid://6023426921"
+rejoinIcon.ImageColor3 = Color3.fromRGB(200, 190, 220)
+rejoinIcon.Parent = rejoinBtn
+
+local rejoinLabel = Instance.new("TextLabel")
+rejoinLabel.Size = UDim2.new(1, -35, 1, 0)
+rejoinLabel.Position = UDim2.new(0, 35, 0, 0)
+rejoinLabel.BackgroundTransparency = 1
+rejoinLabel.Text = "REJOIN SERVER"
+rejoinLabel.TextColor3 = Color3.fromRGB(200, 190, 220)
+rejoinLabel.Font = Enum.Font.GothamBold
+rejoinLabel.TextSize = TEXT_SIZE_NORMAL
+rejoinLabel.TextXAlignment = Enum.TextXAlignment.Left
+rejoinLabel.Parent = rejoinBtn
 
 local rejoinCorner = Instance.new("UICorner")
 rejoinCorner.CornerRadius = UDim.new(0, 8)
@@ -970,153 +1021,56 @@ rejoinBtn.MouseButton1Click:Connect(function()
     TeleportService:Teleport(game.PlaceId, LocalPlayer)
 end)
 
--- Build Teleport Tab (Coming Soon)
+-- Build Teleport Tab (Coming Soon) dengan icon
+local tpPlaceholderFrame = Instance.new("Frame")
+tpPlaceholderFrame.Size = UDim2.new(1, 0, 0, 100)
+tpPlaceholderFrame.BackgroundTransparency = 1
+tpPlaceholderFrame.LayoutOrder = 1
+tpPlaceholderFrame.Parent = tpContainer
+
+local tpIcon = Instance.new("ImageLabel")
+tpIcon.Size = UDim2.new(0, 40, 0, 40)
+tpIcon.Position = UDim2.new(0.5, -20, 0.2, 0)
+tpIcon.BackgroundTransparency = 1
+tpIcon.Image = "rbxassetid://6023426935"
+tpIcon.ImageColor3 = Color3.fromRGB(150, 150, 150)
+tpIcon.Parent = tpPlaceholderFrame
+
 local tpPlaceholder = Instance.new("TextLabel")
-tpPlaceholder.Size = UDim2.new(1, 0, 0, 100)
+tpPlaceholder.Size = UDim2.new(1, 0, 0, 30)
+tpPlaceholder.Position = UDim2.new(0, 0, 0.6, 0)
 tpPlaceholder.BackgroundTransparency = 1
-tpPlaceholder.Text = "TELEPORT FEATURES\n(Coming Soon)"
+tpPlaceholder.Text = "TELEPORT FEATURES"
 tpPlaceholder.TextColor3 = Color3.fromRGB(150, 150, 150)
 tpPlaceholder.Font = Enum.Font.GothamBold
 tpPlaceholder.TextSize = 16
-tpPlaceholder.TextWrapped = true
-tpPlaceholder.Parent = tpContainer
+tpPlaceholder.Parent = tpPlaceholderFrame
 
--- Typing function
+local tpComingSoon = Instance.new("TextLabel")
+tpComingSoon.Size = UDim2.new(1, 0, 0, 20)
+tpComingSoon.Position = UDim2.new(0, 0, 0.8, 0)
+tpComingSoon.BackgroundTransparency = 1
+tpComingSoon.Text = "(Coming Soon)"
+tpComingSoon.TextColor3 = Color3.fromRGB(120, 120, 120)
+tpComingSoon.Font = Enum.Font.Gotham
+tpComingSoon.TextSize = 14
+tpComingSoon.Parent = tpPlaceholderFrame
+
+-- Typing function (Human Mode dihapus)
 local function typeWord(word, length)
     if not IsRunning then return end
     
     wordLength = length or #word
     
-    if humanModeEnabled then
-        local mistakes = math.random(1, 2)
-        local mistakeCount = 0
+    for i = 1, #word do
+        local char = word:sub(i, i):upper()
+        local keyCode = Enum.KeyCode[char]
         
-        if mistakeCount < mistakes and math.random() < 0.3 then
-            mistakeCount = mistakeCount + 1
-            task.wait(math.random() * 0.8 + 0.3)
-        end
-        
-        local i = 1
-        while i <= #word do
-            if not IsRunning then return end
-            
-            if mistakeCount < mistakes and i > 1 and math.random() < 0.12 then
-                mistakeCount = mistakeCount + 1
-                task.wait(math.random() * 0.6 + 0.2)
-            end
-            
-            if mistakeCount < mistakes and math.random() < 0.08 then
-                mistakeCount = mistakeCount + 1
-                
-                local chars = "qwertyuiopasdfghjklzxcvbnm"
-                local numTypos = math.random(1, 2)
-                
-                for _ = 1, numTypos do
-                    local char = chars:sub(math.random(1, #chars), math.random(1, #chars))
-                    local keyCode = Enum.KeyCode[char:upper()]
-                    if keyCode then
-                        VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
-                        task.wait(0.01)
-                        VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
-                        task.wait(typeDelay + math.random() * (enterDelay - typeDelay))
-                    end
-                end
-                
-                task.wait(0.1 + math.random() * 0.2)
-                
-                for _ = 1, numTypos do
-                    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Backspace, false, game)
-                    task.wait(0.03)
-                    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Backspace, false, game)
-                    task.wait(0.04)
-                end
-            end
-            
-            if mistakeCount < mistakes and math.random() < 0.1 then
-                mistakeCount = mistakeCount + 1
-                
-                local chars = "qwertyuiopasdfghjklzxcvbnm"
-                local char = chars:sub(math.random(1, #chars), math.random(1, #chars))
-                local keyCode = Enum.KeyCode[char:upper()]
-                
-                if keyCode then
-                    VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
-                    task.wait(0.01)
-                    VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
-                    task.wait(typeDelay + math.random() * (enterDelay - typeDelay))
-                    
-                    task.wait(0.08 + math.random() * 0.15)
-                    
-                    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Backspace, false, game)
-                    task.wait(0.03)
-                    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Backspace, false, game)
-                    task.wait(0.05 + math.random() * 0.1)
-                end
-            end
-            
-            local char = word:sub(i, i):upper()
-            local keyCode = Enum.KeyCode[char]
-            
-            if keyCode then
-                VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
-                task.wait(0.01)
-                VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
-                task.wait(typeDelay + math.random() * (enterDelay - typeDelay))
-            end
-            
-            i = i + 1
-        end
-        
-        if mistakeCount < mistakes and math.random() < 0.15 then
-            mistakeCount = mistakeCount + 1
-            
-            local randomWord = randomWords[math.random(1, #randomWords)]
-            task.wait(0.2 + math.random() * 0.3)
-            
-            for j = 1, #randomWord do
-                local char = randomWord:sub(j, j):upper()
-                local keyCode = Enum.KeyCode[char]
-                if keyCode then
-                    VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
-                    task.wait(0.01)
-                    VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
-                    task.wait(typeDelay * 0.7 + (math.random() * enterDelay) * 0.5)
-                end
-            end
-            
-            task.wait(0.15 + math.random() * 0.2)
-            
-            for _ = 1, #randomWord do
-                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Backspace, false, game)
-                task.wait(0.03)
-                VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Backspace, false, game)
-                task.wait(0.03)
-            end
-            
-            task.wait(0.1 + math.random() * 0.2)
-            
-            for j = 1, #word do
-                local char = word:sub(j, j):upper()
-                local keyCode = Enum.KeyCode[char]
-                if keyCode then
-                    VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
-                    task.wait(0.01)
-                    VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
-                    task.wait(typeDelay + math.random() * (enterDelay - typeDelay))
-                end
-            end
-        end
-    else
-        for i = 1, #word do
-            local char = word:sub(i, i):upper()
-            local keyCode = Enum.KeyCode[char]
-            
-            if keyCode then
-                VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
-                task.wait(0.01)
-                VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
-                task.wait(typeDelay + math.random() * (enterDelay - typeDelay))
-            end
+        if keyCode then
+            VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
+            task.wait(0.01)
+            VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
+            task.wait(typeDelay + math.random() * (enterDelay - typeDelay))
         end
     end
     
@@ -1211,6 +1165,7 @@ task.spawn(function()
         X = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/X.txt",
         NG = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/NG.txt",
         AI = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/AI.txt",
+       ["SEMUA KATA SULIT"] = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/sulit.txt",
         CY = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/CY.txt",
         UI = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/UI.txt",
         KS = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/KS.txt", 
@@ -1343,4 +1298,4 @@ end)
 -- Show main tab by default
 switchTab(mainContainer, mainTab)
 
-print("✅ Anixly Loaded dengan 4 Section & Input Delay!")
+print("✅ Anixly Loaded dengan 4 Section & 3 Delay Settings!")
