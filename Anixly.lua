@@ -71,6 +71,7 @@ local TEXT_SIZE_LARGE = IsMobile and 13 or 15
 -- Variables
 local autoTypeEnabled = false
 local autoEnterEnabled = true
+local humanModeEnabled = false
 local typeDelay = 0.12
 local enterDelay = 0.15
 local turnDelay = 2.0
@@ -786,16 +787,84 @@ end
 -- Build Main Tab dengan Collapsible Sections
 local order = 1
 
--- AUTO FEATURES SECTION (Collapsible)
+-- AUTO FEATURES SECTION (Collapsible) dengan EMOJI
 local autoFeaturesContent = {}
 
--- Buat toggle buttons dan simpan dalam tabel
+-- Buat toggle buttons dan simpan dalam tabel (3 toggle sekarang)
 autoFeaturesContent[1] = createToggleButton("Auto Answer", mainContainer, false, function(state) autoTypeEnabled = state end, order + 1)
 autoFeaturesContent[2] = createToggleButton("Auto Submit", mainContainer, true, function(state) autoEnterEnabled = state end, order + 2)
+autoFeaturesContent[3] = createToggleButton("Human Mode", mainContainer, false, function(state) humanModeEnabled = state end, order + 3)  
 
--- Header untuk AUTO FEATURES
-createCollapsibleHeader("AUTO FEATURES", "rbxassetid://6023426919", mainContainer, autoFeaturesContent, order)
-order = order + 3  -- +1 untuk header, +2 untuk konten
+-- Header untuk AUTO FEATURES dengan EMOJI
+local autoHeader = Instance.new("TextButton")
+autoHeader.Size = UDim2.new(1, 0, 0, 35)
+autoHeader.LayoutOrder = order
+autoHeader.BackgroundColor3 = Color3.fromRGB(20, 16, 36)
+autoHeader.Text = ""
+autoHeader.AutoButtonColor = false
+autoHeader.Parent = mainContainer
+order = order + 1
+
+local autoHeaderCorner = Instance.new("UICorner")
+autoHeaderCorner.CornerRadius = UDim.new(0, 8)
+autoHeaderCorner.Parent = autoHeader
+
+local autoHeaderStroke = Instance.new("UIStroke")
+autoHeaderStroke.Color = THEME.mid
+autoHeaderStroke.Thickness = 1
+autoHeaderStroke.Transparency = 0.5
+autoHeaderStroke.Parent = autoHeader
+
+-- Icon EMOJI untuk AUTO FEATURES (⚡)
+local autoIcon = Instance.new("TextLabel")
+autoIcon.Size = UDim2.new(0, 18, 0, 18)
+autoIcon.Position = UDim2.new(0, 10, 0.5, -9)
+autoIcon.BackgroundTransparency = 1
+autoIcon.Text = "⚡"  -- Emoji petir
+autoIcon.TextColor3 = THEME.accent
+autoIcon.Font = Enum.Font.GothamBold
+autoIcon.TextSize = 16
+autoIcon.Parent = autoHeader
+
+-- Title
+local autoTitle = Instance.new("TextLabel")
+autoTitle.Size = UDim2.new(1, -80, 1, 0)
+autoTitle.Position = UDim2.new(0, 35, 0, 0)
+autoTitle.BackgroundTransparency = 1
+autoTitle.Text = "AUTO FEATURES"
+autoTitle.TextColor3 = THEME.logText
+autoTitle.Font = Enum.Font.GothamBold
+autoTitle.TextSize = 13
+autoTitle.TextXAlignment = Enum.TextXAlignment.Left
+autoTitle.Parent = autoHeader
+
+-- Arrow indicator
+local autoArrow = Instance.new("TextLabel")
+autoArrow.Size = UDim2.new(0, 20, 0, 20)
+autoArrow.Position = UDim2.new(1, -25, 0.5, -10)
+autoArrow.BackgroundTransparency = 1
+autoArrow.Text = "▼"
+autoArrow.TextColor3 = THEME.accent
+autoArrow.Font = Enum.Font.GothamBold
+autoArrow.TextSize = 14
+autoArrow.Parent = autoHeader
+
+-- Atur visibility untuk AUTO FEATURES
+local autoExpanded = true
+for _, item in ipairs(autoFeaturesContent) do
+    item.Visible = autoExpanded
+end
+
+-- Event klik untuk expand/collapse
+autoHeader.MouseButton1Click:Connect(function()
+    playClickSound()
+    autoExpanded = not autoExpanded
+    autoArrow.Text = autoExpanded and "▼" or "▶"
+    
+    for _, item in ipairs(autoFeaturesContent) do
+        item.Visible = autoExpanded
+    end
+end)
 
 -- SECTION INFORMATION (COLLAPSIBLE)
 local infoContent = {}  -- Tabel untuk menyimpan konten INFORMATION
@@ -887,6 +956,7 @@ awalanLabel.TextXAlignment = Enum.TextXAlignment.Left
 awalanLabel.Parent = logFrame
 
 -- KOLOM PENCARIAN
+-- KOLOM PENCARIAN (dengan tampilan lebih banyak kata)
 local searchLabel = Instance.new("TextLabel")
 searchLabel.Size = UDim2.new(0, 70, 0, 25)
 searchLabel.Position = UDim2.new(0, 10, 0, 30)
@@ -906,7 +976,7 @@ searchBox.Text = ""
 searchBox.TextColor3 = Color3.new(1, 1, 1)
 searchBox.Font = Enum.Font.Gotham
 searchBox.TextSize = 12
-searchBox.PlaceholderText = "(contoh: ka)"
+searchBox.PlaceholderText = "1-3 huruf (contoh: ka)"
 searchBox.PlaceholderColor3 = Color3.fromRGB(100, 90, 120)
 searchBox.ClearTextOnFocus = false
 searchBox.Parent = logFrame
@@ -921,10 +991,32 @@ searchStroke.Thickness = 1
 searchStroke.Transparency = 0.5
 searchStroke.Parent = searchBox
 
--- Hasil pencarian
+-- Hasil pencarian (ScrollingFrame agar bisa menampilkan banyak kata)
+local resultFrame = Instance.new("ScrollingFrame")
+resultFrame.Size = UDim2.new(1, -20, 0, 80)  -- Tinggi ditambah jadi 80
+resultFrame.Position = UDim2.new(0, 10, 0, 60)
+resultFrame.BackgroundColor3 = Color3.fromRGB(20, 18, 30)
+resultFrame.BorderSizePixel = 0
+resultFrame.ScrollBarThickness = 4
+resultFrame.ScrollBarImageColor3 = THEME.accent
+resultFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+resultFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+resultFrame.Parent = logFrame
+
+local resultCorner = Instance.new("UICorner")
+resultCorner.CornerRadius = UDim.new(0, 6)
+resultCorner.Parent = resultFrame
+
+local resultStroke = Instance.new("UIStroke")
+resultStroke.Color = THEME.mid
+resultStroke.Thickness = 1
+resultStroke.Transparency = 0.5
+resultStroke.Parent = resultFrame
+
+-- Label untuk menampilkan hasil (di dalam ScrollingFrame)
 local resultLabel = Instance.new("TextLabel")
-resultLabel.Size = UDim2.new(1, -20, 0, 40)
-resultLabel.Position = UDim2.new(0, 10, 0, 60)
+resultLabel.Size = UDim2.new(1, -10, 0, 0)
+resultLabel.Position = UDim2.new(0, 5, 0, 5)
 resultLabel.BackgroundTransparency = 1
 resultLabel.Text = "Hasil: -"
 resultLabel.TextColor3 = THEME.logText
@@ -933,12 +1025,13 @@ resultLabel.TextSize = 12
 resultLabel.TextWrapped = true
 resultLabel.TextXAlignment = Enum.TextXAlignment.Left
 resultLabel.TextYAlignment = Enum.TextYAlignment.Top
-resultLabel.Parent = logFrame
+resultLabel.AutomaticSize = Enum.AutomaticSize.Y
+resultLabel.Parent = resultFrame
 
--- Label kata terpilih (dari auto answer)
+-- Label kata terpilih (dari auto answer) - posisi disesuaikan
 local kataLabel = Instance.new("TextLabel")
 kataLabel.Size = UDim2.new(1, -10, 0, 30)
-kataLabel.Position = UDim2.new(0, 10, 0, 110)
+kataLabel.Position = UDim2.new(0, 10, 0, 150)  -- Posisi turun karena resultFrame lebih tinggi
 kataLabel.BackgroundTransparency = 1
 kataLabel.Text = "-"
 kataLabel.TextColor3 = Color3.fromRGB(230, 230, 255)
@@ -1475,30 +1568,50 @@ local function autoType()
     isTyping = false
 end
 
--- Fungsi pencarian kata (letakkan di bagian bawah, sebelum remote handler)
-local allIndonesianWords = commonWords  -- Gunakan commonWords sebagai database awal
+-- Fungsi pencarian kata (dengan tampilan lebih banyak)
+local allIndonesianWords = commonWords
 
 local function searchWords(prefix)
     if #prefix < 1 or #prefix > 3 then
         resultLabel.Text = "Hasil: (minimal 1, maksimal 3 huruf)"
+        resultLabel.Size = UDim2.new(1, -10, 0, 0)
         return
     end
     
     local results = {}
     prefix = prefix:lower()
     
+    -- Kumpulkan semua kata yang cocok
     for _, word in ipairs(allIndonesianWords) do
         if word:sub(1, #prefix) == prefix then
             table.insert(results, word)
-            if #results >= 20 then break end
         end
     end
     
+    -- Urutkan results
+    table.sort(results)
+    
     if #results > 0 then
-        resultLabel.Text = "Hasil (" .. #results .. "+): " .. table.concat(results, ", ")
+        -- Batasi tampilan tapi tetap tampilkan jumlah total
+        local displayResults = results
+        local total = #results
+        
+        -- Jika terlalu banyak, tampilkan 50 kata pertama
+        if total > 50 then
+            displayResults = {}
+            for i = 1, 50 do
+                table.insert(displayResults, results[i])
+            end
+            resultLabel.Text = "Hasil (" .. total .. " kata, tampil 50): " .. table.concat(displayResults, ", ")
+        else
+            resultLabel.Text = "Hasil (" .. total .. " kata): " .. table.concat(results, ", ")
+        end
     else
         resultLabel.Text = "Hasil: Tidak ada kata dengan awalan '" .. prefix .. "'"
     end
+    
+    -- Auto-size label
+    resultLabel.Size = UDim2.new(1, -10, 0, 0)
 end
 
 -- Koneksi ke TextBox
