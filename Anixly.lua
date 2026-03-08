@@ -32,7 +32,7 @@ local IsRunning = true
 _G[ScriptName] = function()
     IsRunning = false
     if CoreGui:FindFirstChild("AnixlyHub") then
-        CoreGui.Anixly:Destroy()
+        CoreGui.AnixlyHub:Destroy()
     end
 end
 
@@ -244,7 +244,7 @@ MiniIcon.Name = "AnixlyMiniIcon"
 MiniIcon.Size = UDim2.new(0, IsMobile and 45 or 60, 0, IsMobile and 45 or 60)
 MiniIcon.Position = UDim2.new(0, 10, 0.5, -30)
 MiniIcon.BackgroundColor3 = THEME.headerBg
-MiniIcon.Image = "rbxassetid://14081040144"  -- Test dengan ID ini
+MiniIcon.Image = "rbxassetid://18460757764"  -- Ganti dengan ID Alya
 MiniIcon.ImageColor3 = Color3.new(1, 1, 1)
 MiniIcon.ScaleType = Enum.ScaleType.Fit
 MiniIcon.Visible = false
@@ -1066,7 +1066,7 @@ infoHeader.MouseButton1Click:Connect(function()
     mainContainer.CanvasSize = UDim2.new(0, 0, 0, canvasSize.Y.Offset)
 end)
 
--- SEMUA KATA SULIT SECTION (Collapsible - sudah ada dari sebelumnya)
+-- SEMUA KATA SULIT SECTION (Collapsible)
 local kataSulitHeader = Instance.new("TextButton")
 kataSulitHeader.Size = UDim2.new(1, 0, 0, 35)
 kataSulitHeader.LayoutOrder = order
@@ -1115,7 +1115,6 @@ kataArrow.Font = Enum.Font.GothamBold
 kataArrow.TextSize = 14
 kataArrow.Parent = kataSulitHeader
 
--- Kata Sulit Dropdown Button
 -- Kata Sulit Dropdown Button (teks dibuat normal)
 local kataSulitBtn = Instance.new("TextButton")
 kataSulitBtn.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
@@ -1307,7 +1306,7 @@ order = order + 4  -- +1 untuk header, +3 untuk konten
 -- Build Utility Tab
 local utilOrder = 1
 
--- Noclip toggle (YANG SUDAH ADA)
+-- Noclip toggle
 createToggleButton("NOCLIP", utilContainer, false, function(state)
     noclipEnabled = state
     if noclipEnabled then
@@ -1328,7 +1327,7 @@ createToggleButton("NOCLIP", utilContainer, false, function(state)
 end, utilOrder)
 utilOrder = utilOrder + 1
 
--- ===== INFINITY JUMP (DI BAWAH NOCLIP) =====
+-- ===== INFINITY JUMP =====
 local infinityJumpEnabled = false
 local infinityJumpConnection
 
@@ -1447,16 +1446,7 @@ infinityBtn.MouseButton1Click:Connect(function()
 end)
 -- ===== AKHIR INFINITY JUMP =====
 
--- Respawn button dengan icon (YANG SUDAH ADA)
-local respawnBtn = Instance.new("TextButton")
-respawnBtn.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
-respawnBtn.LayoutOrder = utilOrder
-respawnBtn.BackgroundColor3 = Color3.fromRGB(18, 16, 26)
-respawnBtn.Text = ""
-respawnBtn.Parent = utilContainer
-utilOrder = utilOrder + 1
-
--- Respawn button dengan icon
+-- Respawn button (SATU SAJA)
 local respawnBtn = Instance.new("TextButton")
 respawnBtn.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
 respawnBtn.LayoutOrder = utilOrder
@@ -1502,7 +1492,7 @@ respawnBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- Rejoin button dengan icon
+-- Rejoin button
 local rejoinBtn = Instance.new("TextButton")
 rejoinBtn.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
 rejoinBtn.LayoutOrder = utilOrder
@@ -1546,28 +1536,8 @@ rejoinBtn.MouseButton1Click:Connect(function()
     TeleportService:Teleport(game.PlaceId, LocalPlayer)
 end)
 
--- TELEPORT TAB (dengan button Claim Bambu)
-local tpContainer = createTabContainer()
-tpContainer.ScrollingDirection = Enum.ScrollingDirection.Y
-
--- TP Tab Layout
-local tpLayout = Instance.new("UIListLayout")
-tpLayout.Padding = UDim.new(0, 8)
-tpLayout.SortOrder = Enum.SortOrder.LayoutOrder
-tpLayout.Parent = tpContainer
-tpContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
-tpContainer.AutomaticCanvasSize = Enum.AutomaticSize.Y
-tpContainer.ScrollBarThickness = IsMobile and 3 or 2
-tpContainer.ScrollBarImageColor3 = THEME.accent
-tpContainer.ScrollBarImageTransparency = 0
-tpContainer.Parent = contentArea
-
-local tpPadding = Instance.new("UIPadding")
-tpPadding.PaddingLeft = UDim.new(0, 6)
-tpPadding.PaddingRight = UDim.new(0, 6)
-tpPadding.PaddingTop = UDim.new(0, 8)
-tpPadding.PaddingBottom = UDim.new(0, 10)
-tpPadding.Parent = tpContainer
+-- TELEPORT BUTTONS (LANGSUNG DI sini, tanpa deklarasi ulang tpContainer)
+local tpOrder = 1
 
 -- Fungsi untuk membuat button teleport
 local function createTPButton(text, iconId, callback, order)
@@ -1576,14 +1546,14 @@ local function createTPButton(text, iconId, callback, order)
     btn.LayoutOrder = order
     btn.BackgroundColor3 = Color3.fromRGB(18, 16, 26)
     btn.Text = ""
-    btn.Parent = tpContainer
+    btn.Parent = tpContainer  -- Pakai tpContainer yang sudah ada
     
     -- Icon
     local btnIcon = Instance.new("ImageLabel")
     btnIcon.Size = UDim2.new(0, 18, 0, 18)
     btnIcon.Position = UDim2.new(0, 10, 0.5, -9)
     btnIcon.BackgroundTransparency = 1
-    btnIcon.Image = iconId or "rbxassetid://6023426935"  -- Default icon location
+    btnIcon.Image = iconId or "rbxassetid://6023426935"
     btnIcon.ImageColor3 = Color3.fromRGB(200, 190, 220)
     btnIcon.Parent = btn
     
@@ -1617,16 +1587,11 @@ local function createTPButton(text, iconId, callback, order)
     return btn
 end
 
--- ===== TELEPORT BUTTONS =====
-local tpOrder = 1
-
--- Button Claim Bambu (sesuai kode Anda)
+-- Button Claim Bambu
 createTPButton("Claim Bambu", "rbxassetid://6023426935", function()
-    -- Kode yang Anda berikan
     local player = game.Players.LocalPlayer
     local character = player.Character or player.CharacterAdded:Wait()
     
-    -- Cari target di workspace
     local target = workspace:FindFirstChild("ClaimBambuPart")
     
     if target then
@@ -1642,32 +1607,7 @@ createTPButton("Claim Bambu", "rbxassetid://6023426935", function()
 end, tpOrder)
 tpOrder = tpOrder + 1
 
--- Typing function
-local function typeWord(word, length)
-    if not IsRunning then return end
-    
-    wordLength = length or #word
-    
-    for i = 1, #word do
-        local char = word:sub(i, i):upper()
-        local keyCode = Enum.KeyCode[char]
-        
-        if keyCode then
-            VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
-            task.wait(0.01)
-            VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
-            task.wait(typeDelay + math.random() * (enterDelay - typeDelay))
-        end
-    end
-    
-    if autoEnterEnabled then
-        task.wait(backspaceDelay + math.random() * (deleteDelay - backspaceDelay))
-        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
-        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
-    end
-end
-
--- Typing function dengan HUMAN MODE (lebih lambat dan alami)
+-- Typing function dengan HUMAN MODE (SATU FUNGSI)
 local function typeWord(word, length)
     if not IsRunning then return end
     
@@ -1675,23 +1615,19 @@ local function typeWord(word, length)
     
     if humanModeEnabled then
         -- HUMAN MODE: Lebih lambat dengan variasi dan kesalahan
-        local mistakes = math.random(0, 1)  -- 0 atau 1 kesalahan
+        local mistakes = math.random(0, 1)
         local mistakeCount = 0
         
-        -- Delay awal seperti mikir
-        task.wait(math.random() * 0.5 + 0.3)  -- 0.3 - 0.8 detik
+        task.wait(math.random() * 0.5 + 0.3)
         
         for i = 1, #word do
             if not IsRunning then return end
             
-            -- Simulasi jeda antar huruf (variasi)
-            task.wait(math.random() * 0.15 + 0.08)  -- 0.08 - 0.23 detik per huruf
+            task.wait(math.random() * 0.15 + 0.08)
             
-            -- Simulasi typo (kadang-kadang)
             if mistakeCount < mistakes and math.random() < 0.15 then
                 mistakeCount = mistakeCount + 1
                 
-                -- Ketik huruf salah
                 local wrongChars = "qwertyuiopasdfghjklzxcvbnm"
                 local wrongChar = wrongChars:sub(math.random(1, #wrongChars), math.random(1, #wrongChars))
                 local wrongKey = Enum.KeyCode[wrongChar:upper()]
@@ -1702,9 +1638,8 @@ local function typeWord(word, length)
                     VirtualInputManager:SendKeyEvent(false, wrongKey, false, game)
                 end
                 
-                task.wait(math.random() * 0.2 + 0.1)  -- Jeda sadar salah
+                task.wait(math.random() * 0.2 + 0.1)
                 
-                -- Hapus huruf salah (backspace)
                 for _ = 1, #wrongChar do
                     VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Backspace, false, game)
                     task.wait(0.06)
@@ -1712,10 +1647,9 @@ local function typeWord(word, length)
                     task.wait(0.04)
                 end
                 
-                task.wait(math.random() * 0.15 + 0.1)  -- Jeda sebelum ngetik ulang
+                task.wait(math.random() * 0.15 + 0.1)
             end
             
-            -- Ketik huruf yang benar
             local char = word:sub(i, i):upper()
             local keyCode = Enum.KeyCode[char]
             
@@ -1726,11 +1660,10 @@ local function typeWord(word, length)
             end
         end
         
-        -- Delay sebelum enter (seperti ngecek)
-        task.wait(math.random() * 0.3 + 0.2)  -- 0.2 - 0.5 detik
+        task.wait(math.random() * 0.3 + 0.2)
         
     else
-        -- MODE CEPAT (seperti biasa)
+        -- MODE CEPAT
         for i = 1, #word do
             local char = word:sub(i, i):upper()
             local keyCode = Enum.KeyCode[char]
@@ -1745,9 +1678,8 @@ local function typeWord(word, length)
     end
     
     if autoEnterEnabled then
-        -- Delay sebelum enter
         if humanModeEnabled then
-            task.wait(math.random() * 0.2 + 0.15)  -- 0.15 - 0.35 detik
+            task.wait(math.random() * 0.2 + 0.15)
         else
             task.wait(backspaceDelay + math.random() * (deleteDelay - backspaceDelay))
         end
@@ -1852,10 +1784,12 @@ local function autoType()
     isTyping = false
 end
 
--- Fungsi pencarian kata (dengan tampilan lebih banyak)
+-- Fungsi pencarian kata
 local allIndonesianWords = commonWords
 
 local function searchWords(prefix)
+    if not resultLabel then return end
+    
     if #prefix < 1 or #prefix > 3 then
         resultLabel.Text = "Hasil: (minimal 1, maksimal 3 huruf)"
         resultLabel.Size = UDim2.new(1, -10, 0, 0)
@@ -1865,22 +1799,18 @@ local function searchWords(prefix)
     local results = {}
     prefix = prefix:lower()
     
-    -- Kumpulkan semua kata yang cocok
     for _, word in ipairs(allIndonesianWords) do
         if word:sub(1, #prefix) == prefix then
             table.insert(results, word)
         end
     end
     
-    -- Urutkan results
     table.sort(results)
     
     if #results > 0 then
-        -- Batasi tampilan tapi tetap tampilkan jumlah total
         local displayResults = results
         local total = #results
         
-        -- Jika terlalu banyak, tampilkan 50 kata pertama
         if total > 50 then
             displayResults = {}
             for i = 1, 50 do
@@ -1894,7 +1824,6 @@ local function searchWords(prefix)
         resultLabel.Text = "Hasil: Tidak ada kata dengan awalan '" .. prefix .. "'"
     end
     
-    -- Auto-size label
     resultLabel.Size = UDim2.new(1, -10, 0, 0)
 end
 
@@ -1908,7 +1837,7 @@ searchBox:GetPropertyChangedSignal("Text"):Connect(function()
     end
 end)
 
--- Load kata dari URL (opsional)
+-- Load kata dari URL
 task.spawn(function()
     local success, response = pcall(function()
         return game:HttpGet("https://raw.githubusercontent.com/geovedi/indonesian-wordlist/master/00-indonesian-wordlist.lst")
