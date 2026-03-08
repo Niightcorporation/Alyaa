@@ -213,17 +213,17 @@ local MinimizeBtn = Instance.new("TextButton")
 MinimizeBtn.Size = UDim2.new(0, controlSize, 0, controlSize)
 MinimizeBtn.Position = UDim2.new(1, -(controlSize * 2 + 10), 0.5, -controlSize / 2)
 MinimizeBtn.BackgroundColor3 = Color3.fromRGB(250, 190, 0)
-MinimizeBtn.Text = "−"
+MinimizeBtn.Text = "-"  -- Emoji kopi
 MinimizeBtn.TextColor3 = Color3.fromRGB(30, 20, 0)
 MinimizeBtn.Font = Enum.Font.GothamBold
-MinimizeBtn.TextSize = IsMobile and 14 or 18
+MinimizeBtn.TextSize = IsMobile and 14 or 16
 MinimizeBtn.Parent = Header
 
 local MinCorner = Instance.new("UICorner")
 MinCorner.CornerRadius = UDim.new(1, 0)
 MinCorner.Parent = MinimizeBtn
 
--- Close Button
+-- Close Button (tetap pake X)
 local CloseBtn = Instance.new("TextButton")
 CloseBtn.Size = UDim2.new(0, controlSize, 0, controlSize)
 CloseBtn.Position = UDim2.new(1, -(controlSize + 6), 0.5, -controlSize / 2)
@@ -238,15 +238,16 @@ local CloseCorner = Instance.new("UICorner")
 CloseCorner.CornerRadius = UDim.new(1, 0)
 CloseCorner.Parent = CloseBtn
 
--- Mini Icon (for minimized state) dengan ICON ANIME
-local MiniIcon = Instance.new("ImageButton")
+-- Mini Icon (for minimized state) 
+local MiniIcon = Instance.new("TextButton")  -- Ganti dari ImageButton ke TextButton
 MiniIcon.Name = "AnixlyMiniIcon"
 MiniIcon.Size = UDim2.new(0, IsMobile and 45 or 60, 0, IsMobile and 45 or 60)
 MiniIcon.Position = UDim2.new(0, 10, 0.5, -30)
 MiniIcon.BackgroundColor3 = THEME.headerBg
-MiniIcon.Image = "rbxassetid://18460757764"  -- Ganti dengan ID Alya
-MiniIcon.ImageColor3 = Color3.new(1, 1, 1)
-MiniIcon.ScaleType = Enum.ScaleType.Fit
+MiniIcon.Text = "☕"  -- Emoji kopi yang sama
+MiniIcon.TextColor3 = Color3.new(1, 1, 1)
+MiniIcon.Font = Enum.Font.GothamBold
+MiniIcon.TextSize = IsMobile and 30 or 40  -- Ukuran lebih besar
 MiniIcon.Visible = false
 MiniIcon.BorderSizePixel = 0
 MiniIcon.Parent = ScreenGui
@@ -261,7 +262,7 @@ MiniStroke.Thickness = 2
 MiniStroke.Transparency = 0.1
 MiniStroke.Parent = MiniIcon
 
--- Minimize Logic
+-- Minimize Logic (sama seperti sebelumnya)
 local miniDragDist = 0
 local isDraggingMini = false
 local dragStartPos, miniStartPos
@@ -1445,6 +1446,327 @@ infinityBtn.MouseButton1Click:Connect(function()
     toggleInfinityJump(not infinityJumpEnabled)
 end)
 -- ===== AKHIR INFINITY JUMP =====
+
+-- ===== SKIN BAMBU SECTION (di bawah Infinity Jump) =====
+local skinContent = {}
+
+-- Header SKIN BAMBU (collapsible)
+local skinHeader = Instance.new("TextButton")
+skinHeader.Size = UDim2.new(1, 0, 0, 35)
+skinHeader.LayoutOrder = utilOrder
+skinHeader.BackgroundColor3 = Color3.fromRGB(20, 16, 36)
+skinHeader.Text = ""
+skinHeader.AutoButtonColor = false
+skinHeader.Parent = utilContainer
+utilOrder = utilOrder + 1
+
+local skinHeaderCorner = Instance.new("UICorner")
+skinHeaderCorner.CornerRadius = UDim.new(0, 8)
+skinHeaderCorner.Parent = skinHeader
+
+local skinHeaderStroke = Instance.new("UIStroke")
+skinHeaderStroke.Color = THEME.mid
+skinHeaderStroke.Thickness = 1
+skinHeaderStroke.Transparency = 0.5
+skinHeaderStroke.Parent = skinHeader
+
+-- Icon SKIN BAMBU (🎋)
+local skinIcon = Instance.new("TextLabel")
+skinIcon.Size = UDim2.new(0, 18, 0, 18)
+skinIcon.Position = UDim2.new(0, 10, 0.5, -9)
+skinIcon.BackgroundTransparency = 1
+skinIcon.Text = "🎋"
+skinIcon.TextColor3 = THEME.accent
+skinIcon.Font = Enum.Font.GothamBold
+skinIcon.TextSize = 16
+skinIcon.Parent = skinHeader
+
+-- Title SKIN BAMBU
+local skinTitle = Instance.new("TextLabel")
+skinTitle.Size = UDim2.new(1, -80, 1, 0)
+skinTitle.Position = UDim2.new(0, 35, 0, 0)
+skinTitle.BackgroundTransparency = 1
+skinTitle.Text = "SKIN BAMBU"
+skinTitle.TextColor3 = THEME.logText
+skinTitle.Font = Enum.Font.GothamBold
+skinTitle.TextSize = 13
+skinTitle.TextXAlignment = Enum.TextXAlignment.Left
+skinTitle.Parent = skinHeader
+
+-- Arrow indicator
+local skinArrow = Instance.new("TextLabel")
+skinArrow.Size = UDim2.new(0, 20, 0, 20)
+skinArrow.Position = UDim2.new(1, -25, 0.5, -10)
+skinArrow.BackgroundTransparency = 1
+skinArrow.Text = "▼"
+skinArrow.TextColor3 = THEME.accent
+skinArrow.Font = Enum.Font.GothamBold
+skinArrow.TextSize = 14
+skinArrow.Parent = skinHeader
+
+-- Data skin bambu
+local SKINS = {
+    {name = "BambuApi", label = "Api", color = Color3.fromRGB(255, 100, 30)},
+    {name = "BambuAwan", label = "Awan", color = Color3.fromRGB(180, 220, 255)},
+    {name = "BambuBayang", label = "Bayang", color = Color3.fromRGB(60, 20, 100)},
+    {name = "BambuHati", label = "Hati", color = Color3.fromRGB(255, 80, 120)},
+    {name = "BambuMetalik", label = "Metalik", color = Color3.fromRGB(180, 180, 200)},
+    {name = "BambuPelangi", label = "Pelangi", color = Color3.fromRGB(255, 100, 200)},
+}
+
+local currentSkin = ""
+local skinDropdownOpen = false
+
+-- Frame untuk konten skin
+local skinFrame = Instance.new("Frame")
+skinFrame.Size = UDim2.new(1, 0, 0, 120)  -- Tinggi cukup untuk dropdown
+skinFrame.LayoutOrder = utilOrder
+skinFrame.BackgroundColor3 = Color3.fromRGB(16, 15, 24)
+skinFrame.BorderSizePixel = 0
+skinFrame.Parent = utilContainer
+utilOrder = utilOrder + 1
+
+table.insert(skinContent, skinFrame)
+
+local skinFrameCorner = Instance.new("UICorner")
+skinFrameCorner.CornerRadius = UDim.new(0, 8)
+skinFrameCorner.Parent = skinFrame
+
+local skinFrameStroke = Instance.new("UIStroke")
+skinFrameStroke.Color = THEME.mid
+skinFrameStroke.Thickness = 1
+skinFrameStroke.Transparency = 0.5
+skinFrameStroke.Parent = skinFrame
+
+-- Dropdown button
+local skinDropdownBtn = Instance.new("TextButton")
+skinDropdownBtn.Size = UDim2.new(1, -20, 0, COMPONENT_HEIGHT)
+skinDropdownBtn.Position = UDim2.new(0, 10, 0, 10)
+skinDropdownBtn.BackgroundColor3 = Color3.fromRGB(65, 20, 145)
+skinDropdownBtn.Text = "🎋 Pilih Skin ▼"
+skinDropdownBtn.TextColor3 = Color3.fromRGB(220, 220, 255)
+skinDropdownBtn.Font = Enum.Font.Gotham
+skinDropdownBtn.TextSize = TEXT_SIZE_NORMAL
+skinDropdownBtn.Parent = skinFrame
+
+local skinBtnCorner = Instance.new("UICorner")
+skinBtnCorner.CornerRadius = UDim.new(0, 6)
+skinBtnCorner.Parent = skinDropdownBtn
+
+local skinBtnStroke = Instance.new("UIStroke")
+skinBtnStroke.Color = THEME.mid
+skinBtnStroke.Thickness = 1
+skinBtnStroke.Transparency = 0.3
+skinBtnStroke.Parent = skinDropdownBtn
+
+-- Dropdown content frame
+local skinDropdown = Instance.new("Frame")
+skinDropdown.Size = UDim2.new(1, -20, 0, 0)
+skinDropdown.Position = UDim2.new(0, 10, 0, COMPONENT_HEIGHT + 15)
+skinDropdown.BackgroundColor3 = Color3.fromRGB(14, 13, 22)
+skinDropdown.ClipsDescendants = true
+skinDropdown.BorderSizePixel = 0
+skinDropdown.Parent = skinFrame
+
+local skinDropdownStroke = Instance.new("UIStroke")
+skinDropdownStroke.Color = THEME.mid
+skinDropdownStroke.Thickness = 1
+skinDropdownStroke.Transparency = 0.4
+skinDropdownStroke.Parent = skinDropdown
+
+-- Status skin
+local skinStatus = Instance.new("TextLabel")
+skinStatus.Size = UDim2.new(1, -20, 0, 20)
+skinStatus.Position = UDim2.new(0, 10, 0, COMPONENT_HEIGHT + 70)
+skinStatus.BackgroundTransparency = 1
+skinStatus.Text = "Status: Belum pilih skin"
+skinStatus.TextColor3 = Color3.fromRGB(150, 150, 150)
+skinStatus.Font = Enum.Font.Gotham
+skinStatus.TextSize = 11
+skinStatus.TextXAlignment = Enum.TextXAlignment.Left
+skinStatus.Parent = skinFrame
+
+-- Fungsi apply skin
+local function applySkin(skinName)
+    local character = LocalPlayer.Character
+    if not character then return end
+    
+    -- Cari BackWeapon
+    local backWeapon = character:FindFirstChild("BackWeapon")
+    if not backWeapon then
+        -- Coba cari di workspace
+        local playerModel = workspace:FindFirstChild(LocalPlayer.Name)
+        if playerModel then
+            backWeapon = playerModel:FindFirstChild("BackWeapon")
+        end
+    end
+    
+    if not backWeapon then
+        skinStatus.Text = "Status: BackWeapon tidak ditemukan"
+        return
+    end
+    
+    -- Cari skin di BambuDisplay
+    local display = workspace:FindFirstChild("BambuDisplay")
+    if not display then
+        skinStatus.Text = "Status: BambuDisplay tidak ditemukan"
+        return
+    end
+    
+    local bambu = display:FindFirstChild("Bambu")
+    if not bambu then
+        skinStatus.Text = "Status: Bambu tidak ditemukan"
+        return
+    end
+    
+    local sourceSkin = bambu:FindFirstChild(skinName)
+    if not sourceSkin then
+        skinStatus.Text = "Status: Skin " .. skinName .. " tidak ditemukan"
+        return
+    end
+    
+    -- Copy properties
+    local function copyProperties(target, source)
+        if not target or not source then return end
+        
+        pcall(function()
+            target.Color = source.Color
+            target.Material = source.Material
+            target.Transparency = source.Transparency
+            target.Reflectance = source.Reflectance
+        end)
+        
+        -- Copy children (particle emitters, dll)
+        for _, child in ipairs(source:GetChildren()) do
+            if not child:IsA("WeldConstraint") then
+                local clone = child:Clone()
+                clone.Parent = target
+            end
+        end
+    end
+    
+    -- Apply ke Batang dan Ruas
+    local batang = backWeapon:FindFirstChild("Batang")
+    local ruas = backWeapon:FindFirstChild("Ruas")
+    
+    if batang and sourceSkin:FindFirstChild("Batang") then
+        copyProperties(batang, sourceSkin.Batang)
+    end
+    
+    if ruas and sourceSkin:FindFirstChild("Ruas") then
+        copyProperties(ruas, sourceSkin.Ruas)
+    end
+    
+    currentSkin = skinName
+    for _, s in ipairs(SKINS) do
+        if s.name == skinName then
+            skinStatus.Text = "Status: " .. s.label .. " aktif"
+            skinStatus.TextColor3 = s.color
+            break
+        end
+    end
+    
+    print("✅ Skin " .. skinName .. " applied!")
+end
+
+-- Fungsi update dropdown
+local function updateSkinDropdown()
+    for _, child in pairs(skinDropdown:GetChildren()) do
+        if child:IsA("TextButton") then
+            child:Destroy()
+        end
+    end
+    
+    for i, skinData in ipairs(SKINS) do
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(1, -10, 0, 28)
+        btn.Position = UDim2.new(0, 5, 0, (i - 1) * 28 + 2)
+        btn.BackgroundColor3 = (currentSkin == skinData.name) and Color3.fromRGB(80, 30, 170) or Color3.fromRGB(28, 25, 42)
+        btn.Text = ""
+        btn.Parent = skinDropdown
+        
+        local btnCorner = Instance.new("UICorner")
+        btnCorner.CornerRadius = UDim.new(0, 5)
+        btnCorner.Parent = btn
+        
+        -- Warna dot
+        local colorDot = Instance.new("Frame")
+        colorDot.Size = UDim2.new(0, 12, 0, 12)
+        colorDot.Position = UDim2.new(0, 8, 0.5, -6)
+        colorDot.BackgroundColor3 = skinData.color
+        colorDot.BorderSizePixel = 0
+        colorDot.Parent = btn
+        
+        local dotCorner = Instance.new("UICorner")
+        dotCorner.CornerRadius = UDim.new(1, 0)
+        dotCorner.Parent = colorDot
+        
+        -- Nama skin
+        local nameLabel = Instance.new("TextLabel")
+        nameLabel.Size = UDim2.new(1, -50, 1, 0)
+        nameLabel.Position = UDim2.new(0, 25, 0, 0)
+        nameLabel.BackgroundTransparency = 1
+        nameLabel.Text = skinData.label
+        nameLabel.TextColor3 = (currentSkin == skinData.name) and Color3.new(1, 1, 1) or Color3.fromRGB(200, 190, 220)
+        nameLabel.Font = Enum.Font.GothamBold
+        nameLabel.TextSize = 12
+        nameLabel.TextXAlignment = Enum.TextXAlignment.Left
+        nameLabel.Parent = btn
+        
+        if currentSkin == skinData.name then
+            local btnStroke = Instance.new("UIStroke")
+            btnStroke.Color = THEME.accent
+            btnStroke.Thickness = 1
+            btnStroke.Transparency = 0.2
+            btnStroke.Parent = btn
+        end
+        
+        btn.MouseButton1Click:Connect(function()
+            playClickSound()
+            applySkin(skinData.name)
+            skinDropdownBtn.Text = "🎋 " .. skinData.label .. " ▼"
+            updateSkinDropdown()
+        end)
+    end
+end
+
+-- Event klik dropdown
+skinDropdownBtn.MouseButton1Click:Connect(function()
+    playClickSound()
+    skinDropdownOpen = not skinDropdownOpen
+    local currentText = skinDropdownBtn.Text:gsub("[▼▲]", "")
+    skinDropdownBtn.Text = currentText .. (skinDropdownOpen and "▲" or "▼")
+    
+    skinDropdown:TweenSize(
+        UDim2.new(1, -20, 0, skinDropdownOpen and #SKINS * 28 + 5 or 0),
+        Enum.EasingDirection.Out,
+        Enum.EasingStyle.Quart,
+        0.3,
+        true
+    )
+    
+    if skinDropdownOpen then
+        updateSkinDropdown()
+    end
+end)
+
+-- Atur visibility untuk SKIN BAMBU
+local skinExpanded = true
+for _, item in ipairs(skinContent) do
+    item.Visible = skinExpanded
+end
+
+-- Event klik header
+skinHeader.MouseButton1Click:Connect(function()
+    playClickSound()
+    skinExpanded = not skinExpanded
+    skinArrow.Text = skinExpanded and "▼" or "▶"
+    
+    for _, item in ipairs(skinContent) do
+        item.Visible = skinExpanded
+    end
+end)
+-- ===== AKHIR SKIN BAMBU SECTION =====
 
 -- Respawn button (SATU SAJA)
 local respawnBtn = Instance.new("TextButton")
