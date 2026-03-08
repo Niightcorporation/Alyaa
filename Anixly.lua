@@ -1,7 +1,7 @@
 --[[
     Anixly - Sambung kata
     Fitur Lengkap dengan UI Keren (Versi Stabil)
-    Theme: Tokyo Night Only + Minimize Feature + Icons
+    Theme: Tokyo Night Only + Neon UI + Anime Icon
 ]]
 
 -- Services
@@ -43,7 +43,7 @@ local function playClickSound()
     Debris:AddItem(sound, 1)
 end
 
--- Tokyo Night Theme (Only)
+-- Tokyo Night Theme
 local THEME = {
     primary = Color3.fromRGB(0, 255, 255),       -- Cyan neon
     mid = Color3.fromRGB(255, 0, 255),           -- Magenta neon
@@ -67,12 +67,12 @@ local TEXT_SIZE_LARGE = IsMobile and 13 or 15
 
 -- Variables
 local autoTypeEnabled = false
-local autoEnterEnabled = false
-local typeDelay = 0.30
+local autoEnterEnabled = true
+local typeDelay = 0.12
 local enterDelay = 0.15
 local turnDelay = 2.0
 local backspaceDelay = 0.10
-local deleteDelay = 0.11
+local deleteDelay = 0.12
 local noclipEnabled = false
 local noclipConnection
 
@@ -245,16 +245,15 @@ local CloseCorner = Instance.new("UICorner")
 CloseCorner.CornerRadius = UDim.new(1, 0)
 CloseCorner.Parent = CloseBtn
 
--- Mini Icon (for minimized state)
-local MiniIcon = Instance.new("TextButton")
+-- Mini Icon (for minimized state) dengan ICON ANIME
+local MiniIcon = Instance.new("ImageButton")
 MiniIcon.Name = "AnixlyMiniIcon"
 MiniIcon.Size = UDim2.new(0, IsMobile and 45 or 60, 0, IsMobile and 45 or 60)
 MiniIcon.Position = UDim2.new(0, 10, 0.5, -30)
 MiniIcon.BackgroundColor3 = THEME.headerBg
-MiniIcon.Text = "A"
-MiniIcon.TextColor3 = Color3.new(1, 1, 1)
-MiniIcon.Font = Enum.Font.GothamBold
-MiniIcon.TextSize = IsMobile and 24 or 32
+MiniIcon.Image = "rbxassetid://14081040144"  -- Icon anime girl
+MiniIcon.ImageColor3 = Color3.new(1, 1, 1)
+MiniIcon.ScaleType = Enum.ScaleType.Fit
 MiniIcon.Visible = false
 MiniIcon.BorderSizePixel = 0
 MiniIcon.Parent = ScreenGui
@@ -503,10 +502,7 @@ local function createTabButton(iconId, label, order)
     return btn
 end
 
--- Tab Buttons dengan Icon:
--- MAIN: Icon bolt (6023426941)
--- UTILITY: Icon gear (6023426937)
--- TELEPORT: Icon location (6023426935)
+-- Tab Buttons dengan Icon
 local mainTab = createTabButton("rbxassetid://6023426941", "MAIN", 1)
 local utilTab = createTabButton("rbxassetid://6023426937", "UTILITY", 2)
 local tpTab = createTabButton("rbxassetid://6023426935", "TELEPORT", 3)
@@ -558,13 +554,24 @@ tpTab.MouseButton1Click:Connect(function()
     switchTab(tpContainer, tpTab)
 end)
 
--- Section Header Function
+-- Section Header Function dengan efek neon
 local function createSectionHeader(title, order)
     local header = Instance.new("Frame")
     header.Size = UDim2.new(1, 0, 0, 30)
     header.LayoutOrder = order
     header.BackgroundTransparency = 1
     header.Parent = mainContainer
+    
+    -- Glow untuk teks
+    local glow = Instance.new("ImageLabel")
+    glow.Size = UDim2.new(1, 20, 1, 10)
+    glow.Position = UDim2.new(0, -10, 0, -5)
+    glow.BackgroundTransparency = 1
+    glow.Image = "rbxassetid://3570695787"
+    glow.ImageColor3 = THEME.accent
+    glow.ImageTransparency = 0.7
+    glow.ZIndex = 0
+    glow.Parent = header
     
     local label = Instance.new("TextLabel")
     label.Size = UDim2.new(1, -10, 1, 0)
@@ -584,10 +591,17 @@ local function createSectionHeader(title, order)
     line.BorderSizePixel = 0
     line.Parent = header
     
+    -- Neon effect untuk line
+    local lineGlow = Instance.new("UIStroke")
+    lineGlow.Color = THEME.accent
+    lineGlow.Thickness = 2
+    lineGlow.Transparency = 0.8
+    lineGlow.Parent = line
+    
     return header
 end
 
--- Toggle Button Function
+-- Toggle Button Function dengan efek neon
 local function createToggleButton(text, parent, defaultState, callback, order)
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
@@ -600,10 +614,11 @@ local function createToggleButton(text, parent, defaultState, callback, order)
     frameCorner.CornerRadius = UDim.new(0, 8)
     frameCorner.Parent = frame
     
+    -- Neon stroke
     local frameStroke = Instance.new("UIStroke")
-    frameStroke.Color = Color3.fromRGB(55, 30, 100)
+    frameStroke.Color = THEME.mid
     frameStroke.Thickness = 1
-    frameStroke.Transparency = 0.4
+    frameStroke.Transparency = 0.6
     frameStroke.Parent = frame
     
     local label = Instance.new("TextLabel")
@@ -631,6 +646,13 @@ local function createToggleButton(text, parent, defaultState, callback, order)
     toggleCorner.CornerRadius = UDim.new(1, 0)
     toggleCorner.Parent = toggle
     
+    -- Glow untuk toggle
+    local toggleGlow = Instance.new("UIStroke")
+    toggleGlow.Color = defaultState and Color3.fromRGB(30, 255, 110) or Color3.fromRGB(255, 40, 50)
+    toggleGlow.Thickness = 2
+    toggleGlow.Transparency = 0.5
+    toggleGlow.Parent = toggle
+    
     local knobSize = IsMobile and 20 or 16
     
     local knob = Instance.new("Frame")
@@ -655,6 +677,7 @@ local function createToggleButton(text, parent, defaultState, callback, order)
     btn.MouseButton1Click:Connect(function()
         state = not state
         toggle.BackgroundColor3 = state and Color3.fromRGB(30, 180, 110) or Color3.fromRGB(180, 40, 50)
+        toggleGlow.Color = state and Color3.fromRGB(30, 255, 110) or Color3.fromRGB(255, 40, 50)
         knob.Position = state and UDim2.new(1, -(knobSize + 3), 0.5, -knobSize / 2) or UDim2.new(0, 3, 0.5, -knobSize / 2)
         playClickSound()
         callback(state)
@@ -663,7 +686,7 @@ local function createToggleButton(text, parent, defaultState, callback, order)
     return frame
 end
 
--- Fungsi untuk membuat input delay (TextBox)
+-- Fungsi untuk membuat input delay dengan efek neon
 local function createDelayInput(label, defaultValue, callback, order)
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
@@ -676,10 +699,11 @@ local function createDelayInput(label, defaultValue, callback, order)
     frameCorner.CornerRadius = UDim.new(0, 8)
     frameCorner.Parent = frame
     
+    -- Neon stroke
     local frameStroke = Instance.new("UIStroke")
-    frameStroke.Color = Color3.fromRGB(55, 30, 100)
+    frameStroke.Color = THEME.mid
     frameStroke.Thickness = 1
-    frameStroke.Transparency = 0.4
+    frameStroke.Transparency = 0.6
     frameStroke.Parent = frame
     
     local labelText = Instance.new("TextLabel")
@@ -709,10 +733,11 @@ local function createDelayInput(label, defaultValue, callback, order)
     textBoxCorner.CornerRadius = UDim.new(0, 6)
     textBoxCorner.Parent = textBox
     
+    -- Neon stroke untuk textbox
     local textBoxStroke = Instance.new("UIStroke")
-    textBoxStroke.Color = THEME.mid
+    textBoxStroke.Color = THEME.primary
     textBoxStroke.Thickness = 1
-    textBoxStroke.Transparency = 0.3
+    textBoxStroke.Transparency = 0.5
     textBoxStroke.Parent = textBox
     
     textBox.FocusLost:Connect(function(enterPressed)
@@ -720,6 +745,12 @@ local function createDelayInput(label, defaultValue, callback, order)
             local value = tonumber(textBox.Text)
             if value then
                 callback(value)
+                -- Efek neon saat berhasil
+                textBoxStroke.Color = THEME.accent
+                textBoxStroke.Thickness = 2
+                task.wait(0.2)
+                textBoxStroke.Color = THEME.primary
+                textBoxStroke.Thickness = 1
             else
                 textBox.Text = tostring(defaultValue)
             end
@@ -729,7 +760,7 @@ local function createDelayInput(label, defaultValue, callback, order)
     return frame
 end
 
--- Build Main Tab dengan 4 Section (Human Mode dihapus)
+-- Build Main Tab
 local order = 1
 
 -- SECTION 1: AUTO FEATURES
@@ -758,10 +789,11 @@ local logCorner = Instance.new("UICorner")
 logCorner.CornerRadius = UDim.new(0, 8)
 logCorner.Parent = logFrame
 
+-- Neon stroke untuk log frame
 local logStroke = Instance.new("UIStroke")
-logStroke.Color = Color3.fromRGB(80, 40, 140)
+logStroke.Color = THEME.mid
 logStroke.Thickness = 1
-logStroke.Transparency = 0.4
+logStroke.Transparency = 0.5
 logStroke.Parent = logFrame
 
 local awalanLabel = Instance.new("TextLabel")
@@ -790,7 +822,7 @@ kataLabel.Parent = logFrame
 createSectionHeader("SEMUA KATA SULIT", order)
 order = order + 1
 
--- Kata Sulit Dropdown
+-- Kata Sulit Dropdown dengan efek neon
 local kataSulitBtn = Instance.new("TextButton")
 kataSulitBtn.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
 kataSulitBtn.LayoutOrder = order
@@ -805,6 +837,13 @@ kataSulitBtn.Parent = mainContainer
 local kataCorner = Instance.new("UICorner")
 kataCorner.CornerRadius = UDim.new(0, 8)
 kataCorner.Parent = kataSulitBtn
+
+-- Neon stroke untuk button
+local kataBtnStroke = Instance.new("UIStroke")
+kataBtnStroke.Color = THEME.accent
+kataBtnStroke.Thickness = 1.5
+kataBtnStroke.Transparency = 0.3
+kataBtnStroke.Parent = kataSulitBtn
 
 local kataGradient = Instance.new("UIGradient")
 kataGradient.Color = ColorSequence.new({
@@ -824,14 +863,26 @@ kataDropdown.LayoutOrder = order
 order = order + 1
 
 local kataDropdownStroke = Instance.new("UIStroke")
-kataDropdownStroke.Color = Color3.fromRGB(80, 35, 160)
+kataDropdownStroke.Color = THEME.mid
 kataDropdownStroke.Thickness = 1
-kataDropdownStroke.Transparency = 0.3
+kataDropdownStroke.Transparency = 0.4
 kataDropdownStroke.Parent = kataDropdown
 
 local categoryHeight = IsMobile and 30 or 28
 local dropdownOpen = false
-local categories = {"IF", "X", "NG", "AI", "CY", "UI", "KS", "LY", "RS", "NS"}
+local categories = {"IF", "X", "NG", "AI", "CY", "UI", "KS", "LY", "RS", "NS", "SEMUA KATA SULIT"}
+
+local function getCategoryCount(cat)
+    if cat == "SEMUA KATA SULIT" then
+        local total = 0
+        for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "LY", "RS", "NS"}) do
+            total = total + #wordCategories[c]
+        end
+        return total
+    else
+        return #wordCategories[cat]
+    end
+end
 
 local function updateCategoryButtons()
     for _, child in pairs(kataDropdown:GetChildren()) do
@@ -841,30 +892,48 @@ local function updateCategoryButtons()
     end
     
     for i, cat in ipairs(categories) do
-        local isOn = categoryToggles[cat]
+        local isAllOn = cat == "SEMUA KATA SULIT" and categoryToggles["SEMUA KATA SULIT"]
+        local isOn = cat == "SEMUA KATA SULIT" and categoryToggles["SEMUA KATA SULIT"] or categoryToggles[cat]
+        local count = getCategoryCount(cat)
         
         local btn = Instance.new("TextButton")
         btn.Size = UDim2.new(1, -10, 0, categoryHeight)
         btn.Position = UDim2.new(0, 5, 0, (i - 1) * categoryHeight + 2)
         btn.BackgroundColor3 = isOn and Color3.fromRGB(80, 30, 170) or Color3.fromRGB(28, 25, 42)
-        btn.Text = cat
-        btn.TextColor3 = isOn and Color3.new(1, 1, 1) or Color3.fromRGB(160, 150, 190)
-        btn.Font = Enum.Font.GothamBold
-        btn.TextSize = TEXT_SIZE_NORMAL
-        btn.TextXAlignment = Enum.TextXAlignment.Left
+        btn.Text = ""
         btn.Parent = kataDropdown
         
         local btnCorner = Instance.new("UICorner")
         btnCorner.CornerRadius = UDim.new(0, 5)
         btnCorner.Parent = btn
         
-        local padding = Instance.new("UIPadding")
-        padding.PaddingLeft = UDim.new(0, 10)
-        padding.Parent = btn
+        -- Nama kategori
+        local catLabel = Instance.new("TextLabel")
+        catLabel.Size = UDim2.new(0, 80, 1, 0)
+        catLabel.Position = UDim2.new(0, 10, 0, 0)
+        catLabel.BackgroundTransparency = 1
+        catLabel.Text = cat
+        catLabel.TextColor3 = isOn and Color3.new(1, 1, 1) or Color3.fromRGB(160, 150, 190)
+        catLabel.Font = Enum.Font.GothamBold
+        catLabel.TextSize = TEXT_SIZE_NORMAL
+        catLabel.TextXAlignment = Enum.TextXAlignment.Left
+        catLabel.Parent = btn
+        
+        -- Jumlah kata
+        local countLabel = Instance.new("TextLabel")
+        countLabel.Size = UDim2.new(0, 50, 1, 0)
+        countLabel.Position = UDim2.new(1, -55, 0, 0)
+        countLabel.BackgroundTransparency = 1
+        countLabel.Text = "(" .. count .. ")"
+        countLabel.TextColor3 = isOn and THEME.accent or Color3.fromRGB(120, 100, 150)
+        countLabel.Font = Enum.Font.Gotham
+        countLabel.TextSize = TEXT_SIZE_SMALL
+        countLabel.TextXAlignment = Enum.TextXAlignment.Right
+        countLabel.Parent = btn
         
         if isOn then
             local btnStroke = Instance.new("UIStroke")
-            btnStroke.Color = Color3.fromRGB(130, 70, 220)
+            btnStroke.Color = THEME.accent
             btnStroke.Thickness = 1
             btnStroke.Transparency = 0.2
             btnStroke.Parent = btn
@@ -872,7 +941,30 @@ local function updateCategoryButtons()
         
         btn.MouseButton1Click:Connect(function()
             playClickSound()
-            categoryToggles[cat] = not categoryToggles[cat]
+            
+            if cat == "SEMUA KATA SULIT" then
+                local newState = not categoryToggles["SEMUA KATA SULIT"]
+                categoryToggles["SEMUA KATA SULIT"] = newState
+                if newState then
+                    for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "LY", "RS", "NS"}) do
+                        categoryToggles[c] = false
+                    end
+                end
+            else
+                categoryToggles[cat] = not categoryToggles[cat]
+                -- Cek apakah semua non-SEMUA mati?
+                local anyOn = false
+                for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "LY", "RS", "NS"}) do
+                    if categoryToggles[c] then
+                        anyOn = true
+                        break
+                    end
+                end
+                if not anyOn then
+                    categoryToggles["SEMUA KATA SULIT"] = false
+                end
+            end
+            
             updateCategoryButtons()
         end)
     end
@@ -894,7 +986,7 @@ kataSulitBtn.MouseButton1Click:Connect(function()
     updateCategoryButtons()
 end)
 
--- SECTION 4: DELAY SETTINGS (3 Input saja: Write, Turn, Backspace)
+-- SECTION 4: DELAY SETTINGS
 createSectionHeader("DELAY SETTINGS", order)
 order = order + 1
 
@@ -1056,7 +1148,7 @@ tpComingSoon.Font = Enum.Font.Gotham
 tpComingSoon.TextSize = 14
 tpComingSoon.Parent = tpPlaceholderFrame
 
--- Typing function (Human Mode dihapus)
+-- Typing function
 local function typeWord(word, length)
     if not IsRunning then return end
     
@@ -1109,10 +1201,18 @@ local function autoType()
         local specialCandidates = {}
         
         for cat, enabled in pairs(categoryToggles) do
-            if enabled then
+            if enabled and cat ~= "SEMUA KATA SULIT" then
                 for _, word in ipairs(wordCategories[cat]) do
                     if word:sub(1, #awalan) == awalan and not usedWords[word] and #word > #awalan then
                         table.insert(specialCandidates, word)
+                    end
+                end
+            elseif enabled and cat == "SEMUA KATA SULIT" then
+                for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "LY", "RS", "NS"}) do
+                    for _, word in ipairs(wordCategories[c]) do
+                        if word:sub(1, #awalan) == awalan and not usedWords[word] and #word > #awalan then
+                            table.insert(specialCandidates, word)
+                        end
                     end
                 end
             end
@@ -1135,9 +1235,18 @@ local function autoType()
             local category = "KBBI"
             
             for cat, enabled in pairs(categoryToggles) do
-                if enabled and table.find(wordCategories[cat], chosen) then
-                    category = "KATA SULIT (" .. cat .. ")"
-                    break
+                if enabled then
+                    if cat == "SEMUA KATA SULIT" then
+                        for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "LY", "RS", "NS"}) do
+                            if table.find(wordCategories[c], chosen) then
+                                category = "KATA SULIT (" .. c .. ")"
+                                break
+                            end
+                        end
+                    elseif table.find(wordCategories[cat], chosen) then
+                        category = "KATA SULIT (" .. cat .. ")"
+                        break
+                    end
                 end
             end
             
@@ -1165,7 +1274,7 @@ task.spawn(function()
         X = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/X.txt",
         NG = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/NG.txt",
         AI = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/AI.txt",
-       ["SEMUA KATA SULIT"] = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/sulit.txt",
+        ["SEMUA KATA SULIT"] = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/sulit.txt",        
         CY = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/CY.txt",
         UI = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/UI.txt",
         KS = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/KS.txt", 
@@ -1187,7 +1296,7 @@ task.spawn(function()
                         table.insert(wordCategories[cat], word)
                     end
                 end
-                print("🔥 Category " .. cat .. " Loaded!")
+                print("🔥 Category " .. cat .. " Loaded! (" .. #wordCategories[cat] .. " kata)")
             end
         end)
     end
@@ -1298,4 +1407,4 @@ end)
 -- Show main tab by default
 switchTab(mainContainer, mainTab)
 
-print("✅ Anixly Loaded dengan 4 Section & 3 Delay Settings!")
+print("✅ Anixly Loaded dengan Neon UI & Anime Icon!")
