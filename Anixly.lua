@@ -637,180 +637,76 @@ local function createToggleButton(text, parent, defaultState, callback, order)
     return frame
 end
 
--- Slider Function
-local function createSlider(parent, icon, label, minV, maxV, defMin, defMax, dec, suf, cbMin, cbMax, order)
-    local itemHeight = IsMobile and 48 or 42
+-- Fungsi untuk membuat input delay (TextBox)
+local function createDelayInput(label, defaultValue, callback, order)
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
+    frame.LayoutOrder = order
+    frame.BackgroundColor3 = Color3.fromRGB(16, 15, 24)
+    frame.BorderSizePixel = 0
+    frame.Parent = mainContainer
     
-    local row = Instance.new("Frame")
-    row.Size = UDim2.new(1, 0, 0, itemHeight)
-    row.LayoutOrder = order
-    row.BackgroundColor3 = Color3.fromRGB(13, 12, 22)
-    row.BorderSizePixel = 0
-    row.Parent = parent
+    local frameCorner = Instance.new("UICorner")
+    frameCorner.CornerRadius = UDim.new(0, 8)
+    frameCorner.Parent = frame
     
-    local rowCorner = Instance.new("UICorner")
-    rowCorner.CornerRadius = UDim.new(0, 8)
-    rowCorner.Parent = row
+    local frameStroke = Instance.new("UIStroke")
+    frameStroke.Color = Color3.fromRGB(55, 30, 100)
+    frameStroke.Thickness = 1
+    frameStroke.Transparency = 0.4
+    frameStroke.Parent = frame
     
-    local iconLabel = Instance.new("TextLabel")
-    iconLabel.Size = UDim2.new(0, 70, 0, 20)
-    iconLabel.Position = UDim2.new(0, 10, 0, 5)
-    iconLabel.BackgroundTransparency = 1
-    iconLabel.Text = icon .. " " .. label
-    iconLabel.TextColor3 = Color3.fromRGB(170, 155, 210)
-    iconLabel.Font = Enum.Font.GothamBold
-    iconLabel.TextSize = IsMobile and 9 or 10
-    iconLabel.TextXAlignment = Enum.TextXAlignment.Left
-    iconLabel.Parent = row
+    local labelText = Instance.new("TextLabel")
+    labelText.Size = UDim2.new(0, 100, 1, 0)
+    labelText.Position = UDim2.new(0, 10, 0, 0)
+    labelText.BackgroundTransparency = 1
+    labelText.Text = label
+    labelText.TextColor3 = Color3.fromRGB(210, 200, 230)
+    labelText.Font = Enum.Font.GothamBold
+    labelText.TextSize = TEXT_SIZE_NORMAL
+    labelText.TextXAlignment = Enum.TextXAlignment.Left
+    labelText.Parent = frame
     
-    local formatStr = "%." .. dec .. "f"
+    local textBox = Instance.new("TextBox")
+    textBox.Size = UDim2.new(0, 80, 0, 28)
+    textBox.Position = UDim2.new(1, -90, 0.5, -14)
+    textBox.BackgroundColor3 = Color3.fromRGB(30, 25, 45)
+    textBox.Text = tostring(defaultValue)
+    textBox.TextColor3 = THEME.logText
+    textBox.Font = Enum.Font.GothamBold
+    textBox.TextSize = TEXT_SIZE_NORMAL
+    textBox.PlaceholderText = "0.00"
+    textBox.PlaceholderColor3 = Color3.fromRGB(100, 90, 120)
+    textBox.Parent = frame
     
-    local valueLabel = Instance.new("TextLabel")
-    valueLabel.Size = UDim2.new(0, 100, 0, 20)
-    valueLabel.Position = UDim2.new(1, -105, 0, 5)
-    valueLabel.BackgroundTransparency = 1
-    valueLabel.Font = Enum.Font.GothamBold
-    valueLabel.TextSize = IsMobile and 9 or 10
-    valueLabel.TextXAlignment = Enum.TextXAlignment.Right
-    valueLabel.Parent = row
+    local textBoxCorner = Instance.new("UICorner")
+    textBoxCorner.CornerRadius = UDim.new(0, 6)
+    textBoxCorner.Parent = textBox
     
-    local knobSize = IsMobile and 16 or 11
-    local sliderTrackSize = IsMobile and 32 or 26
-    local trackHeight = IsMobile and 6 or 4
+    local textBoxStroke = Instance.new("UIStroke")
+    textBoxStroke.Color = THEME.mid
+    textBoxStroke.Thickness = 1
+    textBoxStroke.Transparency = 0.3
+    textBoxStroke.Parent = textBox
     
-    local track = Instance.new("Frame")
-    track.Size = UDim2.new(1, -20, 0, trackHeight)
-    track.Position = UDim2.new(0, 10, 0, sliderTrackSize)
-    track.BackgroundColor3 = Color3.fromRGB(30, 25, 50)
-    track.BorderSizePixel = 0
-    track.Parent = row
-    
-    local trackCorner = Instance.new("UICorner")
-    trackCorner.CornerRadius = UDim.new(1, 0)
-    trackCorner.Parent = track
-    
-    local fill = Instance.new("Frame")
-    fill.BackgroundColor3 = THEME.primary
-    fill.BorderSizePixel = 0
-    fill.Parent = track
-    
-    local fillCorner = Instance.new("UICorner")
-    fillCorner.CornerRadius = UDim.new(1, 0)
-    fillCorner.Parent = fill
-    
-    local minKnob = Instance.new("Frame")
-    minKnob.Size = UDim2.new(0, knobSize, 0, knobSize)
-    minKnob.BackgroundColor3 = Color3.new(1, 1, 1)
-    minKnob.BorderSizePixel = 0
-    minKnob.ZIndex = 3
-    minKnob.Parent = track
-    
-    local minKnobCorner = Instance.new("UICorner")
-    minKnobCorner.CornerRadius = UDim.new(1, 0)
-    minKnobCorner.Parent = minKnob
-    
-    local minStroke = Instance.new("UIStroke")
-    minStroke.Color = THEME.accent
-    minStroke.Thickness = 1.5
-    minStroke.Parent = minKnob
-    
-    local maxKnob = Instance.new("Frame")
-    maxKnob.Size = UDim2.new(0, knobSize, 0, knobSize)
-    maxKnob.BackgroundColor3 = THEME.accent
-    maxKnob.BorderSizePixel = 0
-    maxKnob.ZIndex = 3
-    maxKnob.Parent = track
-    
-    local maxKnobCorner = Instance.new("UICorner")
-    maxKnobCorner.CornerRadius = UDim.new(1, 0)
-    maxKnobCorner.Parent = maxKnob
-    
-    local maxStroke = Instance.new("UIStroke")
-    maxStroke.Color = Color3.fromRGB(200, 150, 255)
-    maxStroke.Thickness = 1.5
-    maxStroke.Parent = maxKnob
-    
-    local halfKnob = knobSize / 2
-    local minVal, maxVal = defMin, defMax
-    
-    local function updateSlider()
-        local minPercent = (minVal - minV) / (maxV - minV)
-        local maxPercent = (maxVal - minV) / (maxV - minV)
-        
-        fill.Position = UDim2.new(minPercent, 0, 0, 0)
-        fill.Size = UDim2.new(maxPercent - minPercent, 0, 1, 0)
-        
-        minKnob.Position = UDim2.new(minPercent, -halfKnob, 0.5, -halfKnob)
-        maxKnob.Position = UDim2.new(maxPercent, -halfKnob, 0.5, -halfKnob)
-        
-        valueLabel.Text = string.format(formatStr, minVal) .. " ~ " .. string.format(formatStr, maxVal) .. suf
-        valueLabel.TextColor3 = THEME.logText
-    end
-    updateSlider()
-    
-    local dragButton = Instance.new("TextButton")
-    dragButton.Size = UDim2.new(1, 0, 0, sliderTrackSize * 2)
-    dragButton.Position = UDim2.new(0, 0, 0.5, -sliderTrackSize)
-    dragButton.BackgroundTransparency = 1
-    dragButton.Text = ""
-    dragButton.ZIndex = 4
-    dragButton.Parent = track
-    
-    local draggingMin, draggingMax = false, false
-    
-    local function getPercentFromPos(xPos)
-        local trackX = track.AbsolutePosition.X
-        local trackW = track.AbsoluteSize.X
-        return math.clamp((xPos - trackX) / trackW, 0, 1)
-    end
-    
-    local function roundToDec(val)
-        local mult = 10 ^ dec
-        return math.floor(val * mult + 0.5) / mult
-    end
-    
-    dragButton.InputBegan:Connect(function(input)
-        if input.UserInputType ~= Enum.UserInputType.MouseButton1 and input.UserInputType ~= Enum.UserInputType.Touch then return end
-        
-        local pct = getPercentFromPos(input.Position.X)
-        local val = roundToDec(minV + pct * (maxV - minV))
-        
-        if math.abs(val - minVal) <= math.abs(val - maxVal) then
-            draggingMin = true
-        else
-            draggingMax = true
+    textBox.FocusLost:Connect(function(enterPressed)
+        if enterPressed then
+            local value = tonumber(textBox.Text)
+            if value then
+                callback(value)
+            else
+                textBox.Text = tostring(defaultValue)
+            end
         end
     end)
     
-    UserInputService.InputChanged:Connect(function(input)
-        if input.UserInputType ~= Enum.UserInputType.MouseMovement and input.UserInputType ~= Enum.UserInputType.Touch then return end
-        if not (draggingMin or draggingMax) then return end
-        
-        local pct = getPercentFromPos(input.Position.X)
-        local val = roundToDec(minV + pct * (maxV - minV))
-        local eps = 1 / (10 ^ dec)
-        
-        if draggingMin then
-            minVal = math.clamp(val, minV, maxVal - eps)
-            cbMin(minVal)
-        else
-            maxVal = math.clamp(val, minVal + eps, maxV)
-            cbMax(maxVal)
-        end
-        
-        updateSlider()
-    end)
-    
-    UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            draggingMin = false
-            draggingMax = false
-        end
-    end)
+    return frame
 end
 
--- Build Main Tab
+-- Build Main Tab dengan 4 Section
 local order = 1
+
+-- SECTION 1: AUTO FEATURES
 createSectionHeader("AUTO FEATURES", order)
 order = order + 1
 
@@ -823,24 +719,7 @@ order = order + 1
 createToggleButton("Human Mode", mainContainer, false, function(state) humanModeEnabled = state end, order)
 order = order + 1
 
-createSectionHeader("DELAY SETTINGS", order)
-order = order + 1
-
-createSlider(mainContainer, "⌨", "Write", 0.01, 1, 0.03, 0.08, 2, "s", 
-    function(v) typeDelay = v end, 
-    function(v) enterDelay = v end, order)
-order = order + 1
-
-createSlider(mainContainer, "⏱", "Turn", 0.1, 5, 1.5, 2.5, 1, "s",
-    function(v) turnDelay = v end,
-    function(v) turnDelay = v end, order)
-order = order + 1
-
-createSlider(mainContainer, "⌫", "Backspace", 0.01, 1, 0.02, 0.06, 2, "s",
-    function(v) backspaceDelay = v end,
-    function(v) deleteDelay = v end, order)
-order = order + 1
-
+-- SECTION 2: INFORMATION
 createSectionHeader("INFORMATION", order)
 order = order + 1
 
@@ -883,6 +762,133 @@ kataLabel.Font = Enum.Font.GothamBold
 kataLabel.TextSize = IsMobile and 16 or 18
 kataLabel.TextXAlignment = Enum.TextXAlignment.Left
 kataLabel.Parent = logFrame
+
+-- SECTION 3: SEMUA KATA SULIT
+createSectionHeader("SEMUA KATA SULIT", order)
+order = order + 1
+
+-- Kata Sulit Dropdown
+local kataSulitBtn = Instance.new("TextButton")
+kataSulitBtn.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
+kataSulitBtn.LayoutOrder = order
+order = order + 1
+kataSulitBtn.BackgroundColor3 = Color3.fromRGB(65, 20, 145)
+kataSulitBtn.Text = "SET KATA SULIT ▼"
+kataSulitBtn.TextColor3 = Color3.new(1, 1, 1)
+kataSulitBtn.Font = Enum.Font.GothamBold
+kataSulitBtn.TextSize = TEXT_SIZE_NORMAL
+kataSulitBtn.Parent = mainContainer
+
+local kataCorner = Instance.new("UICorner")
+kataCorner.CornerRadius = UDim.new(0, 8)
+kataCorner.Parent = kataSulitBtn
+
+local kataGradient = Instance.new("UIGradient")
+kataGradient.Color = ColorSequence.new({
+    ColorSequenceKeypoint.new(0, Color3.fromRGB(90, 30, 190)),
+    ColorSequenceKeypoint.new(1, Color3.fromRGB(50, 15, 120))
+})
+kataGradient.Parent = kataSulitBtn
+
+-- Kata Sulit Dropdown Content
+local kataDropdown = Instance.new("Frame")
+kataDropdown.Size = UDim2.new(1, 0, 0, 0)
+kataDropdown.BackgroundColor3 = Color3.fromRGB(14, 13, 22)
+kataDropdown.ClipsDescendants = true
+kataDropdown.BorderSizePixel = 0
+kataDropdown.Parent = mainContainer
+kataDropdown.LayoutOrder = order
+order = order + 1
+
+local kataDropdownStroke = Instance.new("UIStroke")
+kataDropdownStroke.Color = Color3.fromRGB(80, 35, 160)
+kataDropdownStroke.Thickness = 1
+kataDropdownStroke.Transparency = 0.3
+kataDropdownStroke.Parent = kataDropdown
+
+local categoryHeight = IsMobile and 30 or 28
+local dropdownOpen = false
+local categories = {"IF", "X", "NG", "AI", "CY", "UI", "KS", "LY", "RS", "NS"}
+
+local function updateCategoryButtons()
+    for _, child in pairs(kataDropdown:GetChildren()) do
+        if child:IsA("TextButton") then
+            child:Destroy()
+        end
+    end
+    
+    for i, cat in ipairs(categories) do
+        local isOn = categoryToggles[cat]
+        
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(1, -10, 0, categoryHeight)
+        btn.Position = UDim2.new(0, 5, 0, (i - 1) * categoryHeight + 2)
+        btn.BackgroundColor3 = isOn and Color3.fromRGB(80, 30, 170) or Color3.fromRGB(28, 25, 42)
+        btn.Text = cat
+        btn.TextColor3 = isOn and Color3.new(1, 1, 1) or Color3.fromRGB(160, 150, 190)
+        btn.Font = Enum.Font.GothamBold
+        btn.TextSize = TEXT_SIZE_NORMAL
+        btn.TextXAlignment = Enum.TextXAlignment.Left
+        btn.Parent = kataDropdown
+        
+        local btnCorner = Instance.new("UICorner")
+        btnCorner.CornerRadius = UDim.new(0, 5)
+        btnCorner.Parent = btn
+        
+        local padding = Instance.new("UIPadding")
+        padding.PaddingLeft = UDim.new(0, 10)
+        padding.Parent = btn
+        
+        if isOn then
+            local btnStroke = Instance.new("UIStroke")
+            btnStroke.Color = Color3.fromRGB(130, 70, 220)
+            btnStroke.Thickness = 1
+            btnStroke.Transparency = 0.2
+            btnStroke.Parent = btn
+        end
+        
+        btn.MouseButton1Click:Connect(function()
+            playClickSound()
+            categoryToggles[cat] = not categoryToggles[cat]
+            updateCategoryButtons()
+        end)
+    end
+end
+
+kataSulitBtn.MouseButton1Click:Connect(function()
+    playClickSound()
+    dropdownOpen = not dropdownOpen
+    kataSulitBtn.Text = dropdownOpen and "SET KATA SULIT ▲" or "SET KATA SULIT ▼"
+    
+    kataDropdown:TweenSize(
+        UDim2.new(1, 0, 0, dropdownOpen and #categories * categoryHeight + 5 or 0),
+        Enum.EasingDirection.Out,
+        Enum.EasingStyle.Quart,
+        0.3,
+        true
+    )
+    
+    updateCategoryButtons()
+end)
+
+-- SECTION 4: DELAY SETTINGS (dengan TextBox)
+createSectionHeader("DELAY SETTINGS", order)
+order = order + 1
+
+createDelayInput("Type Delay", typeDelay, function(v) typeDelay = v end, order)
+order = order + 1
+
+createDelayInput("Enter Delay", enterDelay, function(v) enterDelay = v end, order)
+order = order + 1
+
+createDelayInput("Turn Delay", turnDelay, function(v) turnDelay = v end, order)
+order = order + 1
+
+createDelayInput("Backspace Delay", backspaceDelay, function(v) backspaceDelay = v end, order)
+order = order + 1
+
+createDelayInput("Delete Delay", deleteDelay, function(v) deleteDelay = v end, order)
+order = order + 1
 
 -- Build Utility Tab
 local utilOrder = 1
@@ -1146,17 +1152,42 @@ local function autoType()
         awalanLabel.Text = "AWALAN: " .. awalan:upper()
         
         local candidates = {}
+        local specialCandidates = {}
         
-        for _, word in ipairs(commonWords) do
-            if word:sub(1, #awalan) == awalan and not usedWords[word] and #word > #awalan then
-                table.insert(candidates, word)
+        for cat, enabled in pairs(categoryToggles) do
+            if enabled then
+                for _, word in ipairs(wordCategories[cat]) do
+                    if word:sub(1, #awalan) == awalan and not usedWords[word] and #word > #awalan then
+                        table.insert(specialCandidates, word)
+                    end
+                end
+            end
+        end
+        
+        if #specialCandidates > 0 then
+            candidates = specialCandidates
+        end
+        
+        if #candidates == 0 then
+            for _, word in ipairs(commonWords) do
+                if word:sub(1, #awalan) == awalan and not usedWords[word] and #word > #awalan then
+                    table.insert(candidates, word)
+                end
             end
         end
         
         if #candidates > 0 then
             local chosen = candidates[math.random(1, #candidates)]
+            local category = "KBBI"
             
-            print("🤖 Anixly: " .. chosen:upper() .. " | Awalan: " .. awalan:upper())
+            for cat, enabled in pairs(categoryToggles) do
+                if enabled and table.find(wordCategories[cat], chosen) then
+                    category = "KATA SULIT (" .. cat .. ")"
+                    break
+                end
+            end
+            
+            print("🤖 Anixly: " .. chosen:upper() .. " | Awalan: " .. awalan:upper() .. " | " .. category)
             kataLabel.Text = chosen:upper()
             currentWord = chosen
             
@@ -1172,6 +1203,84 @@ local function autoType()
     task.wait(0.5)
     isTyping = false
 end
+
+-- Load word categories
+task.spawn(function()
+    local urls = {
+        IF = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/IF.txt",
+        X = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/X.txt",
+        NG = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/NG.txt",
+        AI = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/AI.txt",
+        CY = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/CY.txt",
+        UI = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/UI.txt",
+        KS = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/KS.txt", 
+        LY = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/LY.txt",
+        RS = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/RS.txt",
+        NS = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/NS.txt"
+    }
+    
+    for cat, url in pairs(urls) do
+        task.spawn(function()
+            local success, response = pcall(function()
+                return game:HttpGet(url)
+            end)
+            
+            if success and type(response) == "string" then
+                for line in string.gmatch(response, "[^\r\n]+") do
+                    local word = (line:gsub("%s+", "")):lower()
+                    if #word > 1 and string.match(word, "^%a+$") then
+                        table.insert(wordCategories[cat], word)
+                    end
+                end
+                print("🔥 Category " .. cat .. " Loaded!")
+            end
+        end)
+    end
+end)
+
+-- Shuffle function
+local function shuffleTable(t)
+    for i = #t, 2, -1 do
+        local j = math.random(i)
+        t[i], t[j] = t[j], t[i]
+    end
+end
+
+-- Load common words
+task.spawn(function()
+    local urls = {
+        "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/kamus.txt",
+        "https://cdn.jsdelivr.net/gh/geovedi/indonesian-wordlist@master/00-indonesian-wordlist.lst",
+        "https://raw.githubusercontent.com/geovedi/indonesian-wordlist/master/00-indonesian-wordlist.lst"
+    }
+    
+    local allWords = {}
+    
+    for _, url in ipairs(urls) do
+        if not IsRunning then break end
+        
+        local success, response = pcall(function()
+            return game:HttpGet(url)
+        end)
+        
+        if success and type(response) == "string" and #response > 1000 then
+            for line in string.gmatch(response, "[^\r\n]+") do
+                local word = (line:gsub("%s+", "")):lower()
+                if #word > 1 and string.match(word, "^%a+$") then
+                    table.insert(allWords, word)
+                end
+            end
+        end
+    end
+    
+    if #allWords > 1000 then
+        for _, word in ipairs(allWords) do
+            table.insert(commonWords, word)
+        end
+        shuffleTable(commonWords)
+        print("✅ Anixly: " .. #commonWords .. " Kata Dimuat!")
+    end
+end)
 
 -- Remote handler
 local remotes = ReplicatedStorage:FindFirstChild("Remotes")
@@ -1234,4 +1343,4 @@ end)
 -- Show main tab by default
 switchTab(mainContainer, mainTab)
 
-print("✅ Anixly Loaded")
+print("✅ Anixly Loaded dengan 4 Section & Input Delay!")
