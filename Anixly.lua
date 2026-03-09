@@ -798,7 +798,7 @@ order = order + 1
 autoFeaturesContent[2] = createToggleButton("Auto Submit", mainContainer, true, function(state) autoEnterEnabled = state end, order)
 order = order + 1
 
-autoFeaturesContent[3] = createToggleButton("Human Mode", mainContainer, false, function(state) humanModeEnabled = state end, order)
+autoFeaturesContent[3] = createToggleButton("Human Mode [Tester]", mainContainer, false, function(state) humanModeEnabled = state end, order)
 order = order + 1
 
 -- Header untuk AUTO FEATURES dengan EMOJI
@@ -1790,7 +1790,6 @@ local function updateSkinDropdown()
             playClickSound()
             currentSkin = skinData.name
             skinBtnText.Text = "SKIN BAMBU: " .. skinData.label .. " ▼"
-            skinInfo.Text = "Status: Terpilih " .. skinData.label .. " | " .. skinData.rarity
             skinInfo.TextColor3 = RARITY_COLORS[skinData.rarity] or THEME.logText
             applySkin(skinData.name)
             updateSkinDropdown()
@@ -1804,9 +1803,9 @@ skinBtn.MouseButton1Click:Connect(function()
     skinOpen = not skinOpen
     
     if skinOpen then
-        skinBtnText.Text = "SKIN BAMBU: (pilih) ▲"
+        skinBtnText.Text = "SKIN BAMBU: ▲"
     else
-        skinBtnText.Text = "SKIN BAMBU: (pilih) ▼"
+        skinBtnText.Text = "SKIN BAMBU: (choose) ▼"
     end
     
     skinDropdown:TweenSize(
