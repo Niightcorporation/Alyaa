@@ -234,20 +234,24 @@ local MinCorner = Instance.new("UICorner")
 MinCorner.CornerRadius = UDim.new(1, 0)
 MinCorner.Parent = MinimizeBtn
 
--- Close Button (tetap pake X)
-local CloseBtn = Instance.new("TextButton")
+-- Alternatif: pakai ImageButton
+local CloseBtn = Instance.new("ImageButton")
 CloseBtn.Size = UDim2.new(0, controlSize, 0, controlSize)
 CloseBtn.Position = UDim2.new(1, -(controlSize + 6), 0.5, -controlSize / 2)
 CloseBtn.BackgroundColor3 = Color3.fromRGB(240, 50, 60)
-CloseBtn.Text = "×"
-CloseBtn.TextColor3 = Color3.new(1, 1, 1)
-CloseBtn.Font = Enum.Font.GothamBold
-CloseBtn.TextSize = IsMobile and 16 or 20
+CloseBtn.Image = "rbxassetid://6023426923"  -- Icon close
+CloseBtn.ImageColor3 = Color3.new(1, 1, 1)
 CloseBtn.Parent = Header
+CloseBtn.ZIndex = 10
 
 local CloseCorner = Instance.new("UICorner")
 CloseCorner.CornerRadius = UDim.new(1, 0)
 CloseCorner.Parent = CloseBtn
+
+CloseBtn.MouseButton1Click:Connect(function()
+    ScreenGui:Destroy()
+    IsRunning = false
+end)
 
 -- Mini Icon (for minimized state) 
 local MiniIcon = Instance.new("TextButton")  -- Ganti dari ImageButton ke TextButton
@@ -1458,7 +1462,7 @@ infinityBtn.MouseButton1Click:Connect(function()
 end)
 -- ===== AKHIR INFINITY JUMP =====
 
--- ===== SKIN BAMBU SECTION (dengan rarity) =====
+-- ===== SKIN BAMBU SECTION (Collapsible) =====
 local skinContent = {}
 
 -- Data skin bambu
@@ -1480,11 +1484,11 @@ local RARITY_COLORS = {
 }
 
 local currentSkin = nil
-local skinOpen = false
-local skinExpanded = true  -- State untuk collapsible
+local skinDropdownOpen = false  -- Untuk buka/tutup LIST skin
+local skinExpanded = true       -- Untuk buka/tutup SECTION
 local skinItemHeight = IsMobile and 40 or 34
 
--- Header SKIN BAMBU (ORDER 3)
+-- Header SKIN BAMBU (bisa diklik untuk buka/tutup SECTION)
 local skinHeader = Instance.new("TextButton")
 skinHeader.Size = UDim2.new(1, 0, 0, 35)
 skinHeader.LayoutOrder = 3
@@ -1524,25 +1528,25 @@ skinTitle.TextSize = 13
 skinTitle.TextXAlignment = Enum.TextXAlignment.Left
 skinTitle.Parent = skinHeader
 
--- Arrow Header
+-- Arrow Header (untuk buka/tutup SECTION)
 local skinArrow = Instance.new("TextLabel")
 skinArrow.Size = UDim2.new(0, 20, 0, 20)
 skinArrow.Position = UDim2.new(1, -25, 0.5, -10)
 skinArrow.BackgroundTransparency = 1
-skinArrow.Text = "▼"  -- Awalnya terbuka
+skinArrow.Text = "▼"  -- Awal terbuka
 skinArrow.TextColor3 = THEME.accent
 skinArrow.Font = Enum.Font.GothamBold
 skinArrow.TextSize = 14
 skinArrow.Parent = skinHeader
 
--- Frame utama skin (ORDER 4) - UKURAN TETAP
+-- Frame utama skin (KONTEN SECTION)
 local skinFrame = Instance.new("Frame")
 skinFrame.Size = UDim2.new(1, 0, 0, 120)
 skinFrame.LayoutOrder = 4
 skinFrame.BackgroundColor3 = Color3.fromRGB(16, 15, 24)
 skinFrame.BorderSizePixel = 0
 skinFrame.Parent = utilContainer
-skinFrame.Visible = skinExpanded  -- Set visibility awal
+skinFrame.Visible = skinExpanded  -- Visibility ngikut section
 
 table.insert(skinContent, skinFrame)
 
@@ -1556,7 +1560,7 @@ skinFrameStroke.Thickness = 1
 skinFrameStroke.Transparency = 0.5
 skinFrameStroke.Parent = skinFrame
 
--- Dropdown button
+-- Dropdown button (untuk buka/tutup LIST skin)
 local skinBtn = Instance.new("TextButton")
 skinBtn.Size = UDim2.new(1, -20, 0, COMPONENT_HEIGHT)
 skinBtn.Position = UDim2.new(0, 10, 0, 10)
@@ -1580,21 +1584,21 @@ skinBtnIcon.Image = "rbxassetid://6023426945"
 skinBtnIcon.ImageColor3 = Color3.new(1, 1, 1)
 skinBtnIcon.Parent = skinBtn
 
--- Text di button
+-- Text di button (dengan panah untuk buka/tutup LIST)
 local skinBtnText = Instance.new("TextLabel")
 skinBtnText.Size = UDim2.new(1, -60, 1, 0)
 skinBtnText.Position = UDim2.new(0, 28, 0, 0)
 skinBtnText.BackgroundTransparency = 1
-skinBtnText.Text = "SKIN BAMBU: (pilih) ▼"
+skinBtnText.Text = "SKIN BAMBU: (pilih) ▼"  -- Panah untuk LIST
 skinBtnText.TextColor3 = Color3.new(1, 1, 1)
 skinBtnText.Font = Enum.Font.GothamBold
 skinBtnText.TextSize = TEXT_SIZE_NORMAL
 skinBtnText.TextXAlignment = Enum.TextXAlignment.Left
 skinBtnText.Parent = skinBtn
 
--- Dropdown content (SCROLLING FRAME)
+-- Dropdown content (LIST skin) - ScrollingFrame
 local skinDropdown = Instance.new("ScrollingFrame")
-skinDropdown.Size = UDim2.new(1, -20, 0, 70)
+skinDropdown.Size = UDim2.new(1, -20, 0, 0)  -- Awalnya 0 (tersembunyi)
 skinDropdown.Position = UDim2.new(0, 10, 0, COMPONENT_HEIGHT + 15)
 skinDropdown.BackgroundColor3 = Color3.fromRGB(14, 13, 22)
 skinDropdown.BorderSizePixel = 0
@@ -1602,6 +1606,7 @@ skinDropdown.ScrollBarThickness = 4
 skinDropdown.ScrollBarImageColor3 = THEME.accent
 skinDropdown.CanvasSize = UDim2.new(0, 0, 0, 0)
 skinDropdown.AutomaticCanvasSize = Enum.AutomaticSize.Y
+skinDropdown.ClipsDescendants = true
 skinDropdown.Parent = skinFrame
 
 local skinDropdownStroke = Instance.new("UIStroke")
@@ -1610,8 +1615,7 @@ skinDropdownStroke.Thickness = 1
 skinDropdownStroke.Transparency = 0.4
 skinDropdownStroke.Parent = skinDropdown
 
--- Fungsi apply skin (sama seperti kode Anda)
--- Fungsi apply skin (DARI KODE ANDA)
+-- Fungsi apply skin
 local function applySkin(skinName)
     local character = LocalPlayer.Character
     if not character then return end
@@ -1719,7 +1723,7 @@ local function applySkin(skinName)
     print("[Skin] Applied: " .. skinName)
 end
 
--- Fungsi update dropdown
+-- Fungsi update dropdown (LIST skin)
 local function updateSkinDropdown()
     for _, child in pairs(skinDropdown:GetChildren()) do
         if child:IsA("Frame") or child:IsA("TextButton") then
@@ -1800,42 +1804,53 @@ local function updateSkinDropdown()
     end
 end
 
--- Event klik dropdown
+-- ===== EVENT UNTUK BUKA/TUTUP LIST SKIN (seperti KATA SULIT) =====
 skinBtn.MouseButton1Click:Connect(function()
     playClickSound()
-    skinOpen = not skinOpen
+    skinDropdownOpen = not skinDropdownOpen
     
-    if skinOpen then
-        skinBtnText.Text = "SKIN BAMBU: ▲"
-        updateSkinDropdown()
+    -- Update panah di button
+    if skinDropdownOpen then
+        skinBtnText.Text = "SKIN BAMBU: ▲"  -- Panah atas saat terbuka
     else
-        skinBtnText.Text = "SKIN BAMBU: (pilih) ▼"
+        skinBtnText.Text = "SKIN BAMBU: (pilih) ▼"  -- Panah bawah saat tertutup
+    end
+    
+    -- Animasi buka/tutup dropdown
+    skinDropdown:TweenSize(
+        UDim2.new(1, -20, 0, skinDropdownOpen and #SKINS * skinItemHeight + 8 or 0),
+        Enum.EasingDirection.Out,
+        Enum.EasingStyle.Quart,
+        0.25,
+        true
+    )
+    
+    -- Update list saat dibuka
+    if skinDropdownOpen then
+        updateSkinDropdown()
     end
 end)
 
--- Event klik header untuk buka/tutup SECTION (YANG INI PENTING)
+-- ===== EVENT UNTUK BUKA/TUTUP SECTION (HEADER) =====
 skinHeader.MouseButton1Click:Connect(function()
     playClickSound()
     skinExpanded = not skinExpanded
     
-    -- Update arrow
+    -- Update panah header
     skinArrow.Text = skinExpanded and "▼" or "▶"
     
-    -- Tampilkan/sembunyikan semua konten dalam skinContent
+    -- Tampilkan/sembunyikan konten section
     for _, item in ipairs(skinContent) do
         item.Visible = skinExpanded
     end
-    
-    -- Debug
-    print("Skin section " .. (skinExpanded and "opened" or "closed"))
 end)
 
--- Initialize dropdown
+-- Initialize dropdown (siapin list)
 task.spawn(function()
     updateSkinDropdown()
 end)
 
--- Set initial visibility (PASTIKAN INI)
+-- Set initial visibility
 for _, item in ipairs(skinContent) do
     item.Visible = skinExpanded
 end
