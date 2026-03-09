@@ -194,8 +194,9 @@ HeaderLine.BackgroundColor3 = THEME.accent
 HeaderLine.BorderSizePixel = 0
 HeaderLine.Parent = Header
 
+-- Title Label dengan efek rainbow berjalan
 local TitleLabel = Instance.new("TextLabel")
-TitleLabel.Size = UDim2.new(0, 140, 1, 0)
+TitleLabel.Size = UDim2.new(0, 200, 1, 0)
 TitleLabel.Position = UDim2.new(0, 12, 0, 0)
 TitleLabel.BackgroundTransparency = 1
 TitleLabel.Text = "Anixlyhub V1.0.0"
@@ -204,6 +205,16 @@ TitleLabel.Font = Enum.Font.GothamBold
 TitleLabel.TextSize = TEXT_SIZE_LARGE
 TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
 TitleLabel.Parent = Header
+
+-- Efek rainbow berjalan
+local hue = 0
+task.spawn(function()
+    while IsRunning and TitleLabel do
+        hue = (hue + 0.01) % 1
+        TitleLabel.TextColor3 = Color3.fromHSV(hue, 1, 1)
+        task.wait(0.05)
+    end
+end)
 
 -- Window Controls
 local controlSize = IsMobile and 18 or 26
@@ -1470,6 +1481,7 @@ local RARITY_COLORS = {
 
 local currentSkin = nil
 local skinOpen = false
+local skinExpanded = true  -- State untuk collapsible
 local skinItemHeight = IsMobile and 40 or 34
 
 -- Header SKIN BAMBU (ORDER 3)
@@ -1517,7 +1529,7 @@ local skinArrow = Instance.new("TextLabel")
 skinArrow.Size = UDim2.new(0, 20, 0, 20)
 skinArrow.Position = UDim2.new(1, -25, 0.5, -10)
 skinArrow.BackgroundTransparency = 1
-skinArrow.Text = "▼"
+skinArrow.Text = "▼"  -- Awalnya terbuka
 skinArrow.TextColor3 = THEME.accent
 skinArrow.Font = Enum.Font.GothamBold
 skinArrow.TextSize = 14
@@ -1525,11 +1537,12 @@ skinArrow.Parent = skinHeader
 
 -- Frame utama skin (ORDER 4) - UKURAN TETAP
 local skinFrame = Instance.new("Frame")
-skinFrame.Size = UDim2.new(1, 0, 0, 120)  -- Ukuran tetap, tidak berubah
+skinFrame.Size = UDim2.new(1, 0, 0, 120)
 skinFrame.LayoutOrder = 4
 skinFrame.BackgroundColor3 = Color3.fromRGB(16, 15, 24)
 skinFrame.BorderSizePixel = 0
 skinFrame.Parent = utilContainer
+skinFrame.Visible = skinExpanded  -- Set visibility awal
 
 table.insert(skinContent, skinFrame)
 
@@ -1572,7 +1585,7 @@ local skinBtnText = Instance.new("TextLabel")
 skinBtnText.Size = UDim2.new(1, -60, 1, 0)
 skinBtnText.Position = UDim2.new(0, 28, 0, 0)
 skinBtnText.BackgroundTransparency = 1
-skinBtnText.Text = "SKIN BAMBU: (choose) ▼"
+skinBtnText.Text = "SKIN BAMBU: (pilih) ▼"
 skinBtnText.TextColor3 = Color3.new(1, 1, 1)
 skinBtnText.Font = Enum.Font.GothamBold
 skinBtnText.TextSize = TEXT_SIZE_NORMAL
@@ -1580,8 +1593,8 @@ skinBtnText.TextXAlignment = Enum.TextXAlignment.Left
 skinBtnText.Parent = skinBtn
 
 -- Dropdown content (SCROLLING FRAME)
-local skinDropdown = Instance.new("ScrollingFrame")  -- Ganti dari Frame ke ScrollingFrame
-skinDropdown.Size = UDim2.new(1, -20, 0, 70)  -- Tinggi tetap 70
+local skinDropdown = Instance.new("ScrollingFrame")
+skinDropdown.Size = UDim2.new(1, -20, 0, 70)
 skinDropdown.Position = UDim2.new(0, 10, 0, COMPONENT_HEIGHT + 15)
 skinDropdown.BackgroundColor3 = Color3.fromRGB(14, 13, 22)
 skinDropdown.BorderSizePixel = 0
@@ -1597,6 +1610,7 @@ skinDropdownStroke.Thickness = 1
 skinDropdownStroke.Transparency = 0.4
 skinDropdownStroke.Parent = skinDropdown
 
+-- Fungsi apply skin (sama seperti kode Anda)
 -- Fungsi apply skin (DARI KODE ANDA)
 local function applySkin(skinName)
     local character = LocalPlayer.Character
@@ -1792,32 +1806,39 @@ skinBtn.MouseButton1Click:Connect(function()
     skinOpen = not skinOpen
     
     if skinOpen then
-        skinBtnText.Text = "SKIN BAMBU: (choose) ▲"
+        skinBtnText.Text = "SKIN BAMBU: ▲"
         updateSkinDropdown()
     else
-        skinBtnText.Text = "SKIN BAMBU: (choose) ▼"
+        skinBtnText.Text = "SKIN BAMBU: (pilih) ▼"
     end
 end)
 
--- Atur visibility
-local skinExpanded = true
-for _, item in ipairs(skinContent) do
-    item.Visible = skinExpanded
-end
-
+-- Event klik header untuk buka/tutup SECTION (YANG INI PENTING)
 skinHeader.MouseButton1Click:Connect(function()
     playClickSound()
     skinExpanded = not skinExpanded
+    
+    -- Update arrow
     skinArrow.Text = skinExpanded and "▼" or "▶"
+    
+    -- Tampilkan/sembunyikan semua konten dalam skinContent
     for _, item in ipairs(skinContent) do
         item.Visible = skinExpanded
     end
+    
+    -- Debug
+    print("Skin section " .. (skinExpanded and "opened" or "closed"))
 end)
 
 -- Initialize dropdown
 task.spawn(function()
-    updateSkinDropdown()  -- Siapkan list dropdown
+    updateSkinDropdown()
 end)
+
+-- Set initial visibility (PASTIKAN INI)
+for _, item in ipairs(skinContent) do
+    item.Visible = skinExpanded
+end
 
 -- ===== AKHIR SKIN BAMBU =====
 
