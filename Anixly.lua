@@ -4,7 +4,7 @@
 
 --[[
     Anixly - Sambung kata
-    Fitur Lengkap dengan UI Keren
+    Fitur Lengkap dengan UI Keren + ANTI AFK
 ]]
 
 -- Services
@@ -72,8 +72,6 @@ local TEXT_SIZE_LARGE = IsMobile and 13 or 15
 local autoTypeEnabled = false
 local autoEnterEnabled = true
 local humanModeEnabled = false
-local autoJoinEnabled = false
-local selectedTable = "Table_2P_1"
 local typeDelay = 0.12
 local enterDelay = 0.15
 local turnDelay = 2.0
@@ -81,25 +79,13 @@ local backspaceDelay = 0.10
 local deleteDelay = 0.12
 local noclipEnabled = false
 local noclipConnection
+local antiAfkEnabled = false
+local antiAfkConnection
 
--- Auto Join Variables
-local joinConnection
-local joinCooldown = 5
-
--- Available Tables
-local availableTables = {
-    "Table_2P_1",
-    "Table_2P_2",
-    "Table_2P_3",
-    "Table_2P_4",
-    "Table_2P_5",
-    "Table_2P_6",
-    "Table_2P_7",
-    "Table_4P_1",
-    "Table_4P_2",
-    "Table_4P_3",
-    "Table_8P"
-}
+-- Human Mode Specific Variables
+local humanPauseChance = 0.3
+local humanTypoChance = 0.15
+local humanEjekChance = 0.1
 
 -- Word categories
 local wordCategories = {
@@ -149,6 +135,13 @@ local commonWords = {
     "dengan", "depan", "di", "dia", "diri", "dua", "dulu", "dunia", "uhuk", "uhuy", "bca",
     "yanto", "ilang", "oho", "aiba", "eni", "ungik", "aqua", "aikido", "aku", "dia", "kamu",
     "saya", "mereka", "kami", "kita", "anda", "ini", "itu", "sini", "situ", "sana"
+}
+
+-- Kata-kata ejekan
+local ejekanList = {
+    "wkwk", "wkwkwk", "wadidaw", "gabisa ya?", "cupu", "noob", "ez", "gampang", 
+    "lol", "lmao", "hadeh", "kasian", "lemot", "lambat", "salah tuh", "ulang lagi",
+    "hmm", "yahaha", "wkwk land", "gabener", "salah", "lagi", "coba lagi"
 }
 
 -- Create GUI
@@ -662,29 +655,7 @@ local function createCollapsibleHeader(title, iconId, container, contentList, or
     return header
 end
 
--- Fungsi untuk join table
-local function joinSelectedTable()
-    local remote = ReplicatedStorage:FindFirstChild("Remotes")
-    if remote then
-        local joinRemote = remote:FindFirstChild("JoinTable")
-        if joinRemote then
-            local success, err = pcall(function()
-                joinRemote:FireServer(selectedTable)
-            end)
-            if success then
-                print("✅ Join ke " .. selectedTable)
-            else
-                print("❌ Gagal join: " .. tostring(err))
-            end
-        else
-            print("❌ Remote JoinTable tidak ditemukan")
-        end
-    else
-        print("❌ Folder Remotes tidak ditemukan")
-    end
-end
-
--- Toggle Button Function (untuk Auto Answer, dll)
+-- Toggle Button Function dengan efek neon
 local function createToggleButton(text, parent, defaultState, callback, order)
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
@@ -769,7 +740,7 @@ local function createToggleButton(text, parent, defaultState, callback, order)
     return frame
 end
 
--- Fungsi untuk membuat input delay
+-- Fungsi untuk membuat input delay dengan efek neon
 local function createDelayInput(label, defaultValue, callback, order)
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
@@ -842,7 +813,9 @@ local function createDelayInput(label, defaultValue, callback, order)
     return frame
 end
 
--- Build Main Tab
+-- ==============================================
+-- BUILD MAIN TAB
+-- ==============================================
 local order = 1
 
 -- AUTO FEATURES SECTION
@@ -854,7 +827,14 @@ order = order + 1
 autoFeaturesContent[2] = createToggleButton("Auto Submit", mainContainer, true, function(state) autoEnterEnabled = state end, order)
 order = order + 1
 
-autoFeaturesContent[3] = createToggleButton("Human Mode [Tester]", mainContainer, false, function(state) humanModeEnabled = state end, order)
+autoFeaturesContent[3] = createToggleButton("Human Mode [UPDATED]", mainContainer, false, function(state) 
+    humanModeEnabled = state 
+    if state then
+        print("👤 Human Mode AKTIF - Fitur: Pause, Typo, Kelebihan huruf, Ejekan")
+    else
+        print("⚡ Mode Cepat AKTIF")
+    end
+end, order)
 order = order + 1
 
 -- Header AUTO FEATURES
@@ -923,263 +903,192 @@ autoHeader.MouseButton1Click:Connect(function()
     end
 end)
 
--- INFORMATION SECTION (sama seperti sebelumnya, tapi saya singkat biar gak kepanjangan)
--- (saya skip bagian INFORMATION dan sisanya karena panjang, tapi tetap ada di script aslinya)
-
 -- ==============================================
--- JOIN TABLE SECTION - VERSI SIMPLE (BUTTON BIASA)
+-- SECTION 3: INFORMATION
 -- ==============================================
-local joinSectionHeader = Instance.new("TextButton")
-joinSectionHeader.Size = UDim2.new(1, 0, 0, 35)
-joinSectionHeader.LayoutOrder = order
-joinSectionHeader.BackgroundColor3 = Color3.fromRGB(20, 16, 36)
-joinSectionHeader.Text = ""
-joinSectionHeader.AutoButtonColor = false
-joinSectionHeader.Parent = mainContainer
+local infoHeader = Instance.new("TextButton")
+infoHeader.Size = UDim2.new(1, 0, 0, 35)
+infoHeader.LayoutOrder = order
+infoHeader.BackgroundColor3 = Color3.fromRGB(20, 16, 36)
+infoHeader.Text = ""
+infoHeader.AutoButtonColor = false
+infoHeader.Parent = mainContainer
 order = order + 1
 
-local joinSectionCorner = Instance.new("UICorner")
-joinSectionCorner.CornerRadius = UDim.new(0, 8)
-joinSectionCorner.Parent = joinSectionHeader
+local infoHeaderCorner = Instance.new("UICorner")
+infoHeaderCorner.CornerRadius = UDim.new(0, 8)
+infoHeaderCorner.Parent = infoHeader
 
-local joinSectionStroke = Instance.new("UIStroke")
-joinSectionStroke.Color = THEME.mid
-joinSectionStroke.Thickness = 1
-joinSectionStroke.Transparency = 0.5
-joinSectionStroke.Parent = joinSectionHeader
+local infoHeaderStroke = Instance.new("UIStroke")
+infoHeaderStroke.Color = THEME.mid
+infoHeaderStroke.Thickness = 1
+infoHeaderStroke.Transparency = 0.5
+infoHeaderStroke.Parent = infoHeader
 
-local joinSectionIcon = Instance.new("TextLabel")
-joinSectionIcon.Size = UDim2.new(0, 18, 0, 18)
-joinSectionIcon.Position = UDim2.new(0, 10, 0.5, -9)
-joinSectionIcon.BackgroundTransparency = 1
-joinSectionIcon.Text = "🎮"
-joinSectionIcon.TextColor3 = THEME.accent
-joinSectionIcon.Font = Enum.Font.GothamBold
-joinSectionIcon.TextSize = 16
-joinSectionIcon.Parent = joinSectionHeader
+local infoIcon = Instance.new("ImageLabel")
+infoIcon.Size = UDim2.new(0, 18, 0, 18)
+infoIcon.Position = UDim2.new(0, 10, 0.5, -9)
+infoIcon.BackgroundTransparency = 1
+infoIcon.Image = "rbxassetid://6023426923"
+infoIcon.ImageColor3 = THEME.accent
+infoIcon.Parent = infoHeader
 
-local joinSectionTitle = Instance.new("TextLabel")
-joinSectionTitle.Size = UDim2.new(1, -80, 1, 0)
-joinSectionTitle.Position = UDim2.new(0, 35, 0, 0)
-joinSectionTitle.BackgroundTransparency = 1
-joinSectionTitle.Text = "JOIN TABLE"
-joinSectionTitle.TextColor3 = THEME.logText
-joinSectionTitle.Font = Enum.Font.GothamBold
-joinSectionTitle.TextSize = 13
-joinSectionTitle.TextXAlignment = Enum.TextXAlignment.Left
-joinSectionTitle.Parent = joinSectionHeader
+local infoTitle = Instance.new("TextLabel")
+infoTitle.Size = UDim2.new(1, -80, 1, 0)
+infoTitle.Position = UDim2.new(0, 35, 0, 0)
+infoTitle.BackgroundTransparency = 1
+infoTitle.Text = "INFORMATION"
+infoTitle.TextColor3 = THEME.logText
+infoTitle.Font = Enum.Font.GothamBold
+infoTitle.TextSize = 13
+infoTitle.TextXAlignment = Enum.TextXAlignment.Left
+infoTitle.Parent = infoHeader
 
-local joinSectionArrow = Instance.new("TextLabel")
-joinSectionArrow.Size = UDim2.new(0, 20, 0, 20)
-joinSectionArrow.Position = UDim2.new(1, -25, 0.5, -10)
-joinSectionArrow.BackgroundTransparency = 1
-joinSectionArrow.Text = "▼"
-joinSectionArrow.TextColor3 = THEME.accent
-joinSectionArrow.Font = Enum.Font.GothamBold
-joinSectionArrow.TextSize = 14
-joinSectionArrow.Parent = joinSectionHeader
+local infoArrow = Instance.new("TextLabel")
+infoArrow.Size = UDim2.new(0, 20, 0, 20)
+infoArrow.Position = UDim2.new(1, -25, 0.5, -10)
+infoArrow.BackgroundTransparency = 1
+infoArrow.Text = "▼"
+infoArrow.TextColor3 = THEME.accent
+infoArrow.Font = Enum.Font.GothamBold
+infoArrow.TextSize = 14
+infoArrow.Parent = infoHeader
 
--- KONTEN JOIN TABLE
-local joinContent = {}
+-- CONTENT INFORMATION
+local infoContent = {}
 
--- BUTTON AUTO JOIN (biasa, bukan toggle)
-local autoJoinBtn = Instance.new("TextButton")
-autoJoinBtn.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
-autoJoinBtn.LayoutOrder = order
+local logFrame = Instance.new("Frame")
+logFrame.Size = UDim2.new(1, 0, 0, 150)
+logFrame.LayoutOrder = order
+logFrame.BackgroundColor3 = Color3.fromRGB(12, 10, 20)
+logFrame.BorderSizePixel = 0
+logFrame.Parent = mainContainer
 order = order + 1
-autoJoinBtn.BackgroundColor3 = autoJoinEnabled and Color3.fromRGB(30, 180, 110) or Color3.fromRGB(180, 40, 50)
-autoJoinBtn.Text = autoJoinEnabled and "AUTO JOIN: ON" or "AUTO JOIN: OFF"
-autoJoinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-autoJoinBtn.Font = Enum.Font.GothamBold
-autoJoinBtn.TextSize = TEXT_SIZE_NORMAL
-autoJoinBtn.Parent = mainContainer
 
-table.insert(joinContent, autoJoinBtn)
+table.insert(infoContent, logFrame)
 
-local autoJoinCorner = Instance.new("UICorner")
-autoJoinCorner.CornerRadius = UDim.new(0, 8)
-autoJoinCorner.Parent = autoJoinBtn
+local logCorner = Instance.new("UICorner")
+logCorner.CornerRadius = UDim.new(0, 8)
+logCorner.Parent = logFrame
 
-autoJoinBtn.MouseButton1Click:Connect(function()
-    playClickSound()
-    autoJoinEnabled = not autoJoinEnabled
-    autoJoinBtn.BackgroundColor3 = autoJoinEnabled and Color3.fromRGB(30, 180, 110) or Color3.fromRGB(180, 40, 50)
-    autoJoinBtn.Text = autoJoinEnabled and "AUTO JOIN: ON" or "AUTO JOIN: OFF"
-    
-    if autoJoinEnabled then
-        -- Mulai auto join loop
-        task.spawn(function()
-            while autoJoinEnabled and IsRunning do
-                if not LocalPlayer.PlayerGui:FindFirstChild("MatchUI", true) then
-                    joinSelectedTable()
-                end
-                task.wait(joinCooldown)
-            end
-        end)
-    end
-end)
+local logStroke = Instance.new("UIStroke")
+logStroke.Color = THEME.mid
+logStroke.Thickness = 1
+logStroke.Transparency = 0.5
+logStroke.Parent = logFrame
 
--- SELECT TABLE DROPDOWN
-local tableListBtn = Instance.new("TextButton")
-tableListBtn.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
-tableListBtn.LayoutOrder = order
-order = order + 1
-tableListBtn.BackgroundColor3 = Color3.fromRGB(65, 20, 145)
-tableListBtn.Text = "PILIH TABLE ▼"
-tableListBtn.TextColor3 = Color3.fromRGB(220, 220, 255)
-tableListBtn.Font = Enum.Font.Gotham  
-tableListBtn.TextSize = TEXT_SIZE_NORMAL
-tableListBtn.Parent = mainContainer
+-- AWALAN Label
+local awalanLabel = Instance.new("TextLabel")
+awalanLabel.Size = UDim2.new(1, -10, 0, 25)
+awalanLabel.Position = UDim2.new(0, 10, 0, 5)
+awalanLabel.BackgroundTransparency = 1
+awalanLabel.Text = "AWALAN: -"
+awalanLabel.TextColor3 = THEME.logText
+awalanLabel.Font = Enum.Font.GothamBold
+awalanLabel.TextSize = IsMobile and 12 or 14
+awalanLabel.TextXAlignment = Enum.TextXAlignment.Left
+awalanLabel.Parent = logFrame
 
-table.insert(joinContent, tableListBtn)
+-- Search Box
+local searchLabel = Instance.new("TextLabel")
+searchLabel.Size = UDim2.new(0, 70, 0, 25)
+searchLabel.Position = UDim2.new(0, 10, 0, 30)
+searchLabel.BackgroundTransparency = 1
+searchLabel.Text = "Cari Kata:"
+searchLabel.TextColor3 = Color3.fromRGB(180, 170, 210)
+searchLabel.Font = Enum.Font.GothamBold
+searchLabel.TextSize = 12
+searchLabel.TextXAlignment = Enum.TextXAlignment.Left
+searchLabel.Parent = logFrame
 
-local tableBtnCorner = Instance.new("UICorner")
-tableBtnCorner.CornerRadius = UDim.new(0, 8)
-tableBtnCorner.Parent = tableListBtn
+local searchBox = Instance.new("TextBox")
+searchBox.Size = UDim2.new(1, -90, 0, 28)
+searchBox.Position = UDim2.new(0, 80, 0, 28)
+searchBox.BackgroundColor3 = Color3.fromRGB(30, 25, 45)
+searchBox.Text = ""
+searchBox.TextColor3 = Color3.new(1, 1, 1)
+searchBox.Font = Enum.Font.Gotham
+searchBox.TextSize = 12
+searchBox.PlaceholderText = "1-3 huruf (contoh: ka)"
+searchBox.PlaceholderColor3 = Color3.fromRGB(100, 90, 120)
+searchBox.ClearTextOnFocus = false
+searchBox.Parent = logFrame
 
--- Dropdown Frame
-local tableDropdown = Instance.new("Frame")
-tableDropdown.Size = UDim2.new(1, 0, 0, 0)
-tableDropdown.LayoutOrder = order
-order = order + 1
-tableDropdown.BackgroundColor3 = Color3.fromRGB(14, 13, 22)
-tableDropdown.ClipsDescendants = true
-tableDropdown.BorderSizePixel = 0
-tableDropdown.Parent = mainContainer
+local searchCorner = Instance.new("UICorner")
+searchCorner.CornerRadius = UDim.new(0, 6)
+searchCorner.Parent = searchBox
 
-table.insert(joinContent, tableDropdown)
+local searchStroke = Instance.new("UIStroke")
+searchStroke.Color = THEME.primary
+searchStroke.Thickness = 1
+searchStroke.Transparency = 0.5
+searchStroke.Parent = searchBox
 
-local tableDropdownStroke = Instance.new("UIStroke")
-tableDropdownStroke.Color = THEME.mid
-tableDropdownStroke.Thickness = 1
-tableDropdownStroke.Transparency = 0.4
-tableDropdownStroke.Parent = tableDropdown
+-- Result Frame
+local resultFrame = Instance.new("ScrollingFrame")
+resultFrame.Size = UDim2.new(1, -20, 0, 80)
+resultFrame.Position = UDim2.new(0, 10, 0, 60)
+resultFrame.BackgroundColor3 = Color3.fromRGB(20, 18, 30)
+resultFrame.BorderSizePixel = 0
+resultFrame.ScrollBarThickness = 4
+resultFrame.ScrollBarImageColor3 = THEME.accent
+resultFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+resultFrame.AutomaticCanvasSize = Enum.AutomaticSize.Y
+resultFrame.Parent = logFrame
 
-local tableCategoryHeight = IsMobile and 30 or 28
-local tableDropdownOpen = false
+local resultCorner = Instance.new("UICorner")
+resultCorner.CornerRadius = UDim.new(0, 6)
+resultCorner.Parent = resultFrame
 
--- Selected Table Label
-local selectedTableLabel = Instance.new("TextLabel")
-selectedTableLabel.Size = UDim2.new(1, -20, 0, 20)
-selectedTableLabel.Position = UDim2.new(0, 10, 0, 5)
-selectedTableLabel.BackgroundTransparency = 1
-selectedTableLabel.Text = "Selected: " .. selectedTable
-selectedTableLabel.TextColor3 = THEME.accent
-selectedTableLabel.Font = Enum.Font.GothamBold
-selectedTableLabel.TextSize = TEXT_SIZE_NORMAL
-selectedTableLabel.TextXAlignment = Enum.TextXAlignment.Left
-selectedTableLabel.Parent = tableDropdown
+local resultStroke = Instance.new("UIStroke")
+resultStroke.Color = THEME.mid
+resultStroke.Thickness = 1
+resultStroke.Transparency = 0.5
+resultStroke.Parent = resultFrame
 
-local function updateTableButtons()
-    for _, child in pairs(tableDropdown:GetChildren()) do
-        if child:IsA("TextButton") then
-            child:Destroy()
-        end
-    end
-    
-    for i, tableName in ipairs(availableTables) do
-        local isSelected = tableName == selectedTable
-        
-        local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(1, -10, 0, tableCategoryHeight)
-        btn.Position = UDim2.new(0, 5, 0, 25 + (i - 1) * tableCategoryHeight + 2)
-        btn.BackgroundColor3 = isSelected and Color3.fromRGB(80, 30, 170) or Color3.fromRGB(28, 25, 42)
-        btn.Text = ""
-        btn.Parent = tableDropdown
-        
-        local btnCorner = Instance.new("UICorner")
-        btnCorner.CornerRadius = UDim.new(0, 5)
-        btnCorner.Parent = btn
-        
-        local tableLabel = Instance.new("TextLabel")
-        tableLabel.Size = UDim2.new(1, -20, 1, 0)
-        tableLabel.Position = UDim2.new(0, 10, 0, 0)
-        tableLabel.BackgroundTransparency = 1
-        tableLabel.Text = tableName
-        tableLabel.TextColor3 = isSelected and Color3.new(1, 1, 1) or Color3.fromRGB(160, 150, 190)
-        tableLabel.Font = Enum.Font.GothamBold
-        tableLabel.TextSize = TEXT_SIZE_NORMAL
-        tableLabel.TextXAlignment = Enum.TextXAlignment.Left
-        tableLabel.Parent = btn
-        
-        if isSelected then
-            local btnStroke = Instance.new("UIStroke")
-            btnStroke.Color = THEME.accent
-            btnStroke.Thickness = 1
-            btnStroke.Transparency = 0.2
-            btnStroke.Parent = btn
-        end
-        
-        btn.MouseButton1Click:Connect(function()
-            playClickSound()
-            selectedTable = tableName
-            selectedTableLabel.Text = "Selected: " .. selectedTable
-            updateTableButtons()
-            -- TUTUP DROPDOWN
-            tableDropdownOpen = false
-            tableListBtn.Text = "PILIH TABLE ▼"
-            tableDropdown:TweenSize(UDim2.new(1, 0, 0, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.3, true)
-        end)
-    end
+local resultLabel = Instance.new("TextLabel")
+resultLabel.Size = UDim2.new(1, -10, 0, 0)
+resultLabel.Position = UDim2.new(0, 5, 0, 5)
+resultLabel.BackgroundTransparency = 1
+resultLabel.Text = "Hasil: -"
+resultLabel.TextColor3 = THEME.logText
+resultLabel.Font = Enum.Font.Gotham
+resultLabel.TextSize = 12
+resultLabel.TextWrapped = true
+resultLabel.TextXAlignment = Enum.TextXAlignment.Left
+resultLabel.TextYAlignment = Enum.TextYAlignment.Top
+resultLabel.AutomaticSize = Enum.AutomaticSize.Y
+resultLabel.Parent = resultFrame
+
+local kataLabel = Instance.new("TextLabel")
+kataLabel.Size = UDim2.new(1, -10, 0, 30)
+kataLabel.Position = UDim2.new(0, 10, 0, 150)
+kataLabel.BackgroundTransparency = 1
+kataLabel.Text = "-"
+kataLabel.TextColor3 = Color3.fromRGB(230, 230, 255)
+kataLabel.Font = Enum.Font.GothamBold
+kataLabel.TextSize = IsMobile and 16 or 18
+kataLabel.TextXAlignment = Enum.TextXAlignment.Left
+kataLabel.Parent = logFrame
+
+-- Atur visibility INFORMATION
+local infoExpanded = true
+for _, item in ipairs(infoContent) do
+    item.Visible = infoExpanded
 end
 
-tableListBtn.MouseButton1Click:Connect(function()
+infoHeader.MouseButton1Click:Connect(function()
     playClickSound()
-    tableDropdownOpen = not tableDropdownOpen
-    tableListBtn.Text = tableDropdownOpen and "PILIH TABLE ▲" or "PILIH TABLE ▼"
-    
-    local dropdownHeight = #availableTables * tableCategoryHeight + 25
-    tableDropdown:TweenSize(
-        UDim2.new(1, 0, 0, tableDropdownOpen and dropdownHeight or 0),
-        Enum.EasingDirection.Out,
-        Enum.EasingStyle.Quart,
-        0.3,
-        true
-    )
-    
-    updateTableButtons()
-end)
-
--- BUTTON JOIN SEKARANG (manual)
-local joinNowBtn = Instance.new("TextButton")
-joinNowBtn.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
-joinNowBtn.LayoutOrder = order
-order = order + 1
-joinNowBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 100)
-joinNowBtn.Text = "JOIN SEKARANG 🚀"
-joinNowBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-joinNowBtn.Font = Enum.Font.GothamBold
-joinNowBtn.TextSize = TEXT_SIZE_NORMAL
-joinNowBtn.Parent = mainContainer
-
-table.insert(joinContent, joinNowBtn)
-
-local joinNowCorner = Instance.new("UICorner")
-joinNowCorner.CornerRadius = UDim.new(0, 8)
-joinNowCorner.Parent = joinNowBtn
-
-joinNowBtn.MouseButton1Click:Connect(function()
-    playClickSound()
-    joinSelectedTable()
-end)
-
--- Expand/collapse untuk JOIN TABLE section
-local joinExpanded = true
-for _, item in ipairs(joinContent) do
-    item.Visible = joinExpanded
-end
-
-joinSectionHeader.MouseButton1Click:Connect(function()
-    playClickSound()
-    joinExpanded = not joinExpanded
-    joinSectionArrow.Text = joinExpanded and "▼" or "▶"
-    
-    for _, item in ipairs(joinContent) do
-        item.Visible = joinExpanded
+    infoExpanded = not infoExpanded
+    infoArrow.Text = infoExpanded and "▼" or "▶"
+    for _, item in ipairs(infoContent) do
+        item.Visible = infoExpanded
     end
 end)
 
--- SEMUA KATA SULIT SECTION (Collapsible)
+-- ==============================================
+-- KATA SULIT SECTION
+-- ==============================================
 local kataSulitHeader = Instance.new("TextButton")
 kataSulitHeader.Size = UDim2.new(1, 0, 0, 35)
 kataSulitHeader.LayoutOrder = order
@@ -1367,7 +1276,6 @@ local function updateCategoryButtons()
                 end
             else
                 categoryToggles[cat] = not categoryToggles[cat]
-                -- Cek apakah semua non-SEMUA mati?
                 local anyOn = false
                 for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "LY", "RS", "NS"}) do
                     if categoryToggles[c] then
@@ -1401,10 +1309,11 @@ kataSulitBtn.MouseButton1Click:Connect(function()
     updateCategoryButtons()
 end)
 
--- DELAY SETTINGS SECTION (Collapsible)
+-- ==============================================
+-- DELAY SETTINGS SECTION
+-- ==============================================
 local delaySettingsContent = {}
 
--- Buat delay inputs dan simpan dalam tabel
 delaySettingsContent[1] = createDelayInput("Write Delay", typeDelay, function(v) typeDelay = v; enterDelay = v end, order)
 order = order + 1
 delaySettingsContent[2] = createDelayInput("Turn Delay", turnDelay, function(v) turnDelay = v end, order)
@@ -1412,11 +1321,12 @@ order = order + 1
 delaySettingsContent[3] = createDelayInput("Backspace Delay", backspaceDelay, function(v) backspaceDelay = v; deleteDelay = v end, order)
 order = order + 1
 
--- Header untuk DELAY SETTINGS
 createCollapsibleHeader("DELAY SETTINGS", "rbxassetid://6023426925", mainContainer, delaySettingsContent, order)
-order = order + 4  -- +1 untuk header, +3 untuk konten
+order = order + 4
 
--- Build Utility Tab
+-- ==============================================
+-- BUILD UTILITY TAB (dengan ANTI AFK)
+-- ==============================================
 local utilOrder = 1
 
 -- Noclip toggle
@@ -1456,14 +1366,12 @@ local infinityJumpCorner = Instance.new("UICorner")
 infinityJumpCorner.CornerRadius = UDim.new(0, 8)
 infinityJumpCorner.Parent = infinityJumpFrame
 
--- Neon stroke
 local infinityJumpStroke = Instance.new("UIStroke")
 infinityJumpStroke.Color = THEME.mid
 infinityJumpStroke.Thickness = 1
 infinityJumpStroke.Transparency = 0.6
 infinityJumpStroke.Parent = infinityJumpFrame
 
--- Label
 local infinityJumpLabel = Instance.new("TextLabel")
 infinityJumpLabel.Size = UDim2.new(1, -60, 1, 0)
 infinityJumpLabel.Position = UDim2.new(0, 10, 0, 0)
@@ -1475,7 +1383,6 @@ infinityJumpLabel.TextSize = TEXT_SIZE_NORMAL
 infinityJumpLabel.TextXAlignment = Enum.TextXAlignment.Left
 infinityJumpLabel.Parent = infinityJumpFrame
 
--- Toggle switch
 local infinityToggle = Instance.new("Frame")
 infinityToggle.Size = UDim2.new(0, 44, 0, 22)
 infinityToggle.Position = UDim2.new(1, -50, 0.5, -11)
@@ -1487,14 +1394,12 @@ local infinityToggleCorner = Instance.new("UICorner")
 infinityToggleCorner.CornerRadius = UDim.new(1, 0)
 infinityToggleCorner.Parent = infinityToggle
 
--- Glow untuk toggle
 local infinityToggleGlow = Instance.new("UIStroke")
 infinityToggleGlow.Color = Color3.fromRGB(255, 40, 50)
 infinityToggleGlow.Thickness = 2
 infinityToggleGlow.Transparency = 0.5
 infinityToggleGlow.Parent = infinityToggle
 
--- Knob
 local infinityKnob = Instance.new("Frame")
 infinityKnob.Size = UDim2.new(0, 16, 0, 16)
 infinityKnob.Position = UDim2.new(0, 3, 0.5, -8)
@@ -1506,14 +1411,12 @@ local infinityKnobCorner = Instance.new("UICorner")
 infinityKnobCorner.CornerRadius = UDim.new(1, 0)
 infinityKnobCorner.Parent = infinityKnob
 
--- Button
 local infinityBtn = Instance.new("TextButton")
 infinityBtn.Size = UDim2.new(1, 0, 1, 0)
 infinityBtn.BackgroundTransparency = 1
 infinityBtn.Text = ""
 infinityBtn.Parent = infinityJumpFrame
 
--- Fungsi Infinity Jump
 local function toggleInfinityJump(state)
     infinityJumpEnabled = state
     
@@ -1553,6 +1456,106 @@ infinityBtn.MouseButton1Click:Connect(function()
     toggleInfinityJump(not infinityJumpEnabled)
 end)
 
+-- ==============================================
+-- ANTI AFK (PAKE VIRTUALUSER)
+-- ==============================================
+local antiAfkFrame = Instance.new("Frame")
+antiAfkFrame.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
+antiAfkFrame.LayoutOrder = utilOrder
+utilOrder = utilOrder + 1
+antiAfkFrame.BackgroundColor3 = Color3.fromRGB(16, 15, 24)
+antiAfkFrame.BorderSizePixel = 0
+antiAfkFrame.Parent = utilContainer
+
+local antiAfkCorner = Instance.new("UICorner")
+antiAfkCorner.CornerRadius = UDim.new(0, 8)
+antiAfkCorner.Parent = antiAfkFrame
+
+local antiAfkStroke = Instance.new("UIStroke")
+antiAfkStroke.Color = THEME.mid
+antiAfkStroke.Thickness = 1
+antiAfkStroke.Transparency = 0.6
+antiAfkStroke.Parent = antiAfkFrame
+
+local antiAfkLabel = Instance.new("TextLabel")
+antiAfkLabel.Size = UDim2.new(1, -60, 1, 0)
+antiAfkLabel.Position = UDim2.new(0, 10, 0, 0)
+antiAfkLabel.BackgroundTransparency = 1
+antiAfkLabel.Text = "Anti AFK"
+antiAfkLabel.TextColor3 = Color3.fromRGB(210, 200, 230)
+antiAfkLabel.Font = Enum.Font.GothamBold
+antiAfkLabel.TextSize = TEXT_SIZE_NORMAL
+antiAfkLabel.TextXAlignment = Enum.TextXAlignment.Left
+antiAfkLabel.Parent = antiAfkFrame
+
+local antiAfkToggle = Instance.new("Frame")
+antiAfkToggle.Size = UDim2.new(0, 44, 0, 22)
+antiAfkToggle.Position = UDim2.new(1, -50, 0.5, -11)
+antiAfkToggle.BackgroundColor3 = Color3.fromRGB(180, 40, 50)
+antiAfkToggle.BorderSizePixel = 0
+antiAfkToggle.Parent = antiAfkFrame
+
+local antiAfkToggleCorner = Instance.new("UICorner")
+antiAfkToggleCorner.CornerRadius = UDim.new(1, 0)
+antiAfkToggleCorner.Parent = antiAfkToggle
+
+local antiAfkToggleGlow = Instance.new("UIStroke")
+antiAfkToggleGlow.Color = Color3.fromRGB(255, 40, 50)
+antiAfkToggleGlow.Thickness = 2
+antiAfkToggleGlow.Transparency = 0.5
+antiAfkToggleGlow.Parent = antiAfkToggle
+
+local antiAfkKnob = Instance.new("Frame")
+antiAfkKnob.Size = UDim2.new(0, 16, 0, 16)
+antiAfkKnob.Position = UDim2.new(0, 3, 0.5, -8)
+antiAfkKnob.BackgroundColor3 = Color3.new(1, 1, 1)
+antiAfkKnob.BorderSizePixel = 0
+antiAfkKnob.Parent = antiAfkToggle
+
+local antiAfkKnobCorner = Instance.new("UICorner")
+antiAfkKnobCorner.CornerRadius = UDim.new(1, 0)
+antiAfkKnobCorner.Parent = antiAfkKnob
+
+local antiAfkBtn = Instance.new("TextButton")
+antiAfkBtn.Size = UDim2.new(1, 0, 1, 0)
+antiAfkBtn.BackgroundTransparency = 1
+antiAfkBtn.Text = ""
+antiAfkBtn.Parent = antiAfkFrame
+
+local function toggleAntiAfk(state)
+    if state then
+        -- Aktifkan Anti AFK pake VirtualUser
+        antiAfkConnection = LocalPlayer.Idled:Connect(function()
+            game:GetService("VirtualUser"):CaptureController()
+            game:GetService("VirtualUser"):ClickButton2(Vector2.new())
+        end)
+        print("✅ Anti-AFK ON")
+    else
+        -- Matikan Anti AFK
+        if antiAfkConnection then
+            antiAfkConnection:Disconnect()
+            antiAfkConnection = nil
+            print("❌ Anti-AFK OFF")
+        end
+    end
+end
+
+antiAfkBtn.MouseButton1Click:Connect(function()
+    playClickSound()
+    antiAfkEnabled = not antiAfkEnabled
+    toggleAntiAfk(antiAfkEnabled)
+    
+    if antiAfkEnabled then
+        antiAfkToggle.BackgroundColor3 = Color3.fromRGB(30, 180, 110)
+        antiAfkToggleGlow.Color = Color3.fromRGB(30, 255, 110)
+        antiAfkKnob.Position = UDim2.new(1, -19, 0.5, -8)
+    else
+        antiAfkToggle.BackgroundColor3 = Color3.fromRGB(180, 40, 50)
+        antiAfkToggleGlow.Color = Color3.fromRGB(255, 40, 50)
+        antiAfkKnob.Position = UDim2.new(0, 3, 0.5, -8)
+    end
+end)
+
 -- Respawn button
 local respawnBtn = Instance.new("TextButton")
 respawnBtn.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
@@ -1562,7 +1565,6 @@ respawnBtn.BackgroundColor3 = Color3.fromRGB(18, 16, 26)
 respawnBtn.Text = ""
 respawnBtn.Parent = utilContainer
 
--- Icon untuk respawn
 local respawnIcon = Instance.new("ImageLabel")
 respawnIcon.Size = UDim2.new(0, 18, 0, 18)
 respawnIcon.Position = UDim2.new(0, 10, 0.5, -9)
@@ -1608,7 +1610,6 @@ rejoinBtn.BackgroundColor3 = Color3.fromRGB(18, 16, 26)
 rejoinBtn.Text = ""
 rejoinBtn.Parent = utilContainer
 
--- Icon untuk rejoin
 local rejoinIcon = Instance.new("ImageLabel")
 rejoinIcon.Size = UDim2.new(0, 18, 0, 18)
 rejoinIcon.Position = UDim2.new(0, 10, 0.5, -9)
@@ -1643,10 +1644,11 @@ rejoinBtn.MouseButton1Click:Connect(function()
     TeleportService:Teleport(game.PlaceId, LocalPlayer)
 end)
 
+-- ==============================================
 -- TELEPORT BUTTONS
+-- ==============================================
 local tpOrder = 1
 
--- Fungsi untuk membuat button teleport
 local function createTPButton(text, iconId, callback, order)
     local btn = Instance.new("TextButton")
     btn.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
@@ -1655,7 +1657,6 @@ local function createTPButton(text, iconId, callback, order)
     btn.Text = ""
     btn.Parent = tpContainer
     
-    -- Icon
     local btnIcon = Instance.new("ImageLabel")
     btnIcon.Size = UDim2.new(0, 18, 0, 18)
     btnIcon.Position = UDim2.new(0, 10, 0.5, -9)
@@ -1664,7 +1665,6 @@ local function createTPButton(text, iconId, callback, order)
     btnIcon.ImageColor3 = Color3.fromRGB(200, 190, 220)
     btnIcon.Parent = btn
     
-    -- Label
     local btnLabel = Instance.new("TextLabel")
     btnLabel.Size = UDim2.new(1, -35, 1, 0)
     btnLabel.Position = UDim2.new(0, 35, 0, 0)
@@ -1694,7 +1694,6 @@ local function createTPButton(text, iconId, callback, order)
     return btn
 end
 
--- Button Claim Bambu
 createTPButton("Claim Bambu", "rbxassetid://6023426935", function()
     local player = game.Players.LocalPlayer
     local character = player.Character or player.CharacterAdded:Wait()
@@ -1714,6 +1713,134 @@ createTPButton("Claim Bambu", "rbxassetid://6023426935", function()
 end, tpOrder)
 tpOrder = tpOrder + 1
 
+-- ==============================================
+-- HUMAN MODE FUNCTIONS
+-- ==============================================
+local function humanPause()
+    if not humanModeEnabled then return end
+    
+    if math.random() < humanPauseChance then
+        local pauseTime = math.random(10, 30) / 10
+        print("⏸️ Human Mode: Pause " .. pauseTime .. " detik")
+        task.wait(pauseTime)
+    end
+end
+
+local function humanMidPause()
+    if not humanModeEnabled then return end
+    
+    if math.random() < humanPauseChance then
+        local pauseTime = math.random(5, 20) / 10
+        print("⏸️ Human Mode: Mid-pause " .. pauseTime .. " detik")
+        task.wait(pauseTime)
+    end
+end
+
+local function humanExtraLetter(word, typedSoFar)
+    if not humanModeEnabled then return typedSoFar end
+    
+    if math.random() < 0.2 and #typedSoFar < #word then
+        local extraLetters = math.random(1, 2)
+        print("⌨️ Human Mode: Kelebihan " .. extraLetters .. " huruf")
+        
+        for i = 1, extraLetters do
+            if #typedSoFar + i <= #word then
+                local char = word:sub(typedSoFar:len() + i, typedSoFar:len() + i):upper()
+                local keyCode = Enum.KeyCode[char]
+                if keyCode then
+                    VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
+                    task.wait(0.05)
+                    VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
+                    task.wait(backspaceDelay)
+                end
+            end
+        end
+        
+        typedSoFar = typedSoFar .. word:sub(typedSoFar:len() + 1, typedSoFar:len() + extraLetters)
+        
+        print("⌨️ Human Mode: Sadar kelebihan, menghapus...")
+        task.wait(math.random() * 0.3 + 0.2)
+        
+        for i = 1, extraLetters do
+            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Backspace, false, game)
+            task.wait(backspaceDelay)
+            VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Backspace, false, game)
+            typedSoFar = typedSoFar:sub(1, -2)
+        end
+        
+        task.wait(math.random() * 0.2 + 0.1)
+    end
+    
+    return typedSoFar
+end
+
+local function humanTypo(word, typedSoFar)
+    if not humanModeEnabled then return typedSoFar end
+    
+    if math.random() < humanTypoChance and #typedSoFar < #word then
+        local nextChar = word:sub(typedSoFar:len() + 1, typedSoFar:len() + 1)
+        local wrongChar = string.char(math.random(97, 122)):upper()
+        
+        while wrongChar == nextChar:upper() do
+            wrongChar = string.char(math.random(97, 122)):upper()
+        end
+        
+        print("⌨️ Human Mode: Typo '" .. wrongChar .. "' harusnya '" .. nextChar:upper() .. "'")
+        
+        local keyCode = Enum.KeyCode[wrongChar]
+        if keyCode then
+            VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
+            task.wait(0.05)
+            VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
+            task.wait(math.random() * 0.3 + 0.2)
+        end
+        
+        print("⌨️ Human Mode: Sadar typo, menghapus...")
+        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Backspace, false, game)
+        task.wait(backspaceDelay)
+        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Backspace, false, game)
+        
+        task.wait(math.random() * 0.2 + 0.1)
+    end
+    
+    return typedSoFar
+end
+
+local function humanEjekan(word, typedSoFar)
+    if not humanModeEnabled then return typedSoFar end
+    
+    if math.random() < humanEjekChance and #typedSoFar > 1 then
+        local ejek = ejekanList[math.random(1, #ejekanList)]
+        print("😈 Human Mode: Ejekan '" .. ejek .. "'")
+        
+        for i = 1, #ejek do
+            local char = ejek:sub(i, i):upper()
+            local keyCode = Enum.KeyCode[char]
+            if keyCode then
+                VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
+                task.wait(0.05)
+                VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
+                task.wait(backspaceDelay)
+            end
+        end
+        
+        local totalToDelete = #ejek + #typedSoFar
+        print("😈 Human Mode: Hapus semua...")
+        
+        for i = 1, totalToDelete do
+            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Backspace, false, game)
+            task.wait(backspaceDelay)
+            VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Backspace, false, game)
+        end
+        
+        typedSoFar = ""
+        task.wait(math.random() * 0.5 + 0.3)
+        print("😈 Human Mode: Nulis ulang dari awal")
+    end
+    
+    return typedSoFar
+end
+
 -- Typing function dengan HUMAN MODE
 local function typeWord(word, length)
     if not IsRunning then return end
@@ -1721,28 +1848,56 @@ local function typeWord(word, length)
     wordLength = length or #word
     
     if humanModeEnabled then
-        -- HUMAN MODE: Lebih lambat tapi tetap ngetik
-        for i = 1, #word do
+        print("👤 Human Mode Aktif - Kata: " .. word)
+        
+        humanPause()
+        
+        local typedSoFar = ""
+        local i = 1
+        
+        while i <= #word do
             if not IsRunning then return end
             
-            -- Jeda antar huruf (variasi)
-            task.wait(math.random() * 0.15 + 0.1)  -- 0.1 - 0.25 detik
+            if i > 1 and math.random() < 0.1 then
+                humanMidPause()
+            end
+            
+            typedSoFar = humanExtraLetter(word, typedSoFar)
+            if typedSoFar:len() >= i then
+                i = typedSoFar:len() + 1
+                continue
+            end
+            
+            typedSoFar = humanTypo(word, typedSoFar)
+            if typedSoFar:len() >= i then
+                i = typedSoFar:len() + 1
+                continue
+            end
+            
+            typedSoFar = humanEjekan(word, typedSoFar)
+            if typedSoFar:len() == 0 then
+                i = 1
+                continue
+            end
             
             local char = word:sub(i, i):upper()
             local keyCode = Enum.KeyCode[char]
             
             if keyCode then
+                task.wait(math.random() * 0.2 + 0.1)
+                
                 VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
                 task.wait(0.05)
                 VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
+                
+                typedSoFar = typedSoFar .. char
+                i = i + 1
             end
         end
         
-        -- Jeda sebelum enter
-        task.wait(math.random() * 0.2 + 0.1)  -- 0.1 - 0.3 detik
+        task.wait(math.random() * 0.3 + 0.2)
         
     else
-        -- MODE CEPAT
         for i = 1, #word do
             local char = word:sub(i, i):upper()
             local keyCode = Enum.KeyCode[char]
@@ -1900,7 +2055,6 @@ local function searchWords(prefix)
     resultLabel.Size = UDim2.new(1, -10, 0, 0)
 end
 
--- Koneksi ke TextBox
 searchBox:GetPropertyChangedSignal("Text"):Connect(function()
     local text = searchBox.Text:gsub("%s+", "")
     if #text >= 1 and #text <= 3 then
@@ -1966,14 +2120,6 @@ task.spawn(function()
     end
 end)
 
--- Shuffle function
-local function shuffleTable(t)
-    for i = #t, 2, -1 do
-        local j = math.random(i)
-        t[i], t[j] = t[j], t[i]
-    end
-end
-
 -- Load common words
 task.spawn(function()
     local urls = {
@@ -2005,7 +2151,6 @@ task.spawn(function()
         for _, word in ipairs(allWords) do
             table.insert(commonWords, word)
         end
-        shuffleTable(commonWords)
         print("✅ Anixly: " .. #commonWords .. " Kata Dimuat!")
     end
 end)
@@ -2061,12 +2206,6 @@ if remotes then
         end)
     end
 end
-
--- Close button handler
-CloseBtn.MouseButton1Click:Connect(function()
-    ScreenGui:Destroy()
-    IsRunning = false
-end)
 
 -- Show main tab by default
 switchTab(mainContainer, mainTab)
