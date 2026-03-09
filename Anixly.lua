@@ -1067,7 +1067,7 @@ infoHeader.MouseButton1Click:Connect(function()
     mainContainer.CanvasSize = UDim2.new(0, 0, 0, canvasSize.Y.Offset)
 end)
 
--- SEMUA KATA SULIT SECTION (Collapsible)
+-- SEMUA KATA SULIT SECTION (Collapsible) dengan ScrollingFrame
 local kataSulitHeader = Instance.new("TextButton")
 kataSulitHeader.Size = UDim2.new(1, 0, 0, 35)
 kataSulitHeader.LayoutOrder = order
@@ -1099,7 +1099,7 @@ local kataTitle = Instance.new("TextLabel")
 kataTitle.Size = UDim2.new(1, -80, 1, 0)
 kataTitle.Position = UDim2.new(0, 35, 0, 0)
 kataTitle.BackgroundTransparency = 1
-kataTitle.Text = "SEMUA KATA SULIT"
+kataTitle.Text = "KATA SULIT"
 kataTitle.TextColor3 = THEME.logText
 kataTitle.Font = Enum.Font.GothamBold
 kataTitle.TextSize = 13
@@ -1116,37 +1116,74 @@ kataArrow.Font = Enum.Font.GothamBold
 kataArrow.TextSize = 14
 kataArrow.Parent = kataSulitHeader
 
--- Kata Sulit Dropdown Button (teks dibuat normal)
-local kataSulitBtn = Instance.new("TextButton")
-kataSulitBtn.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
-kataSulitBtn.LayoutOrder = order
+-- Frame utama KATA SULIT (ukuran tetap)
+local kataFrame = Instance.new("Frame")
+kataFrame.Size = UDim2.new(1, 0, 0, 120)  -- Sama seperti skin bambu
+kataFrame.LayoutOrder = order
+kataFrame.BackgroundColor3 = Color3.fromRGB(16, 15, 24)
+kataFrame.BorderSizePixel = 0
+kataFrame.Parent = mainContainer
 order = order + 1
+
+table.insert(kataContent, kataFrame)  -- Masukkan ke kataContent untuk collapsible
+
+local kataFrameCorner = Instance.new("UICorner")
+kataFrameCorner.CornerRadius = UDim.new(0, 8)
+kataFrameCorner.Parent = kataFrame
+
+local kataFrameStroke = Instance.new("UIStroke")
+kataFrameStroke.Color = THEME.mid
+kataFrameStroke.Thickness = 1
+kataFrameStroke.Transparency = 0.5
+kataFrameStroke.Parent = kataFrame
+
+-- Dropdown button
+local kataSulitBtn = Instance.new("TextButton")
+kataSulitBtn.Size = UDim2.new(1, -20, 0, COMPONENT_HEIGHT)
+kataSulitBtn.Position = UDim2.new(0, 10, 0, 10)
 kataSulitBtn.BackgroundColor3 = Color3.fromRGB(65, 20, 145)
-kataSulitBtn.Text = "SET KATA SULIT ▼"
-kataSulitBtn.TextColor3 = Color3.fromRGB(220, 220, 255)
-kataSulitBtn.Font = Enum.Font.Gotham  
+kataSulitBtn.Text = ""
+kataSulitBtn.TextColor3 = Color3.new(1, 1, 1)
+kataSulitBtn.Font = Enum.Font.Gotham
 kataSulitBtn.TextSize = TEXT_SIZE_NORMAL
-kataSulitBtn.Parent = mainContainer
+kataSulitBtn.Parent = kataFrame
 
 local kataBtnCorner = Instance.new("UICorner")
 kataBtnCorner.CornerRadius = UDim.new(0, 8)
 kataBtnCorner.Parent = kataSulitBtn
 
-local kataBtnStroke = Instance.new("UIStroke")
-kataBtnStroke.Color = THEME.mid
-kataBtnStroke.Thickness = 1
-kataBtnStroke.Transparency = 0.3
-kataBtnStroke.Parent = kataSulitBtn
+-- Icon di button
+local kataBtnIcon = Instance.new("ImageLabel")
+kataBtnIcon.Size = UDim2.new(0, 16, 0, 16)
+kataBtnIcon.Position = UDim2.new(0, 8, 0.5, -8)
+kataBtnIcon.BackgroundTransparency = 1
+kataBtnIcon.Image = "rbxassetid://6023426945"
+kataBtnIcon.ImageColor3 = Color3.new(1, 1, 1)
+kataBtnIcon.Parent = kataSulitBtn
 
--- Kata Sulit Dropdown Content
-local kataDropdown = Instance.new("Frame")
-kataDropdown.Size = UDim2.new(1, 0, 0, 0)
-kataDropdown.LayoutOrder = order
-order = order + 1
+-- Text di button
+local kataBtnText = Instance.new("TextLabel")
+kataBtnText.Size = UDim2.new(1, -60, 1, 0)
+kataBtnText.Position = UDim2.new(0, 28, 0, 0)
+kataBtnText.BackgroundTransparency = 1
+kataBtnText.Text = "SET KATA SULIT ▼"
+kataBtnText.TextColor3 = Color3.fromRGB(220, 220, 255)
+kataBtnText.Font = Enum.Font.Gotham
+kataBtnText.TextSize = TEXT_SIZE_NORMAL
+kataBtnText.TextXAlignment = Enum.TextXAlignment.Left
+kataBtnText.Parent = kataSulitBtn
+
+-- Dropdown content (ScrollingFrame)
+local kataDropdown = Instance.new("ScrollingFrame")  -- Ganti dari Frame ke ScrollingFrame
+kataDropdown.Size = UDim2.new(1, -20, 0, 70)  -- Tinggi tetap 70
+kataDropdown.Position = UDim2.new(0, 10, 0, COMPONENT_HEIGHT + 15)
 kataDropdown.BackgroundColor3 = Color3.fromRGB(14, 13, 22)
-kataDropdown.ClipsDescendants = true
 kataDropdown.BorderSizePixel = 0
-kataDropdown.Parent = mainContainer
+kataDropdown.ScrollBarThickness = 4
+kataDropdown.ScrollBarImageColor3 = THEME.accent
+kataDropdown.CanvasSize = UDim2.new(0, 0, 0, 0)
+kataDropdown.AutomaticCanvasSize = Enum.AutomaticSize.Y
+kataDropdown.Parent = kataFrame
 
 local kataDropdownStroke = Instance.new("UIStroke")
 kataDropdownStroke.Color = THEME.mid
@@ -1184,7 +1221,7 @@ local function updateCategoryButtons()
         
         local btn = Instance.new("TextButton")
         btn.Size = UDim2.new(1, -10, 0, categoryHeight)
-        btn.Position = UDim2.new(0, 5, 0, (i - 1) * categoryHeight + 2)
+        btn.Position = UDim2.new(0, 5, 0, (i - 1) * (categoryHeight + 2))
         btn.BackgroundColor3 = isOn and Color3.fromRGB(80, 30, 170) or Color3.fromRGB(28, 25, 42)
         btn.Text = ""
         btn.Parent = kataDropdown
@@ -1256,8 +1293,22 @@ local function updateCategoryButtons()
     end
 end
 
+-- Event klik dropdown
+kataSulitBtn.MouseButton1Click:Connect(function()
+    playClickSound()
+    dropdownOpen = not dropdownOpen
+    
+    if dropdownOpen then
+        kataBtnText.Text = "SET KATA SULIT ▲"
+        updateCategoryButtons()
+    else
+        kataBtnText.Text = "SET KATA SULIT ▼"
+    end
+end)
+
+-- Atur visibility untuk collapsible section
 local kataExpanded = true
-local kataContent = {kataSulitBtn, kataDropdown}
+local kataContent = {kataFrame}  -- Hanya frame yang masuk content
 
 for _, item in ipairs(kataContent) do
     item.Visible = kataExpanded
@@ -1267,25 +1318,13 @@ kataSulitHeader.MouseButton1Click:Connect(function()
     playClickSound()
     kataExpanded = not kataExpanded
     kataArrow.Text = kataExpanded and "▼" or "▶"
-    
     for _, item in ipairs(kataContent) do
         item.Visible = kataExpanded
     end
 end)
 
-kataSulitBtn.MouseButton1Click:Connect(function()
-    playClickSound()
-    dropdownOpen = not dropdownOpen
-    kataSulitBtn.Text = dropdownOpen and "SET KATA SULIT ▲" or "SET KATA SULIT ▼"
-    
-    kataDropdown:TweenSize(
-        UDim2.new(1, 0, 0, dropdownOpen and #categories * categoryHeight + 5 or 0),
-        Enum.EasingDirection.Out,
-        Enum.EasingStyle.Quart,
-        0.3,
-        true
-    )
-    
+-- Initialize dropdown
+task.spawn(function()
     updateCategoryButtons()
 end)
 
@@ -1447,7 +1486,7 @@ infinityBtn.MouseButton1Click:Connect(function()
 end)
 -- ===== AKHIR INFINITY JUMP =====
 
--- ===== SKIN BAMBU SECTION (dengan rarity) =====
+-- ===== SKIN BAMBU SECTION (Collapsible) =====
 local skinContent = {}
 
 -- Data skin bambu
@@ -1470,9 +1509,10 @@ local RARITY_COLORS = {
 
 local currentSkin = nil
 local skinOpen = false
+local skinExpanded = true  -- Untuk collapsible
 local skinItemHeight = IsMobile and 40 or 34
 
--- Header SKIN BAMBU (ORDER 3)
+-- Header SKIN BAMBU (bisa diklik)
 local skinHeader = Instance.new("TextButton")
 skinHeader.Size = UDim2.new(1, 0, 0, 35)
 skinHeader.LayoutOrder = 3
@@ -1512,7 +1552,7 @@ skinTitle.TextSize = 13
 skinTitle.TextXAlignment = Enum.TextXAlignment.Left
 skinTitle.Parent = skinHeader
 
--- Arrow Header
+-- Arrow Header (untuk indikator expand/collapse)
 local skinArrow = Instance.new("TextLabel")
 skinArrow.Size = UDim2.new(0, 20, 0, 20)
 skinArrow.Position = UDim2.new(1, -25, 0.5, -10)
@@ -1523,9 +1563,9 @@ skinArrow.Font = Enum.Font.GothamBold
 skinArrow.TextSize = 14
 skinArrow.Parent = skinHeader
 
--- Frame utama skin (ORDER 4) - UKURAN TETAP
+-- Frame utama skin (KONTEN)
 local skinFrame = Instance.new("Frame")
-skinFrame.Size = UDim2.new(1, 0, 0, 120)  -- Ukuran tetap, tidak berubah
+skinFrame.Size = UDim2.new(1, 0, 0, 120)  -- Ukuran tetap
 skinFrame.LayoutOrder = 4
 skinFrame.BackgroundColor3 = Color3.fromRGB(16, 15, 24)
 skinFrame.BorderSizePixel = 0
@@ -1543,7 +1583,7 @@ skinFrameStroke.Thickness = 1
 skinFrameStroke.Transparency = 0.5
 skinFrameStroke.Parent = skinFrame
 
--- Dropdown button
+-- Dropdown button (di DALAM skinFrame)
 local skinBtn = Instance.new("TextButton")
 skinBtn.Size = UDim2.new(1, -20, 0, COMPONENT_HEIGHT)
 skinBtn.Position = UDim2.new(0, 10, 0, 10)
@@ -1579,9 +1619,9 @@ skinBtnText.TextSize = TEXT_SIZE_NORMAL
 skinBtnText.TextXAlignment = Enum.TextXAlignment.Left
 skinBtnText.Parent = skinBtn
 
--- Dropdown content (SCROLLING FRAME)
-local skinDropdown = Instance.new("ScrollingFrame")  -- Ganti dari Frame ke ScrollingFrame
-skinDropdown.Size = UDim2.new(1, -20, 0, 70)  -- Tinggi tetap 70
+-- Dropdown content (ScrollingFrame)
+local skinDropdown = Instance.new("ScrollingFrame")
+skinDropdown.Size = UDim2.new(1, -20, 0, 70)
 skinDropdown.Position = UDim2.new(0, 10, 0, COMPONENT_HEIGHT + 15)
 skinDropdown.BackgroundColor3 = Color3.fromRGB(14, 13, 22)
 skinDropdown.BorderSizePixel = 0
@@ -1597,7 +1637,7 @@ skinDropdownStroke.Thickness = 1
 skinDropdownStroke.Transparency = 0.4
 skinDropdownStroke.Parent = skinDropdown
 
--- Fungsi apply skin (DARI KODE ANDA)
+-- Fungsi apply skin
 local function applySkin(skinName)
     local character = LocalPlayer.Character
     if not character then return end
@@ -1786,25 +1826,25 @@ local function updateSkinDropdown()
     end
 end
 
--- Event klik dropdown
+-- Event klik dropdown (buka/tutup list skin)
 skinBtn.MouseButton1Click:Connect(function()
     playClickSound()
     skinOpen = not skinOpen
     
     if skinOpen then
-        skinBtnText.Text = "SKIN BAMBU: ▲"
+        skinBtnText.Text = "SKIN BAMBU: (choose) ▲"
         updateSkinDropdown()
     else
-        skinBtnText.Text = "SKIN BAMBU: (pilih) ▼"
+        skinBtnText.Text = "SKIN BAMBU: (choose) ▼"
     end
 end)
 
--- Atur visibility
-local skinExpanded = true
+-- Atur visibility untuk collapsible section (sama seperti SEMUA KATA SULIT)
 for _, item in ipairs(skinContent) do
     item.Visible = skinExpanded
 end
 
+-- Event klik header untuk buka/tutup seluruh section SKIN BAMBU
 skinHeader.MouseButton1Click:Connect(function()
     playClickSound()
     skinExpanded = not skinExpanded
@@ -1816,7 +1856,7 @@ end)
 
 -- Initialize dropdown
 task.spawn(function()
-    updateSkinDropdown()  -- Siapkan list dropdown
+    updateSkinDropdown()
 end)
 
 -- ===== AKHIR SKIN BAMBU =====
