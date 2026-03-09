@@ -1523,9 +1523,9 @@ skinArrow.Font = Enum.Font.GothamBold
 skinArrow.TextSize = 14
 skinArrow.Parent = skinHeader
 
--- Frame utama skin (ORDER 4)
+-- Frame utama skin (ORDER 4) - UKURAN TETAP
 local skinFrame = Instance.new("Frame")
-skinFrame.Size = UDim2.new(1, 0, 0, 200)
+skinFrame.Size = UDim2.new(1, 0, 0, 120)  -- Ukuran tetap, tidak berubah
 skinFrame.LayoutOrder = 4
 skinFrame.BackgroundColor3 = Color3.fromRGB(16, 15, 24)
 skinFrame.BorderSizePixel = 0
@@ -1579,13 +1579,16 @@ skinBtnText.TextSize = TEXT_SIZE_NORMAL
 skinBtnText.TextXAlignment = Enum.TextXAlignment.Left
 skinBtnText.Parent = skinBtn
 
--- Dropdown content
-local skinDropdown = Instance.new("Frame")
-skinDropdown.Size = UDim2.new(1, -20, 0, 0)
+-- Dropdown content (SCROLLING FRAME)
+local skinDropdown = Instance.new("ScrollingFrame")  -- Ganti dari Frame ke ScrollingFrame
+skinDropdown.Size = UDim2.new(1, -20, 0, 70)  -- Tinggi tetap 70
 skinDropdown.Position = UDim2.new(0, 10, 0, COMPONENT_HEIGHT + 15)
 skinDropdown.BackgroundColor3 = Color3.fromRGB(14, 13, 22)
-skinDropdown.ClipsDescendants = true
 skinDropdown.BorderSizePixel = 0
+skinDropdown.ScrollBarThickness = 4
+skinDropdown.ScrollBarImageColor3 = THEME.accent
+skinDropdown.CanvasSize = UDim2.new(0, 0, 0, 0)
+skinDropdown.AutomaticCanvasSize = Enum.AutomaticSize.Y
 skinDropdown.Parent = skinFrame
 
 local skinDropdownStroke = Instance.new("UIStroke")
@@ -1593,18 +1596,6 @@ skinDropdownStroke.Color = THEME.mid
 skinDropdownStroke.Thickness = 1
 skinDropdownStroke.Transparency = 0.4
 skinDropdownStroke.Parent = skinDropdown
-
--- Status info
-local skinInfo = Instance.new("TextLabel")
-skinInfo.Size = UDim2.new(1, -20, 0, 20)
-skinInfo.Position = UDim2.new(0, 10, 0, 165)
-skinInfo.BackgroundTransparency = 1
-skinInfo.Text = "Status: belum pilih skin"
-skinInfo.TextColor3 = Color3.fromRGB(160, 100, 255)
-skinInfo.Font = Enum.Font.GothamBold
-skinInfo.TextSize = 11
-skinInfo.TextXAlignment = Enum.TextXAlignment.Left
-skinInfo.Parent = skinFrame
 
 -- Fungsi apply skin (DARI KODE ANDA)
 local function applySkin(skinName)
@@ -1614,13 +1605,13 @@ local function applySkin(skinName)
     local display = workspace:FindFirstChild("BambuDisplay")
     local bambu = display and display:FindFirstChild("Bambu")
     if not bambu then 
-        skinInfo.Text = "Status: BambuDisplay tidak ditemukan"
+        print("Status: BambuDisplay tidak ditemukan")
         return 
     end
     
     local skin = bambu:FindFirstChild(skinName)
     if not skin then 
-        skinInfo.Text = "Status: Skin " .. skinName .. " tidak ditemukan"
+        print("Status: Skin " .. skinName .. " tidak ditemukan")
         return 
     end
     
@@ -1632,7 +1623,7 @@ local function applySkin(skinName)
     end
     
     if not backWeapon then 
-        skinInfo.Text = "Status: BackWeapon tidak ditemukan"
+        print("Status: BackWeapon tidak ditemukan")
         return 
     end
     
@@ -1712,7 +1703,6 @@ local function applySkin(skinName)
     fixAttachments(backWeapon)
     
     print("[Skin] Applied: " .. skinName)
-    skinInfo.Text = "Status: Skin " .. skinName .. " terpasang"
 end
 
 -- Fungsi update dropdown
@@ -1726,7 +1716,7 @@ local function updateSkinDropdown()
     for i, skinData in ipairs(SKINS) do
         local item = Instance.new("Frame")
         item.Size = UDim2.new(1, -10, 0, skinItemHeight - 4)
-        item.Position = UDim2.new(0, 5, 0, (i - 1) * skinItemHeight + 2)
+        item.Position = UDim2.new(0, 5, 0, (i - 1) * (skinItemHeight - 2))
         item.BackgroundColor3 = currentSkin == skinData.name and Color3.fromRGB(80, 30, 170) or Color3.fromRGB(28, 25, 42)
         item.BorderSizePixel = 0
         item.Parent = skinDropdown
@@ -1790,7 +1780,6 @@ local function updateSkinDropdown()
             playClickSound()
             currentSkin = skinData.name
             skinBtnText.Text = "SKIN BAMBU: " .. skinData.label .. " ▼"
-            skinInfo.TextColor3 = RARITY_COLORS[skinData.rarity] or THEME.logText
             applySkin(skinData.name)
             updateSkinDropdown()
         end)
@@ -1804,20 +1793,9 @@ skinBtn.MouseButton1Click:Connect(function()
     
     if skinOpen then
         skinBtnText.Text = "SKIN BAMBU: ▲"
-    else
-        skinBtnText.Text = "SKIN BAMBU: (choose) ▼"
-    end
-    
-    skinDropdown:TweenSize(
-        UDim2.new(1, -20, 0, skinOpen and #SKINS * skinItemHeight + 8 or 0),
-        Enum.EasingDirection.Out,
-        Enum.EasingStyle.Quart,
-        0.25,
-        true
-    )
-    
-    if skinOpen then
         updateSkinDropdown()
+    else
+        skinBtnText.Text = "SKIN BAMBU: (pilih) ▼"
     end
 end)
 
@@ -2003,59 +1981,32 @@ end, tpOrder)
 tpOrder = tpOrder + 1
 
 -- Typing function dengan HUMAN MODE (SATU FUNGSI)
+-- Typing function dengan HUMAN MODE yang benar
 local function typeWord(word, length)
     if not IsRunning then return end
     
     wordLength = length or #word
     
     if humanModeEnabled then
-        -- HUMAN MODE: Lebih lambat dengan variasi dan kesalahan
-        local mistakes = math.random(0, 1)
-        local mistakeCount = 0
-        
-        task.wait(math.random() * 0.5 + 0.3)
-        
+        -- HUMAN MODE: Lebih lambat tapi tetap ngetik
         for i = 1, #word do
             if not IsRunning then return end
             
-            task.wait(math.random() * 0.15 + 0.08)
-            
-            if mistakeCount < mistakes and math.random() < 0.15 then
-                mistakeCount = mistakeCount + 1
-                
-                local wrongChars = "qwertyuiopasdfghjklzxcvbnm"
-                local wrongChar = wrongChars:sub(math.random(1, #wrongChars), math.random(1, #wrongChars))
-                local wrongKey = Enum.KeyCode[wrongChar:upper()]
-                
-                if wrongKey then
-                    VirtualInputManager:SendKeyEvent(true, wrongKey, false, game)
-                    task.wait(0.05)
-                    VirtualInputManager:SendKeyEvent(false, wrongKey, false, game)
-                end
-                
-                task.wait(math.random() * 0.2 + 0.1)
-                
-                for _ = 1, #wrongChar do
-                    VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Backspace, false, game)
-                    task.wait(0.06)
-                    VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Backspace, false, game)
-                    task.wait(0.04)
-                end
-                
-                task.wait(math.random() * 0.15 + 0.1)
-            end
+            -- Jeda antar huruf (variasi)
+            task.wait(math.random() * 0.15 + 0.1)  -- 0.1 - 0.25 detik
             
             local char = word:sub(i, i):upper()
             local keyCode = Enum.KeyCode[char]
             
             if keyCode then
                 VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
-                task.wait(0.04)
+                task.wait(0.05)
                 VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
             end
         end
         
-        task.wait(math.random() * 0.3 + 0.2)
+        -- Jeda sebelum enter
+        task.wait(math.random() * 0.2 + 0.1)  -- 0.1 - 0.3 detik
         
     else
         -- MODE CEPAT
@@ -2073,12 +2024,6 @@ local function typeWord(word, length)
     end
     
     if autoEnterEnabled then
-        if humanModeEnabled then
-            task.wait(math.random() * 0.2 + 0.15)
-        else
-            task.wait(backspaceDelay + math.random() * (deleteDelay - backspaceDelay))
-        end
-        
         VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
         task.wait(0.03)
         VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
