@@ -1475,7 +1475,7 @@ local skinItemHeight = IsMobile and 40 or 34
 -- Header SKIN BAMBU (ORDER 3)
 local skinHeader = Instance.new("TextButton")
 skinHeader.Size = UDim2.new(1, 0, 0, 35)
-skinHeader.LayoutOrder = 3  -- LANGSUNG SET ORDER 3
+skinHeader.LayoutOrder = 3
 skinHeader.BackgroundColor3 = Color3.fromRGB(20, 16, 36)
 skinHeader.Text = ""
 skinHeader.AutoButtonColor = false
@@ -1526,12 +1526,12 @@ skinArrow.Parent = skinHeader
 -- Frame utama skin (ORDER 4)
 local skinFrame = Instance.new("Frame")
 skinFrame.Size = UDim2.new(1, 0, 0, 200)
-skinFrame.LayoutOrder = 4  -- LANGSUNG SET ORDER 4
+skinFrame.LayoutOrder = 4
 skinFrame.BackgroundColor3 = Color3.fromRGB(16, 15, 24)
 skinFrame.BorderSizePixel = 0
 skinFrame.Parent = utilContainer
 
-table.insert(skinContent, skinFrame)  -- SKIN FRAME MASUK CONTENT
+table.insert(skinContent, skinFrame)
 
 local skinFrameCorner = Instance.new("UICorner")
 skinFrameCorner.CornerRadius = UDim.new(0, 8)
@@ -1606,7 +1606,7 @@ skinInfo.TextSize = 11
 skinInfo.TextXAlignment = Enum.TextXAlignment.Left
 skinInfo.Parent = skinFrame
 
-Fungsi apply skin (DARI KODE ANDA)
+-- Fungsi apply skin (DARI KODE ANDA)
 local function applySkin(skinName)
     local character = LocalPlayer.Character
     if not character then return end
@@ -1755,10 +1755,6 @@ local function updateSkinDropdown()
         dotCorner.CornerRadius = UDim.new(1, 0)
         dotCorner.Parent = colorDot
         
-        local dotCorner = Instance.new("UICorner")
-        dotCorner.CornerRadius = UDim.new(1, 0)
-        dotCorner.Parent = colorDot
-        
         -- Name label
         local nameLabel = Instance.new("TextLabel")
         nameLabel.Size = UDim2.new(0, 100, 1, 0)
@@ -1782,6 +1778,49 @@ local function updateSkinDropdown()
         rarityLabel.TextSize = TEXT_SIZE_SMALL
         rarityLabel.TextXAlignment = Enum.TextXAlignment.Right
         rarityLabel.Parent = item
+        
+        -- Select button
+        local selectBtn = Instance.new("TextButton")
+        selectBtn.Size = UDim2.new(1, 0, 1, 0)
+        selectBtn.BackgroundTransparency = 1
+        selectBtn.Text = ""
+        selectBtn.Parent = item
+        
+        selectBtn.MouseButton1Click:Connect(function()
+            playClickSound()
+            currentSkin = skinData.name
+            skinBtnText.Text = "SKIN BAMBU: " .. skinData.label .. " ▼"
+            skinInfo.Text = "Status: Terpilih " .. skinData.label .. " | " .. skinData.rarity
+            skinInfo.TextColor3 = RARITY_COLORS[skinData.rarity] or THEME.logText
+            applySkin(skinData.name)
+            updateSkinDropdown()
+        end)
+    end
+end
+
+-- Event klik dropdown
+skinBtn.MouseButton1Click:Connect(function()
+    playClickSound()
+    skinOpen = not skinOpen
+    
+    if skinOpen then
+        skinBtnText.Text = "SKIN BAMBU: (pilih) ▲"
+    else
+        skinBtnText.Text = "SKIN BAMBU: (pilih) ▼"
+    end
+    
+    skinDropdown:TweenSize(
+        UDim2.new(1, -20, 0, skinOpen and #SKINS * skinItemHeight + 8 or 0),
+        Enum.EasingDirection.Out,
+        Enum.EasingStyle.Quart,
+        0.25,
+        true
+    )
+    
+    if skinOpen then
+        updateSkinDropdown()
+    end
+end)
 
 -- Atur visibility
 local skinExpanded = true
@@ -1797,6 +1836,12 @@ skinHeader.MouseButton1Click:Connect(function()
         item.Visible = skinExpanded
     end
 end)
+
+-- Initialize dropdown
+task.spawn(function()
+    updateSkinDropdown()  -- Siapkan list dropdown
+end)
+
 -- ===== AKHIR SKIN BAMBU =====
 
 -- Respawn button (SATU SAJA)
