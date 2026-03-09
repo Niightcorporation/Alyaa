@@ -48,24 +48,19 @@ end
 
 -- Tokyo Night Theme
 local THEME = {
-    primary = Color3.fromRGB(0, 255, 255),
-    mid = Color3.fromRGB(255, 0, 255),
-    dark = Color3.fromRGB(10, 10, 30),
-    headerBg = Color3.fromRGB(20, 20, 50),
-    accent = Color3.fromRGB(255, 255, 0),
-    glow = Color3.fromRGB(255, 105, 180),
-    activeTab = Color3.fromRGB(138, 43, 226),
-    logText = Color3.fromRGB(200, 200, 255)
+    primary = Color3.fromRGB(0, 255, 255),       -- Cyan neon
+    mid = Color3.fromRGB(255, 0, 255),           -- Magenta neon
+    dark = Color3.fromRGB(10, 10, 30),           -- Hitam kebiruan
+    headerBg = Color3.fromRGB(20, 20, 50),        -- Dark blue
+    accent = Color3.fromRGB(255, 255, 0),         -- Yellow neon
+    glow = Color3.fromRGB(255, 105, 180),         -- Hot pink
+    activeTab = Color3.fromRGB(138, 43, 226),     -- Blue violet
+    logText = Color3.fromRGB(200, 200, 255)       -- Light blue
 }
 
--- UI Sizes (bisa diubah dengan resize)
+-- UI Sizes
 local UI_WIDTH = IsMobile and 300 or 460
 local UI_HEIGHT = IsMobile and 250 or 310
-local MIN_WIDTH = IsMobile and 250 or 380
-local MIN_HEIGHT = IsMobile and 200 or 250
-local MAX_WIDTH = IsMobile and 500 or 700
-local MAX_HEIGHT = IsMobile and 400 or 600
-
 local SIDEBAR_WIDTH = IsMobile and 85 or 105
 local HEADER_HEIGHT = IsMobile and 42 or 46
 local TEXT_SIZE_SMALL = IsMobile and 9 or 11
@@ -77,6 +72,7 @@ local TEXT_SIZE_LARGE = IsMobile and 13 or 15
 local autoTypeEnabled = false
 local autoEnterEnabled = true
 local humanModeEnabled = false
+local humanModeV2Enabled = false
 local autoJoinEnabled = false
 local selectedTable = "Table_2P_1"
 local typeDelay = 0.12
@@ -192,55 +188,6 @@ local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 16)
 MainCorner.Parent = MainFrame
 
--- Resize Handle (pojok kanan bawah)
-local ResizeHandle = Instance.new("ImageButton")
-ResizeHandle.Name = "ResizeHandle"
-ResizeHandle.Size = UDim2.new(0, 20, 0, 20)
-ResizeHandle.Position = UDim2.new(1, -20, 1, -20)
-ResizeHandle.BackgroundColor3 = Color3.new(1, 1, 1)
-ResizeHandle.BackgroundTransparency = 1
-ResizeHandle.Image = "rbxassetid://6023426928" -- Icon resize
-ResizeHandle.ImageColor3 = THEME.accent
-ResizeHandle.ZIndex = 10
-ResizeHandle.Parent = MainFrame
-
--- Resize variables
-local resizing = false
-local resizeStartPos
-local resizeStartSize
-
-ResizeHandle.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        resizing = true
-        resizeStartPos = input.Position
-        resizeStartSize = MainFrame.Size
-    end
-end)
-
-ResizeHandle.InputEnded:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        resizing = false
-    end
-end)
-
-UserInputService.InputChanged:Connect(function(input)
-    if resizing then
-        local delta = input.Position - resizeStartPos
-        local newWidth = math.clamp(resizeStartSize.X.Offset + delta.X, MIN_WIDTH, MAX_WIDTH)
-        local newHeight = math.clamp(resizeStartSize.Y.Offset + delta.Y, MIN_HEIGHT, MAX_HEIGHT)
-        
-        MainFrame.Size = UDim2.new(0, newWidth, 0, newHeight)
-        GlowWrapper.Size = UDim2.new(0, newWidth + 4, 0, newHeight + 4)
-        GlowWrapper.Position = UDim2.new(
-            MainFrame.Position.X.Scale, MainFrame.Position.X.Offset - 2,
-            MainFrame.Position.Y.Scale, MainFrame.Position.Y.Offset - 2
-        )
-        
-        -- Update content area size
-        contentArea.Size = UDim2.new(1, -(SIDEBAR_WIDTH + 7), 1, -(HEADER_HEIGHT + 6))
-    end
-end)
-
 -- Header
 local Header = Instance.new("Frame")
 Header.Name = "Header"
@@ -294,12 +241,12 @@ end)
 -- Window Controls
 local controlSize = IsMobile and 18 or 26
 
--- Minimize Button (pake icon)
+-- Minimize Button
 local MinimizeBtn = Instance.new("ImageButton")
 MinimizeBtn.Size = UDim2.new(0, controlSize, 0, controlSize)
 MinimizeBtn.Position = UDim2.new(1, -(controlSize * 2 + 10), 0.5, -controlSize / 2)
 MinimizeBtn.BackgroundColor3 = Color3.fromRGB(250, 190, 0)
-MinimizeBtn.Image = "rbxassetid://6023426927" -- Icon minimize
+MinimizeBtn.Image = "rbxassetid://6023426927"
 MinimizeBtn.ImageColor3 = Color3.fromRGB(30, 20, 0)
 MinimizeBtn.Parent = Header
 
@@ -326,13 +273,13 @@ CloseBtn.MouseButton1Click:Connect(function()
     IsRunning = false
 end)
 
--- Mini Icon (untuk minimized state)
+-- Mini Icon
 local MiniIcon = Instance.new("ImageButton")
 MiniIcon.Name = "AnixlyMiniIcon"
 MiniIcon.Size = UDim2.new(0, IsMobile and 45 or 60, 0, IsMobile and 45 or 60)
 MiniIcon.Position = UDim2.new(0, 10, 0.5, -30)
 MiniIcon.BackgroundColor3 = THEME.headerBg
-MiniIcon.Image = "rbxassetid://6023426941" -- Icon Anixly
+MiniIcon.Image = "rbxassetid://6023426941"
 MiniIcon.ImageColor3 = Color3.new(1, 1, 1)
 MiniIcon.Visible = false
 MiniIcon.BorderSizePixel = 0
@@ -788,11 +735,167 @@ local function createDelayInput(label, defaultValue, callback, order)
 end
 
 -- ==================================================
+-- HUMAN MODE V2 FUNCTIONS
+-- ==================================================
+local function simulateHumanTypingV2(word, awalan)
+    if not IsRunning then return end
+    
+    wordLength = #word
+    local fullWord = awalan .. word
+    local typedChars = 0
+    local mistakes = 0
+    
+    -- 1. PAUSE DI AWAL KATA (simulasi mikir)
+    if math.random() < 0.4 then -- 40% chance
+        local pauseTime = math.random() * 0.8 + 0.3 -- 0.3 - 1.1 detik
+        print("🧠 Human V2: Mikir dulu... (" .. string.format("%.1f", pauseTime) .. "s)")
+        task.wait(pauseTime)
+    end
+    
+    -- 2. MULAI NGETIK DENGAN VARIASI
+    for i = 1, #word do
+        if not IsRunning then return end
+        
+        local currentChar = word:sub(i, i)
+        local charToType = currentChar
+        
+        -- 3. TYPO 1 HURUF (15% chance)
+        if i > 1 and i < #word and math.random() < 0.15 then
+            local wrongChar = string.char(math.random(97, 122))
+            if wrongChar ~= currentChar then
+                charToType = wrongChar
+                mistakes = mistakes + 1
+                print("✏️ Human V2: Typo! Ngetik '" .. wrongChar:upper() .. "' harusnya '" .. currentChar:upper() .. "'")
+            end
+        end
+        
+        -- Ketik huruf
+        local keyCode = Enum.KeyCode[charToType:upper()]
+        if keyCode then
+            VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
+            task.wait(0.03)
+            VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
+            typedChars = typedChars + 1
+        end
+        
+        -- 4. HANDLE TYPO - HAPUS DAN KETIK ULANG
+        if charToType ~= currentChar then
+            task.wait(0.1) -- sadar salah
+            
+            -- Hapus huruf yang salah
+            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Backspace, false, game)
+            task.wait(0.08)
+            VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Backspace, false, game)
+            task.wait(0.1)
+            
+            -- Ketik yang benar
+            local correctKey = Enum.KeyCode[currentChar:upper()]
+            if correctKey then
+                VirtualInputManager:SendKeyEvent(true, correctKey, false, game)
+                task.wait(0.03)
+                VirtualInputManager:SendKeyEvent(false, correctKey, false, game)
+                print("✅ Human V2: Membetulkan jadi '" .. currentChar:upper() .. "'")
+            end
+        end
+        
+        -- 5. PAUSE DI TENGAH KATA (25% chance)
+        if i < #word and math.random() < 0.25 then
+            if i >= math.floor(#word / 3) and i <= math.floor(#word * 2/3) then
+                local midPause = math.random() * 0.5 + 0.2 -- 0.2 - 0.7 detik
+                print("⏸️ Human V2: Pause di tengah kata... (" .. string.format("%.1f", midPause) .. "s)")
+                task.wait(midPause)
+            end
+        end
+        
+        -- Jeda antar huruf (variasi alami)
+        local typingSpeed = math.random() * 0.15 + 0.08 -- 0.08 - 0.23 detik
+        task.wait(typingSpeed)
+    end
+    
+    -- 6. CEK KELEBIHAN HURUF (20% chance)
+    if math.random() < 0.2 then
+        local extraCount = math.random(1, 2)
+        print("➕ Human V2: Kelebihan " .. extraCount .. " huruf")
+        
+        -- Ketik huruf ekstra
+        for e = 1, extraCount do
+            local extraChar = string.char(math.random(97, 122))
+            local extraKey = Enum.KeyCode[extraChar:upper()]
+            if extraKey then
+                VirtualInputManager:SendKeyEvent(true, extraKey, false, game)
+                task.wait(0.03)
+                VirtualInputManager:SendKeyEvent(false, extraKey, false, game)
+                task.wait(0.1)
+            end
+        end
+        
+        task.wait(0.2) -- sadar kelebihan
+        
+        -- Hapus huruf ekstra
+        print("🗑️ Human V2: Menghapus huruf kelebihan...")
+        for e = 1, extraCount do
+            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Backspace, false, game)
+            task.wait(0.08)
+            VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Backspace, false, game)
+            task.wait(0.1)
+        end
+    end
+    
+    -- 7. EJEKAN + HAPUS + NULIS ULANG (10% chance, hanya jika belum pernah typo)
+    if mistakes == 0 and math.random() < 0.1 then
+        local mockWords = {"haha", "lol", "wkwk", "gg", "ez", "noob", "pro", "nice", "buset", "wow"}
+        local mockWord = mockWords[math.random(1, #mockWords)]
+        print("😝 Human V2: Ejekan! Ngetik '" .. mockWord .. "'")
+        
+        -- Ketik ejekan
+        for m = 1, #mockWord do
+            local mockChar = mockWord:sub(m, m)
+            local mockKey = Enum.KeyCode[mockChar:upper()]
+            if mockKey then
+                VirtualInputManager:SendKeyEvent(true, mockKey, false, game)
+                task.wait(0.03)
+                VirtualInputManager:SendKeyEvent(false, mockKey, false, game)
+                task.wait(0.1)
+            end
+        end
+        
+        task.wait(0.3) -- jeda sebelum hapus
+        
+        -- Hapus ejekan
+        print("🧹 Human V2: Menghapus ejekan...")
+        for m = 1, #mockWord do
+            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Backspace, false, game)
+            task.wait(0.08)
+            VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Backspace, false, game)
+            task.wait(0.08)
+        end
+        
+        task.wait(0.2) -- jeda sebelum lanjut
+        
+        -- 8. NULIS ULANG JAWABAN
+        print("✍️ Human V2: Ngetik ulang jawaban...")
+        for i = 1, #word do
+            local correctChar = word:sub(i, i)
+            local correctKey = Enum.KeyCode[correctChar:upper()]
+            if correctKey then
+                VirtualInputManager:SendKeyEvent(true, correctKey, false, game)
+                task.wait(0.03)
+                VirtualInputManager:SendKeyEvent(false, correctKey, false, game)
+                task.wait(math.random() * 0.15 + 0.08)
+            end
+        end
+    end
+    
+    -- 9. JEDA SEBELUM ENTER (variasi)
+    task.wait(math.random() * 0.3 + 0.2) -- 0.2 - 0.5 detik
+end
+
+-- ==================================================
 -- BUILD MAIN TAB
 -- ==================================================
 local order = 1
 
--- SECTION 1: AUTO FEATURES (HEADER DI ATAS)
+-- SECTION 1: AUTO FEATURES
 local autoHeader = Instance.new("TextButton")
 autoHeader.Size = UDim2.new(1, 0, 0, 35)
 autoHeader.LayoutOrder = order
@@ -854,6 +957,94 @@ order = order + 1
 
 autoFeaturesContent[3] = createToggleButton("Human Mode [Tester]", mainContainer, false, function(state) humanModeEnabled = state end, order)
 order = order + 1
+
+-- HUMAN MODE V2 BUTTON
+local humanModeV2Frame = Instance.new("Frame")
+humanModeV2Frame.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
+humanModeV2Frame.LayoutOrder = order
+humanModeV2Frame.BackgroundColor3 = Color3.fromRGB(16, 15, 24)
+humanModeV2Frame.BorderSizePixel = 0
+humanModeV2Frame.Parent = mainContainer
+order = order + 1
+
+local humanModeV2Corner = Instance.new("UICorner")
+humanModeV2Corner.CornerRadius = UDim.new(0, 8)
+humanModeV2Corner.Parent = humanModeV2Frame
+
+local humanModeV2Stroke = Instance.new("UIStroke")
+humanModeV2Stroke.Color = THEME.mid
+humanModeV2Stroke.Thickness = 1
+humanModeV2Stroke.Transparency = 0.6
+humanModeV2Stroke.Parent = humanModeV2Frame
+
+local humanModeV2Label = Instance.new("TextLabel")
+humanModeV2Label.Size = UDim2.new(1, -60, 1, 0)
+humanModeV2Label.Position = UDim2.new(0, 10, 0, 0)
+humanModeV2Label.BackgroundTransparency = 1
+humanModeV2Label.Text = "Human Mode V2 🔥"
+humanModeV2Label.TextColor3 = Color3.fromRGB(210, 200, 230)
+humanModeV2Label.Font = Enum.Font.GothamBold
+humanModeV2Label.TextSize = TEXT_SIZE_NORMAL
+humanModeV2Label.TextXAlignment = Enum.TextXAlignment.Left
+humanModeV2Label.Parent = humanModeV2Frame
+
+local humanModeV2Toggle = Instance.new("Frame")
+humanModeV2Toggle.Size = UDim2.new(0, 44, 0, 22)
+humanModeV2Toggle.Position = UDim2.new(1, -50, 0.5, -11)
+humanModeV2Toggle.BackgroundColor3 = Color3.fromRGB(180, 40, 50)
+humanModeV2Toggle.BorderSizePixel = 0
+humanModeV2Toggle.Parent = humanModeV2Frame
+
+local humanModeV2ToggleCorner = Instance.new("UICorner")
+humanModeV2ToggleCorner.CornerRadius = UDim.new(1, 0)
+humanModeV2ToggleCorner.Parent = humanModeV2Toggle
+
+local humanModeV2ToggleGlow = Instance.new("UIStroke")
+humanModeV2ToggleGlow.Color = Color3.fromRGB(255, 40, 50)
+humanModeV2ToggleGlow.Thickness = 2
+humanModeV2ToggleGlow.Transparency = 0.5
+humanModeV2ToggleGlow.Parent = humanModeV2Toggle
+
+local humanModeV2Knob = Instance.new("Frame")
+humanModeV2Knob.Size = UDim2.new(0, 16, 0, 16)
+humanModeV2Knob.Position = UDim2.new(0, 3, 0.5, -8)
+humanModeV2Knob.BackgroundColor3 = Color3.new(1, 1, 1)
+humanModeV2Knob.BorderSizePixel = 0
+humanModeV2Knob.Parent = humanModeV2Toggle
+
+local humanModeV2KnobCorner = Instance.new("UICorner")
+humanModeV2KnobCorner.CornerRadius = UDim.new(1, 0)
+humanModeV2KnobCorner.Parent = humanModeV2Knob
+
+local humanModeV2Btn = Instance.new("TextButton")
+humanModeV2Btn.Size = UDim2.new(1, 0, 1, 0)
+humanModeV2Btn.BackgroundTransparency = 1
+humanModeV2Btn.Text = ""
+humanModeV2Btn.Parent = humanModeV2Frame
+
+autoFeaturesContent[4] = humanModeV2Frame
+
+-- Toggle function untuk Human Mode V2
+local function toggleHumanModeV2(state)
+    humanModeV2Enabled = state
+    
+    if humanModeV2Enabled then
+        humanModeV2Toggle.BackgroundColor3 = Color3.fromRGB(30, 180, 110)
+        humanModeV2ToggleGlow.Color = Color3.fromRGB(30, 255, 110)
+        humanModeV2Knob.Position = UDim2.new(1, -19, 0.5, -8)
+        print("✅ Human Mode V2 AKTIF - Mode manusia super realistis!")
+    else
+        humanModeV2Toggle.BackgroundColor3 = Color3.fromRGB(180, 40, 50)
+        humanModeV2ToggleGlow.Color = Color3.fromRGB(255, 40, 50)
+        humanModeV2Knob.Position = UDim2.new(0, 3, 0.5, -8)
+        print("❌ Human Mode V2 NONAKTIF")
+    end
+end
+
+humanModeV2Btn.MouseButton1Click:Connect(function()
+    playClickSound()
+    toggleHumanModeV2(not humanModeV2Enabled)
+end)
 
 -- Atur visibility
 local autoExpanded = true
@@ -935,6 +1126,7 @@ autoJoinContent[1] = createToggleButton("Auto Join Table", mainContainer, false,
                     pcall(function()
                         game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("JoinTable"):FireServer(unpack(args))
                     end)
+                    print("🔄 Auto Join: Mencoba join ke " .. selectedTable)
                 end
                 task.wait(joinCooldown)
             end
@@ -1562,7 +1754,7 @@ delayHeader.MouseButton1Click:Connect(function()
 end)
 
 -- ==================================================
--- BUILD UTILITY TAB
+-- BUILD UTILITY TAB (TIDAK ADA BUTTON JOIN TABLE)
 -- ==================================================
 local utilOrder = 1
 
@@ -1854,35 +2046,33 @@ tpOrder = tpOrder + 1
 -- ==================================================
 -- TYPING FUNCTIONS
 -- ==================================================
-local function typeWord(word, length)
+local function typeWord(word, length, awalan)
     if not IsRunning then return end
     
     wordLength = length or #word
     
-    if humanModeEnabled then
-        -- HUMAN MODE
+    if humanModeV2Enabled then
+        -- HUMAN MODE V2 (baru - super lengkap)
+        simulateHumanTypingV2(word, awalan or "")
+    elseif humanModeEnabled then
+        -- HUMAN MODE LAMA (tester)
         for i = 1, #word do
             if not IsRunning then return end
-            
             task.wait(math.random() * 0.15 + 0.1)
-            
             local char = word:sub(i, i):upper()
             local keyCode = Enum.KeyCode[char]
-            
             if keyCode then
                 VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
                 task.wait(0.05)
                 VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
             end
         end
-        
         task.wait(math.random() * 0.2 + 0.1)
     else
         -- MODE CEPAT
         for i = 1, #word do
             local char = word:sub(i, i):upper()
             local keyCode = Enum.KeyCode[char]
-            
             if keyCode then
                 VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
                 task.wait(0.01)
@@ -1980,7 +2170,7 @@ local function autoType()
             kataLabel.Text = chosen:upper()
             currentWord = chosen
             
-            typeWord(chosen:sub(#awalan + 1), #chosen)
+            typeWord(chosen:sub(#awalan + 1), #chosen, awalan)
             usedWords[chosen] = true
             
             task.wait(1)
