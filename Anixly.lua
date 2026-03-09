@@ -72,7 +72,6 @@ local TEXT_SIZE_LARGE = IsMobile and 13 or 15
 local autoTypeEnabled = false
 local autoEnterEnabled = true
 local humanModeEnabled = false
-local autoJoinEnabled = false
 local selectedTable = "Table_2P_1"
 local typeDelay = 0.12
 local enterDelay = 0.15
@@ -81,10 +80,6 @@ local backspaceDelay = 0.10
 local deleteDelay = 0.12
 local noclipEnabled = false
 local noclipConnection
-
--- Auto Join Variables
-local joinConnection
-local joinCooldown = 5
 
 -- Available Tables
 local availableTables = {
@@ -669,7 +664,7 @@ local function joinSelectedTable()
         game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("JoinTable"):FireServer(unpack(args))
     end)
     if success then
-        print("✅ Mencoba join ke " .. selectedTable)
+        print("✅ Join ke " .. selectedTable)
     else
         print("❌ Gagal join ke " .. selectedTable)
     end
@@ -1116,82 +1111,64 @@ infoHeader.MouseButton1Click:Connect(function()
     mainContainer.CanvasSize = UDim2.new(0, 0, 0, canvasSize.Y.Offset)
 end)
 
--- AUTO JOIN TABLE SECTION (Collapsible) - BARU
-local autoJoinContent = {}
+-- TABLE SELECTION SECTION (SEDERHANA - LANGSUNG JOIN)
+local tableContent = {}
 
--- Toggle Auto Join
-autoJoinContent[1] = createToggleButton("Auto Join Table", mainContainer, false, function(state) 
-    autoJoinEnabled = state 
-    if autoJoinEnabled then
-        -- Mulai auto join loop
-        task.spawn(function()
-            while autoJoinEnabled and IsRunning do
-                if not LocalPlayer.PlayerGui:FindFirstChild("MatchUI", true) then
-                    -- Jika tidak sedang dalam match, coba join
-                    joinSelectedTable()
-                end
-                task.wait(joinCooldown)
-            end
-        end)
-    end
-end, order)
+-- Header TABLE SELECTION
+local tableHeader = Instance.new("TextButton")
+tableHeader.Size = UDim2.new(1, 0, 0, 35)
+tableHeader.LayoutOrder = order
+tableHeader.BackgroundColor3 = Color3.fromRGB(20, 16, 36)
+tableHeader.Text = ""
+tableHeader.AutoButtonColor = false
+tableHeader.Parent = mainContainer
 order = order + 1
 
--- Header untuk AUTO JOIN
-local joinHeader = Instance.new("TextButton")
-joinHeader.Size = UDim2.new(1, 0, 0, 35)
-joinHeader.LayoutOrder = order
-joinHeader.BackgroundColor3 = Color3.fromRGB(20, 16, 36)
-joinHeader.Text = ""
-joinHeader.AutoButtonColor = false
-joinHeader.Parent = mainContainer
-order = order + 1
+local tableHeaderCorner = Instance.new("UICorner")
+tableHeaderCorner.CornerRadius = UDim.new(0, 8)
+tableHeaderCorner.Parent = tableHeader
 
-local joinHeaderCorner = Instance.new("UICorner")
-joinHeaderCorner.CornerRadius = UDim.new(0, 8)
-joinHeaderCorner.Parent = joinHeader
+local tableHeaderStroke = Instance.new("UIStroke")
+tableHeaderStroke.Color = THEME.mid
+tableHeaderStroke.Thickness = 1
+tableHeaderStroke.Transparency = 0.5
+tableHeaderStroke.Parent = tableHeader
 
-local joinHeaderStroke = Instance.new("UIStroke")
-joinHeaderStroke.Color = THEME.mid
-joinHeaderStroke.Thickness = 1
-joinHeaderStroke.Transparency = 0.5
-joinHeaderStroke.Parent = joinHeader
-
--- Icon untuk AUTO JOIN
-local joinIcon = Instance.new("TextLabel")
-joinIcon.Size = UDim2.new(0, 18, 0, 18)
-joinIcon.Position = UDim2.new(0, 10, 0.5, -9)
-joinIcon.BackgroundTransparency = 1
-joinIcon.Text = "🎮"
-joinIcon.TextColor3 = THEME.accent
-joinIcon.Font = Enum.Font.GothamBold
-joinIcon.TextSize = 16
-joinIcon.Parent = joinHeader
+-- Icon TABLE
+local tableIcon = Instance.new("TextLabel")
+tableIcon.Size = UDim2.new(0, 18, 0, 18)
+tableIcon.Position = UDim2.new(0, 10, 0.5, -9)
+tableIcon.BackgroundTransparency = 1
+tableIcon.Text = "🎮"
+tableIcon.TextColor3 = THEME.accent
+tableIcon.Font = Enum.Font.GothamBold
+tableIcon.TextSize = 16
+tableIcon.Parent = tableHeader
 
 -- Title
-local joinTitle = Instance.new("TextLabel")
-joinTitle.Size = UDim2.new(1, -80, 1, 0)
-joinTitle.Position = UDim2.new(0, 35, 0, 0)
-joinTitle.BackgroundTransparency = 1
-joinTitle.Text = "AUTO JOIN TABLE"
-joinTitle.TextColor3 = THEME.logText
-joinTitle.Font = Enum.Font.GothamBold
-joinTitle.TextSize = 13
-joinTitle.TextXAlignment = Enum.TextXAlignment.Left
-joinTitle.Parent = joinHeader
+local tableTitle = Instance.new("TextLabel")
+tableTitle.Size = UDim2.new(1, -80, 1, 0)
+tableTitle.Position = UDim2.new(0, 35, 0, 0)
+tableTitle.BackgroundTransparency = 1
+tableTitle.Text = "PILIH TABLE"
+tableTitle.TextColor3 = THEME.logText
+tableTitle.Font = Enum.Font.GothamBold
+tableTitle.TextSize = 13
+tableTitle.TextXAlignment = Enum.TextXAlignment.Left
+tableTitle.Parent = tableHeader
 
 -- Arrow indicator
-local joinArrow = Instance.new("TextLabel")
-joinArrow.Size = UDim2.new(0, 20, 0, 20)
-joinArrow.Position = UDim2.new(1, -25, 0.5, -10)
-joinArrow.BackgroundTransparency = 1
-joinArrow.Text = "▼"
-joinArrow.TextColor3 = THEME.accent
-joinArrow.Font = Enum.Font.GothamBold
-joinArrow.TextSize = 14
-joinArrow.Parent = joinHeader
+local tableArrow = Instance.new("TextLabel")
+tableArrow.Size = UDim2.new(0, 20, 0, 20)
+tableArrow.Position = UDim2.new(1, -25, 0.5, -10)
+tableArrow.BackgroundTransparency = 1
+tableArrow.Text = "▼"
+tableArrow.TextColor3 = THEME.accent
+tableArrow.Font = Enum.Font.GothamBold
+tableArrow.TextSize = 14
+tableArrow.Parent = tableHeader
 
--- Table List Button (untuk memilih table)
+-- Table List Button
 local tableListBtn = Instance.new("TextButton")
 tableListBtn.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
 tableListBtn.LayoutOrder = order
@@ -1203,7 +1180,7 @@ tableListBtn.Font = Enum.Font.Gotham
 tableListBtn.TextSize = TEXT_SIZE_NORMAL
 tableListBtn.Parent = mainContainer
 
-autoJoinContent[2] = tableListBtn
+tableContent[1] = tableListBtn
 
 local tableBtnCorner = Instance.new("UICorner")
 tableBtnCorner.CornerRadius = UDim.new(0, 8)
@@ -1225,42 +1202,13 @@ tableDropdown.ClipsDescendants = true
 tableDropdown.BorderSizePixel = 0
 tableDropdown.Parent = mainContainer
 
-autoJoinContent[3] = tableDropdown
+tableContent[2] = tableDropdown
 
 local tableDropdownStroke = Instance.new("UIStroke")
 tableDropdownStroke.Color = THEME.mid
 tableDropdownStroke.Thickness = 1
 tableDropdownStroke.Transparency = 0.4
 tableDropdownStroke.Parent = tableDropdown
-
--- Join Now Button (langsung join saat dipilih)
-local joinNowBtn = Instance.new("TextButton")
-joinNowBtn.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
-joinNowBtn.LayoutOrder = order
-order = order + 1
-joinNowBtn.BackgroundColor3 = Color3.fromRGB(0, 180, 100)
-joinNowBtn.Text = "JOIN NOW 🚀"
-joinNowBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-joinNowBtn.Font = Enum.Font.GothamBold
-joinNowBtn.TextSize = TEXT_SIZE_NORMAL
-joinNowBtn.Parent = mainContainer
-
-autoJoinContent[4] = joinNowBtn
-
-local joinNowCorner = Instance.new("UICorner")
-joinNowCorner.CornerRadius = UDim.new(0, 8)
-joinNowCorner.Parent = joinNowBtn
-
-local joinNowStroke = Instance.new("UIStroke")
-joinNowStroke.Color = THEME.accent
-joinNowStroke.Thickness = 2
-joinNowStroke.Transparency = 0.2
-joinNowStroke.Parent = joinNowBtn
-
-joinNowBtn.MouseButton1Click:Connect(function()
-    playClickSound()
-    joinSelectedTable()
-end)
 
 local tableCategoryHeight = IsMobile and 30 or 28
 local tableDropdownOpen = false
@@ -1324,26 +1272,29 @@ local function updateTableButtons()
             selectedTable = tableName
             selectedTableLabel.Text = "Selected: " .. selectedTable
             updateTableButtons()
-            print("✅ Table dipilih: " .. selectedTable)
-            -- LANGSUNG JOIN SAAT MEMILIH TABLE
+            -- TUTUP DROPDOWN
+            tableDropdownOpen = false
+            tableListBtn.Text = "PILIH TABLE ▼"
+            tableDropdown:TweenSize(UDim2.new(1, 0, 0, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.3, true)
+            -- LANGSUNG JOIN
             joinSelectedTable()
         end)
     end
 end
 
--- Atur visibility untuk AUTO JOIN
-local joinExpanded = true
-for _, item in ipairs(autoJoinContent) do
-    item.Visible = joinExpanded
+-- Atur visibility untuk TABLE SELECTION
+local tableExpanded = true
+for _, item in ipairs(tableContent) do
+    item.Visible = tableExpanded
 end
 
-joinHeader.MouseButton1Click:Connect(function()
+tableHeader.MouseButton1Click:Connect(function()
     playClickSound()
-    joinExpanded = not joinExpanded
-    joinArrow.Text = joinExpanded and "▼" or "▶"
+    tableExpanded = not tableExpanded
+    tableArrow.Text = tableExpanded and "▼" or "▶"
     
-    for _, item in ipairs(autoJoinContent) do
-        item.Visible = joinExpanded
+    for _, item in ipairs(tableContent) do
+        item.Visible = tableExpanded
     end
 end)
 
