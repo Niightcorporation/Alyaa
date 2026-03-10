@@ -1,3 +1,7 @@
+--[[
+    Anixly - Sambung kata (Human Mode Lambat Saja)
+]]
+
 -- Services
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
@@ -59,12 +63,12 @@ local COMPONENT_HEIGHT = IsMobile and 32 or 36
 local TEXT_SIZE_NORMAL = IsMobile and 10 or 12
 local TEXT_SIZE_LARGE = IsMobile and 13 or 15
 
--- ===== DELAY SETTINGS =====
-local typeDelay = 0.12      -- Jeda antar huruf (detik)
-local enterDelay = 0.15      -- Jeda sebelum enter
-local turnDelay = 1.5        -- Jeda sebelum mulai ngetik
-local backspaceDelay = 0.10  -- Jeda hapus huruf
-local deleteDelay = 0.12     -- Jeda hapus tambahan
+-- ===== DELAY SETTINGS (HIDDEN) =====
+local typeDelay = 0.12      -- Jeda antar huruf mode cepat
+local enterDelay = 0.15     -- Jeda sebelum enter
+local turnDelay = 1.5       -- Jeda sebelum mulai ngetik
+local backspaceDelay = 0.10 -- Jeda hapus huruf
+local deleteDelay = 0.12    -- Jeda hapus tambahan
 
 -- Variables
 local autoTypeEnabled = false
@@ -80,14 +84,14 @@ local typingQueue = false
 -- Word categories
 local wordCategories = {
     IF = {}, X = {}, NG = {}, AI = {}, KS = {}, CY = {}, UI = {}, LY = {}, RS = {}, NS = {},
-    AX = {}, LT = {}, TT = {}, OO = {},
+    AX = {}, LT = {}, TT = {}, 
     ["SEMUA KATA SULIT"] = {}
 }
 
 local categoryToggles = {
     IF = false, X = false, NG = false, AI = false, KS = false,
     CY = false, UI = false, LY = false, RS = false, NS = false,
-    AX = false, LT = false, TT = false, OO = false,
+    AX = false, LT = false, TT = false,
     ["SEMUA KATA SULIT"] = false
 }
 
@@ -694,10 +698,10 @@ order = order + 1
 autoFeaturesContent[2] = createToggleButton("Auto Submit", mainContainer, true, function(state) autoEnterEnabled = state end, order)
 order = order + 1
 
-autoFeaturesContent[3] = createToggleButton("Human Mode [10% Typo]", mainContainer, false, function(state) 
+autoFeaturesContent[3] = createToggleButton("Human Mode [🧠]", mainContainer, false, function(state) 
     humanModeEnabled = state 
     if state then
-        print("👤 Human Mode AKTIF - 10% Typo")
+        print("👤 Human Mode AKTIF - Ngetik Lambat")
     else
         print("⚡ Mode Cepat AKTIF")
     end
@@ -1042,7 +1046,7 @@ kataDropdownStroke.Parent = kataDropdown
 
 local categoryHeight = IsMobile and 30 or 28
 local dropdownOpen = false
-local categories = {"IF", "X", "NG", "AI", "CY", "UI", "KS", "RS", "NS", "AX", "LT", "TT", "LY", "OO", "SEMUA KATA SULIT"}
+local categories = {"IF", "X", "NG", "AI", "CY", "UI", "KS", "RS", "NS", "AX", "LT", "TT", "LY", "SEMUA KATA SULIT"}
 
 local kataExpanded = true
 local kataContent = {kataSulitBtn, kataDropdown}
@@ -1063,7 +1067,7 @@ end)
 local function getCategoryCount(cat)
     if cat == "SEMUA KATA SULIT" then
         local total = 0
-        for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "RS", "NS", "AX", "LT", "TT", "LY", "OO"}) do
+        for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "RS", "NS", "AX", "LT", "TT", "LY"}) do
             total = total + #wordCategories[c]
         end
         return total
@@ -1133,14 +1137,14 @@ local function updateCategoryButtons()
                 local newState = not categoryToggles["SEMUA KATA SULIT"]
                 categoryToggles["SEMUA KATA SULIT"] = newState
                 if newState then
-                    for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "RS", "NS", "AX", "LT", "TT", "LY", "OO"}) do
+                    for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "RS", "NS", "AX", "LT", "TT", "LY"}) do
                         categoryToggles[c] = false
                     end
                 end
             else
                 categoryToggles[cat] = not categoryToggles[cat]
                 local anyOn = false
-                for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "RS", "NS", "AX", "LT", "TT", "LY", "OO"}) do
+                for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "RS", "NS", "AX", "LT", "TT", "LY"}) do
                     if categoryToggles[c] then
                         anyOn = true
                         break
@@ -1550,65 +1554,41 @@ createTPButton("Claim Bambu", "rbxassetid://6023426935", function()
 end, tpOrder)
 
 -- ==============================================
--- STABLE HUMAN MODE TYPING FUNCTION
+-- TYPING FUNCTION (HUMAN MODE LAMBAT SAJA)
 -- ==============================================
 local function typeWord(word, length)
     if not IsRunning then return end
     wordLength = length or #word
     
     if humanModeEnabled then
-        local typoCount = 0
-        local maxTypo = math.random(1, 2)
-        local typoChance = 0.1
-        
+        -- HUMAN MODE LAMBAT (TANPA TYPO)
         for i = 1, #word do
             if not IsRunning then return end
             
-            -- Cek typo
-            if typoCount < maxTypo and math.random() < typoChance then
-                local wrongChar = string.char(math.random(97, 122)):upper()
-                local correctChar = word:sub(i, i):upper()
-                while wrongChar == correctChar do
-                    wrongChar = string.char(math.random(97, 122)):upper()
-                end
-                
-                local keyCode = Enum.KeyCode[wrongChar]
-                if keyCode then
-                    VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
-                    task.wait(0.05)
-                    VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
-                    task.wait(backspaceDelay)
-                end
-                
-                -- Hapus huruf salah
-                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Backspace, false, game)
-                task.wait(backspaceDelay)
-                VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Backspace, false, game)
-                
-                typoCount = typoCount + 1
-                task.wait(0.1)
-            end
-            
-            -- Ketik huruf bener
             local char = word:sub(i, i):upper()
             local keyCode = Enum.KeyCode[char]
+            
             if keyCode then
-                -- Jeda antar huruf
-                task.wait(math.random() * 0.15 + 0.1)
+                -- Jeda antar huruf (lebih lambat)
+                task.wait(math.random() * 0.15 + 0.1)  -- 0.1 - 0.25 detik
                 
                 VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
                 task.wait(0.05)
                 VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
             end
         end
-        task.wait(math.random() * 0.2 + 0.1)
+        
+        -- Jeda sebelum enter
+        task.wait(math.random() * 0.2 + 0.1)  -- 0.1 - 0.3 detik
+        
     else
-        -- Mode cepat
+        -- MODE CEPAT (seperti biasa)
         for i = 1, #word do
             if not IsRunning then return end
             
             local char = word:sub(i, i):upper()
             local keyCode = Enum.KeyCode[char]
+            
             if keyCode then
                 VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
                 task.wait(0.01)
@@ -1625,7 +1605,7 @@ local function typeWord(word, length)
     end
 end
 
--- Auto type function dengan state management yang lebih baik
+-- Auto type function dengan state management
 local function autoType()
     if not autoTypeEnabled or not IsRunning or isTyping then 
         if autoTypeEnabled and not isTyping then
@@ -1667,7 +1647,7 @@ local function autoType()
                     end
                 end
             elseif enabled and cat == "SEMUA KATA SULIT" then
-                for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "RS", "NS", "AX", "LT", "TT", "LY", "OO"}) do
+                for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "RS", "NS", "AX", "LT", "TT", "LY"}) do
                     for _, word in ipairs(wordCategories[c]) do
                         if word:sub(1, #awalan) == awalan and not usedWords[word] and #word > #awalan then
                             table.insert(specialCandidates, word)
@@ -1796,7 +1776,6 @@ task.spawn(function()
         AX = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/AX.txt", 
         LT = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/LT.txt",
         TT = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/TT.txt",
-        OO = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/OO.txt",
         ["SEMUA KATA SULIT"] = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/sulit.txt"
     }
     
@@ -1874,4 +1853,4 @@ end
 -- Show main tab by default
 switchTab(mainContainer, mainTab)
 
-print("✅ Anixly Loaded - Scrolling Fixed & Human Mode Stabil!")
+print("✅ Anixly Loaded")
