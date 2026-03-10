@@ -241,16 +241,20 @@ end)
 -- Window Controls
 local controlSize = IsMobile and 18 or 26
 
--- Minimize Button (pake teks)
+-- Minimize Button (PAKE TEKS - LEBIH AMAN)
 local MinimizeBtn = Instance.new("TextButton")
 MinimizeBtn.Size = UDim2.new(0, controlSize, 0, controlSize)
 MinimizeBtn.Position = UDim2.new(1, -(controlSize * 2 + 10), 0.5, -controlSize / 2)
 MinimizeBtn.BackgroundColor3 = Color3.fromRGB(250, 190, 0)
-MinimizeBtn.Text = "−"  -- karakter minus
+MinimizeBtn.Text = "−"
 MinimizeBtn.TextColor3 = Color3.fromRGB(30, 20, 0)
 MinimizeBtn.Font = Enum.Font.GothamBold
 MinimizeBtn.TextSize = IsMobile and 14 or 16
 MinimizeBtn.Parent = Header
+
+local MinCorner = Instance.new("UICorner")
+MinCorner.CornerRadius = UDim.new(1, 0)
+MinCorner.Parent = MinimizeBtn
 
 -- Close Button
 local CloseBtn = Instance.new("ImageButton")
