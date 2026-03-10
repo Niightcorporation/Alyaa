@@ -43,14 +43,14 @@ end
 
 -- Tokyo Night Theme
 local THEME = {
-    primary = Color3.fromRGB(0, 255, 255),       -- Cyan neon
-    mid = Color3.fromRGB(255, 0, 255),           -- Magenta neon
-    dark = Color3.fromRGB(10, 10, 30),           -- Hitam kebiruan
-    headerBg = Color3.fromRGB(20, 20, 50),        -- Dark blue
-    accent = Color3.fromRGB(255, 255, 0),         -- Yellow neon
-    glow = Color3.fromRGB(255, 105, 180),         -- Hot pink
-    activeTab = Color3.fromRGB(138, 43, 226),     -- Blue violet
-    logText = Color3.fromRGB(200, 200, 255)       -- Light blue
+    primary = Color3.fromRGB(0, 255, 255),
+    mid = Color3.fromRGB(255, 0, 255),
+    dark = Color3.fromRGB(10, 10, 30),
+    headerBg = Color3.fromRGB(20, 20, 50),
+    accent = Color3.fromRGB(255, 255, 0),
+    glow = Color3.fromRGB(255, 105, 180),
+    activeTab = Color3.fromRGB(138, 43, 226),
+    logText = Color3.fromRGB(200, 200, 255)
 }
 
 -- UI Sizes
@@ -163,7 +163,7 @@ local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 16)
 MainCorner.Parent = MainFrame
 
--- Header
+-- Header (sama kayak sebelumnya)
 local Header = Instance.new("Frame")
 Header.Name = "Header"
 Header.Size = UDim2.new(1, 0, 0, HEADER_HEIGHT)
@@ -191,7 +191,7 @@ HeaderLine.BackgroundColor3 = THEME.accent
 HeaderLine.BorderSizePixel = 0
 HeaderLine.Parent = Header
 
--- Title Label dengan efek rainbow berjalan
+-- Title Label
 local TitleLabel = Instance.new("TextLabel")
 TitleLabel.Size = UDim2.new(0, 200, 1, 0)
 TitleLabel.Position = UDim2.new(0, 12, 0, 0)
@@ -203,7 +203,7 @@ TitleLabel.TextSize = TEXT_SIZE_LARGE
 TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
 TitleLabel.Parent = Header
 
--- Efek rainbow berjalan
+-- Efek rainbow
 local hue = 0
 task.spawn(function()
     while IsRunning and TitleLabel do
@@ -216,7 +216,7 @@ end)
 -- Window Controls
 local controlSize = IsMobile and 18 or 26
 
--- Minimize Button (PAKE TEKS - LEBIH AMAN)
+-- Minimize Button
 local MinimizeBtn = Instance.new("TextButton")
 MinimizeBtn.Size = UDim2.new(0, controlSize, 0, controlSize)
 MinimizeBtn.Position = UDim2.new(1, -(controlSize * 2 + 10), 0.5, -controlSize / 2)
@@ -289,24 +289,16 @@ end)
 
 MiniIcon.InputBegan:Connect(function(input)
     if not (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then return end
-    
     isDraggingMini = true
     miniDragDist = 0
     dragStartPos = input.Position
     miniStartPos = MiniIcon.Position
-    
-    input.Changed:Connect(function()
-        if input.UserInputState == Enum.UserInputState.End then
-            isDraggingMini = false
-        end
-    end)
 end)
 
 MiniIcon.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.Touch then
         isDraggingMini = false
         local dragDist = dragStartPos and (input.Position - dragStartPos).Magnitude or 999
-        
         if dragDist <= 12 then
             playClickSound()
             MainFrame.Visible = true
@@ -319,12 +311,10 @@ end)
 
 MiniIcon.MouseButton1Click:Connect(function()
     if IsMobile then return end
-    
     if miniDragDist > 10 then
         miniDragDist = 0
         return
     end
-    
     playClickSound()
     MainFrame.Visible = true
     GlowWrapper.Visible = true
@@ -332,7 +322,7 @@ MiniIcon.MouseButton1Click:Connect(function()
     miniDragDist = 0
 end)
 
--- Dragging for main frame
+-- Dragging main frame
 local dragButton = Instance.new("TextButton")
 dragButton.Size = UDim2.new(1, -(controlSize * 2 + 30), 1, 0)
 dragButton.Position = UDim2.new(0, 0, 0, 0)
@@ -345,20 +335,12 @@ local dragStart, dragStartPos
 
 dragButton.InputBegan:Connect(function(input)
     if not (input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch) then return end
-    
     dragStart = input.Position
     dragStartPos = MainFrame.Position
-    
-    input.Changed:Connect(function()
-        if input.UserInputState == Enum.UserInputState.End then
-            dragStart = nil
-        end
-    end)
 end)
 
 UserInputService.InputChanged:Connect(function(input)
     if not (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then return end
-    
     if dragStart then
         local delta = input.Position - dragStart
         local newPos = UDim2.new(
@@ -372,7 +354,6 @@ UserInputService.InputChanged:Connect(function(input)
         )
         return
     end
-    
     if isDraggingMini then
         local delta = input.Position - dragStartPos
         miniDragDist = delta.Magnitude
@@ -396,7 +377,6 @@ local SidebarCorner = Instance.new("UICorner")
 SidebarCorner.CornerRadius = UDim.new(0, 16)
 SidebarCorner.Parent = Sidebar
 
--- Sidebar Divider
 local SideDivider = Instance.new("Frame")
 SideDivider.Size = UDim2.new(0, 1, 1, -HEADER_HEIGHT)
 SideDivider.Position = UDim2.new(0, SIDEBAR_WIDTH, 0, HEADER_HEIGHT)
@@ -404,7 +384,6 @@ SideDivider.BackgroundColor3 = THEME.mid
 SideDivider.BorderSizePixel = 0
 SideDivider.Parent = MainFrame
 
--- Sidebar Layout
 local SidebarLayout = Instance.new("UIListLayout")
 SidebarLayout.Padding = UDim.new(0, IsMobile and 4 or 5)
 SidebarLayout.SortOrder = Enum.SortOrder.LayoutOrder
@@ -442,13 +421,15 @@ local mainContainer = createTabContainer()
 local utilContainer = createTabContainer()
 local tpContainer = createTabContainer()
 
--- Layout for containers
+setupContainerLayout(mainContainer)
+setupContainerLayout(utilContainer)
+setupContainerLayout(tpContainer)
+
 local function setupContainerLayout(container)
     local layout = Instance.new("UIListLayout")
     layout.Padding = UDim.new(0, IsMobile and 5 or 7)
     layout.SortOrder = Enum.SortOrder.LayoutOrder
     layout.Parent = container
-    
     local padding = Instance.new("UIPadding")
     padding.PaddingLeft = UDim.new(0, 5)
     padding.PaddingRight = UDim.new(0, 5)
@@ -457,11 +438,7 @@ local function setupContainerLayout(container)
     padding.Parent = container
 end
 
-setupContainerLayout(mainContainer)
-setupContainerLayout(utilContainer)
-setupContainerLayout(tpContainer)
-
--- Sidebar Tab Buttons dengan ICON
+-- Sidebar Tab Buttons
 local tabButtons = {}
 
 local function createTabButton(iconId, label, order)
@@ -482,7 +459,6 @@ local function createTabButton(iconId, label, order)
     btnStroke.Transparency = 0.6
     btnStroke.Parent = btn
     
-    -- Icon
     local icon = Instance.new("ImageLabel")
     icon.Size = UDim2.new(0, IsMobile and 22 or 28, 0, IsMobile and 22 or 28)
     icon.Position = UDim2.new(0.5, - (IsMobile and 11 or 14), 0.25, 0)
@@ -492,7 +468,6 @@ local function createTabButton(iconId, label, order)
     icon.Name = "Icon"
     icon.Parent = btn
     
-    -- Label
     local labelText = Instance.new("TextLabel")
     labelText.Size = UDim2.new(1, 0, 0, 15)
     labelText.Position = UDim2.new(0, 0, 0.7, 0)
@@ -508,12 +483,10 @@ local function createTabButton(iconId, label, order)
     return btn
 end
 
--- Tab Buttons dengan Icon
 local mainTab = createTabButton("rbxassetid://6023426941", "MAIN", 1)
 local utilTab = createTabButton("rbxassetid://6023426937", "UTILITY", 2)
 local tpTab = createTabButton("rbxassetid://6023426935", "TELEPORT", 3)
 
--- Highlight Tab Function
 local function highlightTab(activeBtn)
     for _, tab in pairs(tabButtons) do
         tab.btn.BackgroundColor3 = Color3.fromRGB(20, 18, 32)
@@ -522,9 +495,7 @@ local function highlightTab(activeBtn)
         tab.icon.ImageColor3 = Color3.fromRGB(120, 110, 150)
         tab.label.TextColor3 = Color3.fromRGB(120, 110, 150)
     end
-    
     activeBtn.BackgroundColor3 = THEME.activeTab
-    
     for _, tab in pairs(tabButtons) do
         if tab.btn == activeBtn then
             tab.stroke.Color = THEME.accent
@@ -535,7 +506,6 @@ local function highlightTab(activeBtn)
     end
 end
 
--- Tab Switching
 local function switchTab(activeContainer, activeBtn)
     mainContainer.Visible = false
     utilContainer.Visible = false
@@ -544,7 +514,6 @@ local function switchTab(activeContainer, activeBtn)
     highlightTab(activeBtn)
 end
 
--- Click handlers
 mainTab.MouseButton1Click:Connect(function()
     playClickSound()
     switchTab(mainContainer, mainTab)
@@ -560,7 +529,7 @@ tpTab.MouseButton1Click:Connect(function()
     switchTab(tpContainer, tpTab)
 end)
 
--- Fungsi untuk membuat Section Header dengan tombol expand/collapse
+-- Fungsi createCollapsibleHeader
 local function createCollapsibleHeader(title, iconId, container, contentList, order)
     local header = Instance.new("TextButton")
     header.Size = UDim2.new(1, 0, 0, 35)
@@ -580,7 +549,6 @@ local function createCollapsibleHeader(title, iconId, container, contentList, or
     headerStroke.Transparency = 0.5
     headerStroke.Parent = header
     
-    -- Icon
     local icon = Instance.new("ImageLabel")
     icon.Size = UDim2.new(0, 18, 0, 18)
     icon.Position = UDim2.new(0, 10, 0.5, -9)
@@ -589,7 +557,6 @@ local function createCollapsibleHeader(title, iconId, container, contentList, or
     icon.ImageColor3 = THEME.accent
     icon.Parent = header
     
-    -- Title
     local titleLabel = Instance.new("TextLabel")
     titleLabel.Size = UDim2.new(1, -80, 1, 0)
     titleLabel.Position = UDim2.new(0, 35, 0, 0)
@@ -601,7 +568,6 @@ local function createCollapsibleHeader(title, iconId, container, contentList, or
     titleLabel.TextXAlignment = Enum.TextXAlignment.Left
     titleLabel.Parent = header
     
-    -- Arrow indicator
     local arrow = Instance.new("TextLabel")
     arrow.Size = UDim2.new(0, 20, 0, 20)
     arrow.Position = UDim2.new(1, -25, 0.5, -10)
@@ -615,7 +581,6 @@ local function createCollapsibleHeader(title, iconId, container, contentList, or
     local expanded = true
     local content = contentList
     
-    -- Sembunyikan/tampilkan konten
     for _, item in ipairs(content) do
         item.Visible = expanded
     end
@@ -624,12 +589,9 @@ local function createCollapsibleHeader(title, iconId, container, contentList, or
         playClickSound()
         expanded = not expanded
         arrow.Text = expanded and "▼" or "▶"
-        
         for _, item in ipairs(content) do
             item.Visible = expanded
         end
-        
-        -- Update canvas size
         task.wait(0.05)
         local canvasSize = container.CanvasSize
         container.CanvasSize = UDim2.new(0, 0, 0, canvasSize.Y.Offset)
@@ -638,7 +600,7 @@ local function createCollapsibleHeader(title, iconId, container, contentList, or
     return header
 end
 
--- Toggle Button Function dengan efek neon
+-- Toggle Button
 local function createToggleButton(text, parent, defaultState, callback, order)
     local frame = Instance.new("Frame")
     frame.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
@@ -651,7 +613,6 @@ local function createToggleButton(text, parent, defaultState, callback, order)
     frameCorner.CornerRadius = UDim.new(0, 8)
     frameCorner.Parent = frame
     
-    -- Neon stroke
     local frameStroke = Instance.new("UIStroke")
     frameStroke.Color = THEME.mid
     frameStroke.Thickness = 1
@@ -683,7 +644,6 @@ local function createToggleButton(text, parent, defaultState, callback, order)
     toggleCorner.CornerRadius = UDim.new(1, 0)
     toggleCorner.Parent = toggle
     
-    -- Glow untuk toggle
     local toggleGlow = Instance.new("UIStroke")
     toggleGlow.Color = defaultState and Color3.fromRGB(30, 255, 110) or Color3.fromRGB(255, 40, 50)
     toggleGlow.Thickness = 2
@@ -691,7 +651,6 @@ local function createToggleButton(text, parent, defaultState, callback, order)
     toggleGlow.Parent = toggle
     
     local knobSize = IsMobile and 20 or 16
-    
     local knob = Instance.new("Frame")
     knob.Size = UDim2.new(0, knobSize, 0, knobSize)
     knob.Position = defaultState and UDim2.new(1, -(knobSize + 3), 0.5, -knobSize / 2) or UDim2.new(0, 3, 0.5, -knobSize / 2)
@@ -724,7 +683,7 @@ local function createToggleButton(text, parent, defaultState, callback, order)
 end
 
 -- ==============================================
--- FUNGSI SLIDER BAR UNTUK DELAY SETTINGS
+-- SLIDER DELAY (DIPERBAIKI - BISA DIGESER)
 -- ==============================================
 local function createSlider(text, parent, min, max, defaultValue, callback, order)
     local frame = Instance.new("Frame")
@@ -809,7 +768,7 @@ local function createSlider(text, parent, min, max, defaultValue, callback, orde
     sliderBtnStroke.Thickness = 2
     sliderBtnStroke.Parent = sliderBtn
     
-    -- Logic Slider
+    -- Logic Slider (DIPERBAIKI)
     local dragging = false
     
     local function updateSlider(input)
@@ -822,7 +781,7 @@ local function createSlider(text, parent, min, max, defaultValue, callback, orde
         local relativeX = math.clamp(mousePos.X - sliderPos, 0, sliderWidth)
         local percent = relativeX / sliderWidth
         
-        -- Hitung nilai berdasarkan range min-max
+        -- Hitung nilai
         local value = min + (percent * (max - min))
         value = math.floor(value * 100) / 100  -- 2 desimal
         
@@ -839,16 +798,23 @@ local function createSlider(text, parent, min, max, defaultValue, callback, orde
         dragging = true
     end)
     
+    -- Input ended
     UserInputService.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             dragging = false
         end
     end)
     
+    -- Input changed
     UserInputService.InputChanged:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseMovement then
             updateSlider(input)
         end
+    end)
+    
+    -- Tambahin juga untuk touch (mobile)
+    sliderBtn.TouchLongPress:Connect(function()
+        dragging = true
     end)
     
     return frame
@@ -938,14 +904,13 @@ autoHeader.MouseButton1Click:Connect(function()
     playClickSound()
     autoExpanded = not autoExpanded
     autoArrow.Text = autoExpanded and "▼" or "▶"
-    
     for _, item in ipairs(autoFeaturesContent) do
         item.Visible = autoExpanded
     end
 end)
 
 -- ==============================================
--- SECTION 2: INFORMATION (AWALAN DAN SEARCH)
+-- INFORMATION SECTION (AWALAN DAN SEARCH)
 -- ==============================================
 local infoHeader = Instance.new("TextButton")
 infoHeader.Size = UDim2.new(1, 0, 0, 35)
@@ -1112,7 +1077,6 @@ kataLabel.TextSize = IsMobile and 16 or 18
 kataLabel.TextXAlignment = Enum.TextXAlignment.Left
 kataLabel.Parent = logFrame
 
--- Atur visibility INFORMATION
 local infoExpanded = true
 for _, item in ipairs(infoContent) do
     item.Visible = infoExpanded
@@ -1128,7 +1092,7 @@ infoHeader.MouseButton1Click:Connect(function()
 end)
 
 -- ==============================================
--- KATA SULIT SECTION (DENGAN JUMLAH KATA)
+-- KATA SULIT DROPDOWN (kayak yang lama)
 -- ==============================================
 local kataSulitHeader = Instance.new("TextButton")
 kataSulitHeader.Size = UDim2.new(1, 0, 0, 35)
@@ -1178,137 +1142,51 @@ kataArrow.Font = Enum.Font.GothamBold
 kataArrow.TextSize = 14
 kataArrow.Parent = kataSulitHeader
 
--- KATA SULIT CONTENT
-local kataContent = {}
+-- Kata Sulit Dropdown Button
+local kataSulitBtn = Instance.new("TextButton")
+kataSulitBtn.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
+kataSulitBtn.LayoutOrder = order
+order = order + 1
+kataSulitBtn.BackgroundColor3 = Color3.fromRGB(65, 20, 145)
+kataSulitBtn.Text = "SET KATA SULIT ▼"
+kataSulitBtn.TextColor3 = Color3.fromRGB(220, 220, 255)
+kataSulitBtn.Font = Enum.Font.Gotham  
+kataSulitBtn.TextSize = TEXT_SIZE_NORMAL
+kataSulitBtn.Parent = mainContainer
 
--- Buat toggle untuk setiap kategori dengan jumlah kata
+local kataBtnCorner = Instance.new("UICorner")
+kataBtnCorner.CornerRadius = UDim.new(0, 8)
+kataBtnCorner.Parent = kataSulitBtn
+
+local kataBtnStroke = Instance.new("UIStroke")
+kataBtnStroke.Color = THEME.mid
+kataBtnStroke.Thickness = 1
+kataBtnStroke.Transparency = 0.3
+kataBtnStroke.Parent = kataSulitBtn
+
+-- Kata Sulit Dropdown Content
+local kataDropdown = Instance.new("Frame")
+kataDropdown.Size = UDim2.new(1, 0, 0, 0)
+kataDropdown.LayoutOrder = order
+order = order + 1
+kataDropdown.BackgroundColor3 = Color3.fromRGB(14, 13, 22)
+kataDropdown.ClipsDescendants = true
+kataDropdown.BorderSizePixel = 0
+kataDropdown.Parent = mainContainer
+
+local kataDropdownStroke = Instance.new("UIStroke")
+kataDropdownStroke.Color = THEME.mid
+kataDropdownStroke.Thickness = 1
+kataDropdownStroke.Transparency = 0.4
+kataDropdownStroke.Parent = kataDropdown
+
+local categoryHeight = IsMobile and 30 or 28
+local dropdownOpen = false
 local categories = {"IF", "X", "NG", "AI", "CY", "UI", "KS", "LY", "RS", "NS", "SEMUA KATA SULIT"}
-local kataToggles = {}
 
-for i, cat in ipairs(categories) do
-    local toggleFrame = Instance.new("Frame")
-    toggleFrame.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
-    toggleFrame.LayoutOrder = order + i
-    toggleFrame.BackgroundColor3 = Color3.fromRGB(16, 15, 24)
-    toggleFrame.BorderSizePixel = 0
-    toggleFrame.Parent = mainContainer
-    toggleFrame.Visible = true
-    table.insert(kataContent, toggleFrame)
-    
-    local frameCorner = Instance.new("UICorner")
-    frameCorner.CornerRadius = UDim.new(0, 8)
-    frameCorner.Parent = toggleFrame
-    
-    local frameStroke = Instance.new("UIStroke")
-    frameStroke.Color = THEME.mid
-    frameStroke.Thickness = 1
-    frameStroke.Transparency = 0.6
-    frameStroke.Parent = toggleFrame
-    
-    -- Nama kategori + jumlah kata
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(1, -60, 1, 0)
-    label.Position = UDim2.new(0, 10, 0, 0)
-    label.BackgroundTransparency = 1
-    label.Text = cat
-    label.TextColor3 = Color3.fromRGB(210, 200, 230)
-    label.Font = Enum.Font.GothamBold
-    label.TextSize = TEXT_SIZE_NORMAL
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Parent = toggleFrame
-    
-    -- Jumlah kata
-    local countLabel = Instance.new("TextLabel")
-    countLabel.Size = UDim2.new(0, 50, 1, 0)
-    countLabel.Position = UDim2.new(1, -100, 0, 0)
-    countLabel.BackgroundTransparency = 1
-    countLabel.Text = "(0)"
-    countLabel.TextColor3 = THEME.accent
-    countLabel.Font = Enum.Font.Gotham
-    countLabel.TextSize = TEXT_SIZE_SMALL
-    countLabel.TextXAlignment = Enum.TextXAlignment.Right
-    countLabel.Parent = toggleFrame
-    
-    -- Toggle switch
-    local toggle = Instance.new("Frame")
-    toggle.Size = UDim2.new(0, 44, 0, 22)
-    toggle.Position = UDim2.new(1, -50, 0.5, -11)
-    toggle.BackgroundColor3 = Color3.fromRGB(180, 40, 50)
-    toggle.BorderSizePixel = 0
-    toggle.Parent = toggleFrame
-    
-    local toggleCorner = Instance.new("UICorner")
-    toggleCorner.CornerRadius = UDim.new(1, 0)
-    toggleCorner.Parent = toggle
-    
-    local toggleGlow = Instance.new("UIStroke")
-    toggleGlow.Color = Color3.fromRGB(255, 40, 50)
-    toggleGlow.Thickness = 2
-    toggleGlow.Transparency = 0.5
-    toggleGlow.Parent = toggle
-    
-    local knob = Instance.new("Frame")
-    knob.Size = UDim2.new(0, 16, 0, 16)
-    knob.Position = UDim2.new(0, 3, 0.5, -8)
-    knob.BackgroundColor3 = Color3.new(1, 1, 1)
-    knob.BorderSizePixel = 0
-    knob.Parent = toggle
-    
-    local knobCorner = Instance.new("UICorner")
-    knobCorner.CornerRadius = UDim.new(1, 0)
-    knobCorner.Parent = knob
-    
-    local btn = Instance.new("TextButton")
-    btn.Size = UDim2.new(1, 0, 1, 0)
-    btn.BackgroundTransparency = 1
-    btn.Text = ""
-    btn.Parent = toggleFrame
-    
-    local state = false
-    
-    btn.MouseButton1Click:Connect(function()
-        state = not state
-        toggle.BackgroundColor3 = state and Color3.fromRGB(30, 180, 110) or Color3.fromRGB(180, 40, 50)
-        toggleGlow.Color = state and Color3.fromRGB(30, 255, 110) or Color3.fromRGB(255, 40, 50)
-        knob.Position = state and UDim2.new(1, -19, 0.5, -8) or UDim2.new(0, 3, 0.5, -8)
-        playClickSound()
-        categoryToggles[cat] = state
-    end)
-    
-    kataToggles[cat] = {
-        frame = toggleFrame,
-        countLabel = countLabel,
-        toggle = toggle,
-        knob = knob,
-        state = state
-    }
-end
-
-order = order + #categories
-
--- Fungsi update jumlah kata
-local function updateKataCounts()
-    for cat, data in pairs(kataToggles) do
-        if cat == "SEMUA KATA SULIT" then
-            local total = 0
-            for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "LY", "RS", "NS"}) do
-                total = total + #wordCategories[c]
-            end
-            data.countLabel.Text = "(" .. total .. ")"
-        else
-            data.countLabel.Text = "(" .. #wordCategories[cat] .. ")"
-        end
-    end
-end
-
--- Panggil update setelah loading
-task.spawn(function()
-    task.wait(3)
-    updateKataCounts()
-end)
-
--- Atur visibility KATA SULIT
 local kataExpanded = true
+local kataContent = {kataSulitBtn, kataDropdown}
+
 for _, item in ipairs(kataContent) do
     item.Visible = kataExpanded
 end
@@ -1317,14 +1195,126 @@ kataSulitHeader.MouseButton1Click:Connect(function()
     playClickSound()
     kataExpanded = not kataExpanded
     kataArrow.Text = kataExpanded and "▼" or "▶"
-    
     for _, item in ipairs(kataContent) do
         item.Visible = kataExpanded
     end
 end)
 
+local function getCategoryCount(cat)
+    if cat == "SEMUA KATA SULIT" then
+        local total = 0
+        for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "LY", "RS", "NS"}) do
+            total = total + #wordCategories[c]
+        end
+        return total
+    else
+        return #wordCategories[cat]
+    end
+end
+
+local function updateCategoryButtons()
+    for _, child in pairs(kataDropdown:GetChildren()) do
+        if child:IsA("TextButton") then
+            child:Destroy()
+        end
+    end
+    
+    for i, cat in ipairs(categories) do
+        local isSelected = categoryToggles[cat]
+        local count = getCategoryCount(cat)
+        
+        local btn = Instance.new("TextButton")
+        btn.Size = UDim2.new(1, -10, 0, categoryHeight)
+        btn.Position = UDim2.new(0, 5, 0, (i - 1) * categoryHeight + 2)
+        btn.BackgroundColor3 = isSelected and Color3.fromRGB(80, 30, 170) or Color3.fromRGB(28, 25, 42)
+        btn.Text = ""
+        btn.Parent = kataDropdown
+        
+        local btnCorner = Instance.new("UICorner")
+        btnCorner.CornerRadius = UDim.new(0, 5)
+        btnCorner.Parent = btn
+        
+        -- Nama kategori + jumlah kata
+        local catLabel = Instance.new("TextLabel")
+        catLabel.Size = UDim2.new(0, 80, 1, 0)
+        catLabel.Position = UDim2.new(0, 10, 0, 0)
+        catLabel.BackgroundTransparency = 1
+        catLabel.Text = cat
+        catLabel.TextColor3 = isSelected and Color3.new(1, 1, 1) or Color3.fromRGB(160, 150, 190)
+        catLabel.Font = Enum.Font.GothamBold
+        catLabel.TextSize = TEXT_SIZE_NORMAL
+        catLabel.TextXAlignment = Enum.TextXAlignment.Left
+        catLabel.Parent = btn
+        
+        -- Jumlah kata
+        local countLabel = Instance.new("TextLabel")
+        countLabel.Size = UDim2.new(0, 50, 1, 0)
+        countLabel.Position = UDim2.new(1, -55, 0, 0)
+        countLabel.BackgroundTransparency = 1
+        countLabel.Text = "(" .. count .. ")"
+        countLabel.TextColor3 = isSelected and THEME.accent or Color3.fromRGB(120, 100, 150)
+        countLabel.Font = Enum.Font.Gotham
+        countLabel.TextSize = TEXT_SIZE_SMALL
+        countLabel.TextXAlignment = Enum.TextXAlignment.Right
+        countLabel.Parent = btn
+        
+        if isSelected then
+            local btnStroke = Instance.new("UIStroke")
+            btnStroke.Color = THEME.accent
+            btnStroke.Thickness = 1
+            btnStroke.Transparency = 0.2
+            btnStroke.Parent = btn
+        end
+        
+        btn.MouseButton1Click:Connect(function()
+            playClickSound()
+            
+            if cat == "SEMUA KATA SULIT" then
+                local newState = not categoryToggles["SEMUA KATA SULIT"]
+                categoryToggles["SEMUA KATA SULIT"] = newState
+                if newState then
+                    for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "LY", "RS", "NS"}) do
+                        categoryToggles[c] = false
+                    end
+                end
+            else
+                categoryToggles[cat] = not categoryToggles[cat]
+                local anyOn = false
+                for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "LY", "RS", "NS"}) do
+                    if categoryToggles[c] then
+                        anyOn = true
+                        break
+                    end
+                end
+                if not anyOn then
+                    categoryToggles["SEMUA KATA SULIT"] = false
+                end
+            end
+            
+            updateCategoryButtons()
+        end)
+    end
+end
+
+kataSulitBtn.MouseButton1Click:Connect(function()
+    playClickSound()
+    dropdownOpen = not dropdownOpen
+    kataSulitBtn.Text = dropdownOpen and "SET KATA SULIT ▲" or "SET KATA SULIT ▼"
+    
+    local dropdownHeight = #categories * categoryHeight + 5
+    kataDropdown:TweenSize(
+        UDim2.new(1, 0, 0, dropdownOpen and dropdownHeight or 0),
+        Enum.EasingDirection.Out,
+        Enum.EasingStyle.Quart,
+        0.3,
+        true
+    )
+    
+    updateCategoryButtons()
+end)
+
 -- ==============================================
--- DELAY SETTINGS SECTION (DENGAN SLIDER BAR)
+-- DELAY SETTINGS (DENGAN SLIDER YANG BENER)
 -- ==============================================
 local delayHeader = Instance.new("TextButton")
 delayHeader.Size = UDim2.new(1, 0, 0, 35)
@@ -1374,28 +1364,31 @@ delayArrow.Font = Enum.Font.GothamBold
 delayArrow.TextSize = 14
 delayArrow.Parent = delayHeader
 
--- CONTENT DELAY (DENGAN SLIDER)
+-- CONTENT DELAY
 local delayContent = {}
 
--- Slider Write Delay (0.05 - 0.5)
+-- Slider Write Delay
 local writeSlider = createSlider("Write Delay", mainContainer, 0.05, 0.5, typeDelay, function(value)
     typeDelay = value
     enterDelay = value
+    print("✏️ Write Delay: " .. value .. "s")
 end, order)
 order = order + 1
 table.insert(delayContent, writeSlider)
 
--- Slider Turn Delay (1.0 - 5.0)
+-- Slider Turn Delay
 local turnSlider = createSlider("Turn Delay", mainContainer, 1.0, 5.0, turnDelay, function(value)
     turnDelay = value
+    print("⏱️ Turn Delay: " .. value .. "s")
 end, order)
 order = order + 1
 table.insert(delayContent, turnSlider)
 
--- Slider Backspace Delay (0.05 - 0.3)
+-- Slider Backspace Delay
 local backspaceSlider = createSlider("Backspace Delay", mainContainer, 0.05, 0.3, backspaceDelay, function(value)
     backspaceDelay = value
     deleteDelay = value
+    print("⌫ Backspace Delay: " .. value .. "s")
 end, order)
 order = order + 1
 table.insert(delayContent, backspaceSlider)
@@ -1410,7 +1403,6 @@ delayHeader.MouseButton1Click:Connect(function()
     playClickSound()
     delayExpanded = not delayExpanded
     delayArrow.Text = delayExpanded and "▼" or "▶"
-    
     for _, item in ipairs(delayContent) do
         item.Visible = delayExpanded
     end
@@ -1548,9 +1540,7 @@ infinityBtn.MouseButton1Click:Connect(function()
     toggleInfinityJump(not infinityJumpEnabled)
 end)
 
--- ==============================================
--- ANTI AFK (PAKE VIRTUALUSER)
--- ==============================================
+-- Anti AFK
 local antiAfkFrame = Instance.new("Frame")
 antiAfkFrame.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
 antiAfkFrame.LayoutOrder = utilOrder
@@ -1787,48 +1777,32 @@ end
 createTPButton("Claim Bambu", "rbxassetid://6023426935", function()
     local player = game.Players.LocalPlayer
     local character = player.Character or player.CharacterAdded:Wait()
-    
     local target = workspace:FindFirstChild("ClaimBambuPart")
-    
-    if target then
-        if character:FindFirstChild("HumanoidRootPart") then
-            character.HumanoidRootPart.CFrame = target.CFrame + Vector3.new(0, 3, 0)
-            print("✅ Teleport ke ClaimBambuPart")
-        else
-            print("❌ HumanoidRootPart tidak ditemukan")
-        end
-    else
-        print("❌ ClaimBambuPart tidak ditemukan di workspace")
+    if target and character:FindFirstChild("HumanoidRootPart") then
+        character.HumanoidRootPart.CFrame = target.CFrame + Vector3.new(0, 3, 0)
+        print("✅ Teleport ke ClaimBambuPart")
     end
 end, tpOrder)
-tpOrder = tpOrder + 1
 
 -- ==============================================
--- TYPING FUNCTION (HUMAN MODE DENGAN TYPO 10%)
+-- TYPING FUNCTION
 -- ==============================================
 local function typeWord(word, length)
     if not IsRunning then return end
-    
     wordLength = length or #word
     
     if humanModeEnabled then
-        -- HUMAN MODE DENGAN TYPO 10%
         local typoCount = 0
         local maxTypo = math.random(1, 2)
         local typoChance = 0.1
         
         for i = 1, #word do
-            if not IsRunning then return end
-            
             if typoCount < maxTypo and math.random() < typoChance then
                 local wrongChar = string.char(math.random(97, 122)):upper()
                 local correctChar = word:sub(i, i):upper()
-                
                 while wrongChar == correctChar do
                     wrongChar = string.char(math.random(97, 122)):upper()
                 end
-                
-                print("⌨️ Human Mode: Typo '" .. wrongChar .. "' harusnya '" .. correctChar .. "'")
                 
                 local keyCode = Enum.KeyCode[wrongChar]
                 if keyCode then
@@ -1841,30 +1815,24 @@ local function typeWord(word, length)
                 VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Backspace, false, game)
                 task.wait(backspaceDelay)
                 VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Backspace, false, game)
-                
                 typoCount = typoCount + 1
                 task.wait(0.1)
             end
             
             local char = word:sub(i, i):upper()
             local keyCode = Enum.KeyCode[char]
-            
             if keyCode then
                 task.wait(math.random() * 0.15 + 0.1)
-                
                 VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
                 task.wait(0.05)
                 VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
             end
         end
-        
         task.wait(math.random() * 0.2 + 0.1)
-        
     else
         for i = 1, #word do
             local char = word:sub(i, i):upper()
             local keyCode = Enum.KeyCode[char]
-            
             if keyCode then
                 VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
                 task.wait(0.01)
@@ -1884,7 +1852,6 @@ end
 -- Auto type function
 local function autoType()
     if not autoTypeEnabled or not IsRunning or isTyping then return end
-    
     isTyping = true
     
     local playerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -1940,25 +1907,6 @@ local function autoType()
         
         if #candidates > 0 then
             local chosen = candidates[math.random(1, #candidates)]
-            local category = "KBBI"
-            
-            for cat, enabled in pairs(categoryToggles) do
-                if enabled then
-                    if cat == "SEMUA KATA SULIT" then
-                        for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "LY", "RS", "NS"}) do
-                            if table.find(wordCategories[c], chosen) then
-                                category = "KATA SULIT (" .. c .. ")"
-                                break
-                            end
-                        end
-                    elseif table.find(wordCategories[cat], chosen) then
-                        category = "KATA SULIT (" .. cat .. ")"
-                        break
-                    end
-                end
-            end
-            
-            print("🤖 Anixly: " .. chosen:upper() .. " | Awalan: " .. awalan:upper() .. " | " .. category)
             kataLabel.Text = chosen:upper()
             currentWord = chosen
             
@@ -1999,15 +1947,11 @@ local function searchWords(prefix)
     table.sort(results)
     
     if #results > 0 then
-        local displayResults = results
         local total = #results
-        
         if total > 50 then
-            displayResults = {}
-            for i = 1, 50 do
-                table.insert(displayResults, results[i])
-            end
-            resultLabel.Text = "Hasil (" .. total .. " kata, tampil 50): " .. table.concat(displayResults, ", ")
+            local display = {}
+            for i = 1, 50 do table.insert(display, results[i]) end
+            resultLabel.Text = "Hasil (" .. total .. " kata, tampil 50): " .. table.concat(display, ", ")
         else
             resultLabel.Text = "Hasil (" .. total .. " kata): " .. table.concat(results, ", ")
         end
@@ -2066,10 +2010,7 @@ task.spawn(function()
     
     for cat, url in pairs(urls) do
         task.spawn(function()
-            local success, response = pcall(function()
-                return game:HttpGet(url)
-            end)
-            
+            local success, response = pcall(function() return game:HttpGet(url) end)
             if success and type(response) == "string" then
                 for line in string.gmatch(response, "[^\r\n]+") do
                     local word = (line:gsub("%s+", "")):lower()
@@ -2078,44 +2019,9 @@ task.spawn(function()
                     end
                 end
                 print("🔥 Category " .. cat .. " Loaded! (" .. #wordCategories[cat] .. " kata)")
-                updateKataCounts()
+                updateCategoryButtons()
             end
         end)
-    end
-end)
-
--- Load common words
-task.spawn(function()
-    local urls = {
-        "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/kamus.txt",
-        "https://cdn.jsdelivr.net/gh/geovedi/indonesian-wordlist@master/00-indonesian-wordlist.lst",
-        "https://raw.githubusercontent.com/geovedi/indonesian-wordlist/master/00-indonesian-wordlist.lst"
-    }
-    
-    local allWords = {}
-    
-    for _, url in ipairs(urls) do
-        if not IsRunning then break end
-        
-        local success, response = pcall(function()
-            return game:HttpGet(url)
-        end)
-        
-        if success and type(response) == "string" and #response > 1000 then
-            for line in string.gmatch(response, "[^\r\n]+") do
-                local word = (line:gsub("%s+", "")):lower()
-                if #word > 1 and string.match(word, "^%a+$") then
-                    table.insert(allWords, word)
-                end
-            end
-        end
-    end
-    
-    if #allWords > 1000 then
-        for _, word in ipairs(allWords) do
-            table.insert(commonWords, word)
-        end
-        print("✅ Anixly: " .. #commonWords .. " Kata Dimuat!")
     end
 end)
 
@@ -2155,10 +2061,7 @@ if remotes then
                 if matchUI then
                     local submitBtn = matchUI:FindFirstChild("WordSubmit", true)
                     if submitBtn and submitBtn.Visible and submitBtn.BackgroundTransparency < 0.6 then
-                        if currentWord ~= "" then
-                            usedWords[currentWord] = true
-                        end
-                        
+                        if currentWord ~= "" then usedWords[currentWord] = true end
                         print("⚠️ Anixly: Salah! Menghapus & Cari Baru...")
                         isTyping = true
                         clearWord()
@@ -2174,4 +2077,4 @@ end
 -- Show main tab by default
 switchTab(mainContainer, mainTab)
 
-print("✅ Anixly Loaded - Dengan Slider Delay!")
+print("✅ Anixly Loaded - Slider Delay Bisa Digeser!")
