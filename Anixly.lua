@@ -4,7 +4,7 @@
 
 --[[
     Anixly - Sambung kata
-    Fitur Lengkap dengan UI Keren + ANTI AFK
+    Fitur Lengkap dengan UI Keren + ANTI AFK + Slider Typo
 ]]
 
 -- Services
@@ -83,7 +83,7 @@ local antiAfkEnabled = false
 local antiAfkConnection
 
 -- Human Mode Variables (Sederhana + Typo)
-local humanTypoChance = 0.25  -- 25% chance buat typo
+local humanTypoChance = 25  -- Default 25% (bisa diubah lewat slider)
 local humanMaxTypo = 2        -- Maksimal typo 2 huruf
 
 -- Word categories
@@ -226,18 +226,19 @@ end)
 local controlSize = IsMobile and 18 or 26
 
 -- Minimize Button
-    local MinimizeBtn = Instance.new("ImageButton")
-    MinimizeBtn.Size = UDim2.new(0, controlSize, 0, controlSize)
-    MinimizeBtn.Position = UDim2.new(1, -(controlSize * 2 + 10), 0.5, -controlSize / 2)
-    MinimizeBtn.BackgroundColor3 = Color3.fromRGB(250, 190, 0)
-    MinimizeBtn.Image = "rbxassetid://6023426955"
-    MinimizeBtn.ImageColor3 = Color3.fromRGB(30, 20, 0)
-    MinimizeBtn.Parent = Header
-    MinimizeBtn.ZIndex = 10
-    
-    local MinCorner = Instance.new("UICorner")
-    MinCorner.CornerRadius = UDim.new(1, 0)
-    MinCorner.Parent = MinimizeBtn
+local MinimizeBtn = Instance.new("TextButton")
+MinimizeBtn.Size = UDim2.new(0, controlSize, 0, controlSize)
+MinimizeBtn.Position = UDim2.new(1, -(controlSize * 2 + 10), 0.5, -controlSize / 2)
+MinimizeBtn.BackgroundColor3 = Color3.fromRGB(250, 190, 0)
+MinimizeBtn.Text = "-"
+MinimizeBtn.TextColor3 = Color3.fromRGB(30, 20, 0)
+MinimizeBtn.Font = Enum.Font.GothamBold
+MinimizeBtn.TextSize = IsMobile and 14 or 16
+MinimizeBtn.Parent = Header
+
+local MinCorner = Instance.new("UICorner")
+MinCorner.CornerRadius = UDim.new(1, 0)
+MinCorner.Parent = MinimizeBtn
 
 -- Close Button
 local CloseBtn = Instance.new("ImageButton")
@@ -257,49 +258,6 @@ CloseBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
     IsRunning = false
 end)
-
-   -- RESIZE HANDLE
-    local ResizeHandle = Instance.new("TextButton")
-    ResizeHandle.Name = "ResizeHandle"
-    ResizeHandle.Size = UDim2.new(0, 20, 0, 20)
-    ResizeHandle.Position = UDim2.new(1, -20, 1, -20)
-    ResizeHandle.BackgroundColor3 = window.Theme.mid
-    ResizeHandle.Text = "↘️"
-    ResizeHandle.TextColor3 = Color3.new(1, 1, 1)
-    ResizeHandle.Font = Enum.Font.GothamBold
-    ResizeHandle.TextSize = 14
-    ResizeHandle.ZIndex = 10
-    ResizeHandle.Parent = MainFrame
-    ResizeHandle.Visible = true
-    
-    local ResizeCorner = Instance.new("UICorner")
-    ResizeCorner.CornerRadius = UDim.new(0, 4)
-    ResizeCorner.Parent = ResizeHandle
-    
-    -- Resize Logic
-    local isResizing = false
-    local resizeStartPos, startWidth, startHeight
-    
-    local function clampSize(width, height)
-        return math.clamp(width, MIN_WIDTH, MAX_WIDTH), math.clamp(height, MIN_HEIGHT, MAX_HEIGHT)
-    end
-    
-    local function updateGlow()
-        Glow.Size = UDim2.new(0, MainFrame.Size.X.Offset + 4, 0, MainFrame.Size.Y.Offset + 4)
-        Glow.Position = UDim2.new(
-            MainFrame.Position.X.Scale, MainFrame.Position.X.Offset - 2,
-            MainFrame.Position.Y.Scale, MainFrame.Position.Y.Offset - 2
-        )
-    end
-    
-    ResizeHandle.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-            isResizing = true
-            resizeStartPos = input.Position
-            startWidth = MainFrame.Size.X.Offset
-            startHeight = MainFrame.Size.Y.Offset
-        end
-    end)
 
 -- Mini Icon
 local MiniIcon = Instance.new("TextButton")
@@ -848,6 +806,130 @@ local function createDelayInput(label, defaultValue, callback, order)
 end
 
 -- ==============================================
+-- FUNGSI SLIDER BAR UNTUK TYPO CHANCE
+-- ==============================================
+local function createSlider(label, min, max, defaultValue, callback, order)
+    local frame = Instance.new("Frame")
+    frame.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT + 10)
+    frame.LayoutOrder = order
+    frame.BackgroundColor3 = Color3.fromRGB(16, 15, 24)
+    frame.BorderSizePixel = 0
+    frame.Parent = mainContainer
+    
+    local frameCorner = Instance.new("UICorner")
+    frameCorner.CornerRadius = UDim.new(0, 8)
+    frameCorner.Parent = frame
+    
+    local frameStroke = Instance.new("UIStroke")
+    frameStroke.Color = THEME.mid
+    frameStroke.Thickness = 1
+    frameStroke.Transparency = 0.6
+    frameStroke.Parent = frame
+    
+    -- Label
+    local labelText = Instance.new("TextLabel")
+    labelText.Size = UDim2.new(0, 100, 0, 20)
+    labelText.Position = UDim2.new(0, 10, 0, 5)
+    labelText.BackgroundTransparency = 1
+    labelText.Text = label
+    labelText.TextColor3 = Color3.fromRGB(210, 200, 230)
+    labelText.Font = Enum.Font.GothamBold
+    labelText.TextSize = TEXT_SIZE_NORMAL
+    labelText.TextXAlignment = Enum.TextXAlignment.Left
+    labelText.Parent = frame
+    
+    -- Value Display
+    local valueLabel = Instance.new("TextLabel")
+    valueLabel.Size = UDim2.new(0, 40, 0, 20)
+    valueLabel.Position = UDim2.new(1, -45, 0, 5)
+    valueLabel.BackgroundTransparency = 1
+    valueLabel.Text = defaultValue .. "%"
+    valueLabel.TextColor3 = THEME.accent
+    valueLabel.Font = Enum.Font.GothamBold
+    valueLabel.TextSize = TEXT_SIZE_NORMAL
+    valueLabel.TextXAlignment = Enum.TextXAlignment.Right
+    valueLabel.Parent = frame
+    
+    -- Slider Background
+    local sliderBg = Instance.new("Frame")
+    sliderBg.Size = UDim2.new(1, -20, 0, 8)
+    sliderBg.Position = UDim2.new(0, 10, 0, 30)
+    sliderBg.BackgroundColor3 = Color3.fromRGB(40, 35, 55)
+    sliderBg.BorderSizePixel = 0
+    sliderBg.Parent = frame
+    
+    local sliderBgCorner = Instance.new("UICorner")
+    sliderBgCorner.CornerRadius = UDim.new(1, 0)
+    sliderBgCorner.Parent = sliderBg
+    
+    -- Slider Fill
+    local sliderFill = Instance.new("Frame")
+    sliderFill.Size = UDim2.new(defaultValue/100, 0, 1, 0)
+    sliderFill.BackgroundColor3 = THEME.accent
+    sliderFill.BorderSizePixel = 0
+    sliderFill.Parent = sliderBg
+    
+    local sliderFillCorner = Instance.new("UICorner")
+    sliderFillCorner.CornerRadius = UDim.new(1, 0)
+    sliderFillCorner.Parent = sliderFill
+    
+    -- Slider Button (Dragger)
+    local sliderBtn = Instance.new("TextButton")
+    sliderBtn.Size = UDim2.new(0, 16, 0, 16)
+    sliderBtn.Position = UDim2.new(defaultValue/100, -8, 0.5, -8)
+    sliderBtn.BackgroundColor3 = Color3.new(1, 1, 1)
+    sliderBtn.Text = ""
+    sliderBtn.ZIndex = 10
+    sliderBtn.Parent = sliderBg
+    
+    local sliderBtnCorner = Instance.new("UICorner")
+    sliderBtnCorner.CornerRadius = UDim.new(1, 0)
+    sliderBtnCorner.Parent = sliderBtn
+    
+    local sliderBtnStroke = Instance.new("UIStroke")
+    sliderBtnStroke.Color = THEME.accent
+    sliderBtnStroke.Thickness = 2
+    sliderBtnStroke.Parent = sliderBtn
+    
+    -- Logic Slider
+    local dragging = false
+    
+    sliderBtn.MouseButton1Down:Connect(function()
+        dragging = true
+    end)
+    
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+            local mousePos = UserInputService:GetMouseLocation()
+            local sliderPos = sliderBg.AbsolutePosition.X
+            local sliderWidth = sliderBg.AbsoluteSize.X
+            
+            local relativeX = math.clamp(mousePos.X - sliderPos, 0, sliderWidth)
+            local percent = relativeX / sliderWidth
+            local value = math.floor(percent * 100)
+            
+            value = math.clamp(value, min, max)
+            
+            -- Update UI
+            sliderFill.Size = UDim2.new(value/100, 0, 1, 0)
+            sliderBtn.Position = UDim2.new(value/100, -8, 0.5, -8)
+            valueLabel.Text = value .. "%"
+            
+            -- Panggil callback dengan nilai baru
+            callback(value)
+        end
+    end)
+    
+    return frame
+end
+
+-- ==============================================
 -- TYPING FUNCTION (HUMAN MODE SEDERHANA + TYPO)
 -- ==============================================
 local function typeWord(word, length)
@@ -859,12 +941,13 @@ local function typeWord(word, length)
         -- HUMAN MODE SEDERHANA + TYPO
         local typoCount = 0
         local maxTypo = math.random(1, humanMaxTypo)  -- Random typo 1 atau 2 kali
+        local typoChanceDecimal = humanTypoChance / 100  -- Convert ke desimal
         
         for i = 1, #word do
             if not IsRunning then return end
             
-            -- Cek apakah akan typo
-            if typoCount < maxTypo and math.random() < humanTypoChance then
+            -- Cek apakah akan typo (berdasarkan chance dari slider)
+            if typoCount < maxTypo and math.random() < typoChanceDecimal then
                 -- Bikin typo (1 huruf salah)
                 local wrongChar = string.char(math.random(97, 122)):upper()
                 local correctChar = word:sub(i, i):upper()
@@ -950,7 +1033,7 @@ order = order + 1
 autoFeaturesContent[3] = createToggleButton("Human Mode [Typo 1-2x]", mainContainer, false, function(state) 
     humanModeEnabled = state 
     if state then
-        print("👤 Human Mode AKTIF - Bisa typo 1-2 huruf")
+        print("👤 Human Mode AKTIF - Chance Typo: " .. humanTypoChance .. "%")
     else
         print("⚡ Mode Cepat AKTIF")
     end
@@ -1430,7 +1513,7 @@ kataSulitBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ==============================================
--- DELAY SETTINGS SECTION
+-- DELAY SETTINGS SECTION (DENGAN SLIDER TYPO)
 -- ==============================================
 local delaySettingsContent = {}
 
@@ -1441,8 +1524,19 @@ order = order + 1
 delaySettingsContent[3] = createDelayInput("Backspace Delay", backspaceDelay, function(v) backspaceDelay = v; deleteDelay = v end, order)
 order = order + 1
 
+-- SLIDER UNTUK TYPO CHANCE (1-100%)
+local typoSlider = createSlider("Typo Chance", 1, 100, humanTypoChance, function(value)
+    humanTypoChance = value
+    if humanModeEnabled then
+        print("🎯 Typo chance diubah ke " .. value .. "%")
+    end
+end, order)
+order = order + 1
+
+table.insert(delaySettingsContent, typoSlider)
+
 createCollapsibleHeader("DELAY SETTINGS", "rbxassetid://6023426925", mainContainer, delaySettingsContent, order)
-order = order + 4
+order = order + 5
 
 -- ==============================================
 -- BUILD UTILITY TAB (dengan ANTI AFK)
@@ -2125,4 +2219,4 @@ end
 -- Show main tab by default
 switchTab(mainContainer, mainTab)
 
-print("✅ Anixly Loaded")
+print("✅ Anixly Loaded - Slider Typo siap!")
