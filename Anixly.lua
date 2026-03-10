@@ -83,7 +83,7 @@ local antiAfkEnabled = false
 local antiAfkConnection
 
 -- Human Mode Variables (Sederhana + Typo)
-local humanTypoChance = 25  -- Default 25% (bisa diubah lewat slider)
+local humanTypoChance = 10  -- Default 25% (bisa diubah lewat slider)
 local humanMaxTypo = 2        -- Maksimal typo 2 huruf
 
 -- Word categories
@@ -1036,7 +1036,7 @@ order = order + 1
 autoFeaturesContent[2] = createToggleButton("Auto Submit", mainContainer, true, function(state) autoEnterEnabled = state end, order)
 order = order + 1
 
-autoFeaturesContent[3] = createToggleButton("Human Mode [Typo 1-2x]", mainContainer, false, function(state) 
+autoFeaturesContent[3] = createToggleButton("Human Mode [Tester]", mainContainer, false, function(state) 
     humanModeEnabled = state 
     if state then
         print("👤 Human Mode AKTIF - Chance Typo: " .. humanTypoChance .. "%")
