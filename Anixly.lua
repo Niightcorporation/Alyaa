@@ -1,7 +1,3 @@
---[[
-    Anixly - Sambung kata (Fixed UI + Resize + Stable Human Mode)
-]]
-
 -- Services
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
@@ -56,10 +52,6 @@ local THEME = {
 -- UI Sizes
 local UI_WIDTH = IsMobile and 300 or 460
 local UI_HEIGHT = IsMobile and 250 or 310
-local MIN_WIDTH = 300
-local MIN_HEIGHT = 250
-local MAX_WIDTH = 800
-local MAX_HEIGHT = 600
 local SIDEBAR_WIDTH = IsMobile and 85 or 105
 local HEADER_HEIGHT = IsMobile and 42 or 46
 local TEXT_SIZE_SMALL = IsMobile and 9 or 11
@@ -83,7 +75,7 @@ local noclipConnection
 local antiAfkEnabled = false
 local antiAfkConnection
 local isTyping = false
-local typingConnection = nil
+local typingQueue = false
 
 -- Word categories
 local wordCategories = {
@@ -242,48 +234,6 @@ CloseBtn.MouseButton1Click:Connect(function()
     IsRunning = false
 end)
 
--- RESIZE HANDLE
-local ResizeHandle = Instance.new("TextButton")
-ResizeHandle.Name = "ResizeHandle"
-ResizeHandle.Size = UDim2.new(0, 20, 0, 20)
-ResizeHandle.Position = UDim2.new(1, -20, 1, -20)
-ResizeHandle.BackgroundColor3 = THEME.mid
-ResizeHandle.Text = "↘️"
-ResizeHandle.TextColor3 = Color3.new(1, 1, 1)
-ResizeHandle.Font = Enum.Font.GothamBold
-ResizeHandle.TextSize = 14
-ResizeHandle.ZIndex = 10
-ResizeHandle.Parent = MainFrame
-
-local ResizeCorner = Instance.new("UICorner")
-ResizeCorner.CornerRadius = UDim.new(0, 4)
-ResizeCorner.Parent = ResizeHandle
-
--- Resize Logic
-local isResizing = false
-local resizeStartPos, startWidth, startHeight
-
-local function clampSize(width, height)
-    return math.clamp(width, MIN_WIDTH, MAX_WIDTH), math.clamp(height, MIN_HEIGHT, MAX_HEIGHT)
-end
-
-local function updateGlow()
-    GlowWrapper.Size = UDim2.new(0, MainFrame.Size.X.Offset + 4, 0, MainFrame.Size.Y.Offset + 4)
-    GlowWrapper.Position = UDim2.new(
-        MainFrame.Position.X.Scale, MainFrame.Position.X.Offset - 2,
-        MainFrame.Position.Y.Scale, MainFrame.Position.Y.Offset - 2
-    )
-end
-
-ResizeHandle.InputBegan:Connect(function(input)
-    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
-        isResizing = true
-        resizeStartPos = input.Position
-        startWidth = MainFrame.Size.X.Offset
-        startHeight = MainFrame.Size.Y.Offset
-    end
-end)
-
 -- Mini Icon
 local MiniIcon = Instance.new("TextButton")
 MiniIcon.Name = "MiniIcon"
@@ -316,7 +266,6 @@ MinimizeBtn.MouseButton1Click:Connect(function()
     playClickSound()
     MainFrame.Visible = false
     GlowWrapper.Visible = false
-    ResizeHandle.Visible = false
     MiniIcon.Visible = true
     miniDragDist = 0
 end)
@@ -337,7 +286,6 @@ MiniIcon.InputEnded:Connect(function(input)
             playClickSound()
             MainFrame.Visible = true
             GlowWrapper.Visible = true
-            ResizeHandle.Visible = true
             MiniIcon.Visible = false
         end
         miniDragDist = 0
@@ -353,7 +301,6 @@ MiniIcon.MouseButton1Click:Connect(function()
     playClickSound()
     MainFrame.Visible = true
     GlowWrapper.Visible = true
-    ResizeHandle.Visible = true
     MiniIcon.Visible = false
     miniDragDist = 0
 end)
@@ -375,32 +322,22 @@ dragButton.InputBegan:Connect(function(input)
     dragStartPos = MainFrame.Position
 end)
 
--- Input handling untuk drag & resize
 UserInputService.InputChanged:Connect(function(input)
     if not (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then return end
     
-    -- RESIZE
-    if isResizing then
-        local delta = input.Position - resizeStartPos
-        local newW, newH = clampSize(startWidth + delta.X, startHeight + delta.Y)
-        MainFrame.Size = UDim2.new(0, newW, 0, newH)
-        updateGlow()
-        ResizeHandle.Position = UDim2.new(1, -20, 1, -20)
-        return
-    end
-    
-    -- DRAG MAIN WINDOW
     if dragStart then
         local delta = input.Position - dragStart
         MainFrame.Position = UDim2.new(
             dragStartPos.X.Scale, dragStartPos.X.Offset + delta.X,
             dragStartPos.Y.Scale, dragStartPos.Y.Offset + delta.Y
         )
-        updateGlow()
+        GlowWrapper.Position = UDim2.new(
+            MainFrame.Position.X.Scale, MainFrame.Position.X.Offset - 2,
+            MainFrame.Position.Y.Scale, MainFrame.Position.Y.Offset - 2
+        )
         return
     end
     
-    -- DRAG MINI ICON
     if isDraggingMini then
         local delta = input.Position - dragStartPos
         miniDragDist = delta.Magnitude
@@ -414,7 +351,6 @@ end)
 UserInputService.InputEnded:Connect(function(input)
     if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
         dragStart = nil
-        isResizing = false
     end
 end)
 
@@ -758,7 +694,7 @@ order = order + 1
 autoFeaturesContent[2] = createToggleButton("Auto Submit", mainContainer, true, function(state) autoEnterEnabled = state end, order)
 order = order + 1
 
-autoFeaturesContent[3] = createToggleButton("Human Mode [🧠]", mainContainer, false, function(state) 
+autoFeaturesContent[3] = createToggleButton("Human Mode [10% Typo]", mainContainer, false, function(state) 
     humanModeEnabled = state 
     if state then
         print("👤 Human Mode AKTIF - 10% Typo")
@@ -1690,9 +1626,6 @@ local function typeWord(word, length)
 end
 
 -- Auto type function dengan state management yang lebih baik
-local isTyping = false
-local typingQueue = false
-
 local function autoType()
     if not autoTypeEnabled or not IsRunning or isTyping then 
         if autoTypeEnabled and not isTyping then
@@ -1941,4 +1874,4 @@ end
 -- Show main tab by default
 switchTab(mainContainer, mainTab)
 
-print("✅ Anixly Loaded)
+print("✅ Anixly Loaded - Scrolling Fixed & Human Mode Stabil!")
