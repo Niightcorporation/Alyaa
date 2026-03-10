@@ -82,10 +82,9 @@ local noclipConnection
 local antiAfkEnabled = false
 local antiAfkConnection
 
--- Human Mode Specific Variables
-local humanPauseChance = 0.3
-local humanTypoChance = 0.15
-local humanEjekChance = 0.1
+-- Human Mode Variables (Sederhana + Typo)
+local humanTypoChance = 0.25  -- 25% chance buat typo
+local humanMaxTypo = 2        -- Maksimal typo 2 huruf
 
 -- Word categories
 local wordCategories = {
@@ -135,13 +134,6 @@ local commonWords = {
     "dengan", "depan", "di", "dia", "diri", "dua", "dulu", "dunia", "uhuk", "uhuy", "bca",
     "yanto", "ilang", "oho", "aiba", "eni", "ungik", "aqua", "aikido", "aku", "dia", "kamu",
     "saya", "mereka", "kami", "kita", "anda", "ini", "itu", "sini", "situ", "sana"
-}
-
--- Kata-kata ejekan
-local ejekanList = {
-    "wkwk", "wkwkwk", "wadidaw", "gabisa ya?", "cupu", "noob", "ez", "gampang", 
-    "lol", "lmao", "hadeh", "kasian", "lemot", "lambat", "salah tuh", "ulang lagi",
-    "hmm", "yahaha", "wkwk land", "gabener", "salah", "lagi", "coba lagi"
 }
 
 -- Create GUI
@@ -234,19 +226,18 @@ end)
 local controlSize = IsMobile and 18 or 26
 
 -- Minimize Button
-local MinimizeBtn = Instance.new("TextButton")
-MinimizeBtn.Size = UDim2.new(0, controlSize, 0, controlSize)
-MinimizeBtn.Position = UDim2.new(1, -(controlSize * 2 + 10), 0.5, -controlSize / 2)
-MinimizeBtn.BackgroundColor3 = Color3.fromRGB(250, 190, 0)
-MinimizeBtn.Text = "-"
-MinimizeBtn.TextColor3 = Color3.fromRGB(30, 20, 0)
-MinimizeBtn.Font = Enum.Font.GothamBold
-MinimizeBtn.TextSize = IsMobile and 14 or 16
-MinimizeBtn.Parent = Header
-
-local MinCorner = Instance.new("UICorner")
-MinCorner.CornerRadius = UDim.new(1, 0)
-MinCorner.Parent = MinimizeBtn
+    local MinimizeBtn = Instance.new("ImageButton")
+    MinimizeBtn.Size = UDim2.new(0, controlSize, 0, controlSize)
+    MinimizeBtn.Position = UDim2.new(1, -(controlSize * 2 + 10), 0.5, -controlSize / 2)
+    MinimizeBtn.BackgroundColor3 = Color3.fromRGB(250, 190, 0)
+    MinimizeBtn.Image = "rbxassetid://6023426955"
+    MinimizeBtn.ImageColor3 = Color3.fromRGB(30, 20, 0)
+    MinimizeBtn.Parent = Header
+    MinimizeBtn.ZIndex = 10
+    
+    local MinCorner = Instance.new("UICorner")
+    MinCorner.CornerRadius = UDim.new(1, 0)
+    MinCorner.Parent = MinimizeBtn
 
 -- Close Button
 local CloseBtn = Instance.new("ImageButton")
@@ -266,6 +257,49 @@ CloseBtn.MouseButton1Click:Connect(function()
     ScreenGui:Destroy()
     IsRunning = false
 end)
+
+   -- RESIZE HANDLE
+    local ResizeHandle = Instance.new("TextButton")
+    ResizeHandle.Name = "ResizeHandle"
+    ResizeHandle.Size = UDim2.new(0, 20, 0, 20)
+    ResizeHandle.Position = UDim2.new(1, -20, 1, -20)
+    ResizeHandle.BackgroundColor3 = window.Theme.mid
+    ResizeHandle.Text = "↘️"
+    ResizeHandle.TextColor3 = Color3.new(1, 1, 1)
+    ResizeHandle.Font = Enum.Font.GothamBold
+    ResizeHandle.TextSize = 14
+    ResizeHandle.ZIndex = 10
+    ResizeHandle.Parent = MainFrame
+    ResizeHandle.Visible = true
+    
+    local ResizeCorner = Instance.new("UICorner")
+    ResizeCorner.CornerRadius = UDim.new(0, 4)
+    ResizeCorner.Parent = ResizeHandle
+    
+    -- Resize Logic
+    local isResizing = false
+    local resizeStartPos, startWidth, startHeight
+    
+    local function clampSize(width, height)
+        return math.clamp(width, MIN_WIDTH, MAX_WIDTH), math.clamp(height, MIN_HEIGHT, MAX_HEIGHT)
+    end
+    
+    local function updateGlow()
+        Glow.Size = UDim2.new(0, MainFrame.Size.X.Offset + 4, 0, MainFrame.Size.Y.Offset + 4)
+        Glow.Position = UDim2.new(
+            MainFrame.Position.X.Scale, MainFrame.Position.X.Offset - 2,
+            MainFrame.Position.Y.Scale, MainFrame.Position.Y.Offset - 2
+        )
+    end
+    
+    ResizeHandle.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+            isResizing = true
+            resizeStartPos = input.Position
+            startWidth = MainFrame.Size.X.Offset
+            startHeight = MainFrame.Size.Y.Offset
+        end
+    end)
 
 -- Mini Icon
 local MiniIcon = Instance.new("TextButton")
@@ -814,6 +848,92 @@ local function createDelayInput(label, defaultValue, callback, order)
 end
 
 -- ==============================================
+-- TYPING FUNCTION (HUMAN MODE SEDERHANA + TYPO)
+-- ==============================================
+local function typeWord(word, length)
+    if not IsRunning then return end
+    
+    wordLength = length or #word
+    
+    if humanModeEnabled then
+        -- HUMAN MODE SEDERHANA + TYPO
+        local typoCount = 0
+        local maxTypo = math.random(1, humanMaxTypo)  -- Random typo 1 atau 2 kali
+        
+        for i = 1, #word do
+            if not IsRunning then return end
+            
+            -- Cek apakah akan typo
+            if typoCount < maxTypo and math.random() < humanTypoChance then
+                -- Bikin typo (1 huruf salah)
+                local wrongChar = string.char(math.random(97, 122)):upper()
+                local correctChar = word:sub(i, i):upper()
+                
+                -- Pastikan wrongChar berbeda dari correctChar
+                while wrongChar == correctChar do
+                    wrongChar = string.char(math.random(97, 122)):upper()
+                end
+                
+                print("⌨️ Human Mode: Typo '" .. wrongChar .. "' harusnya '" .. correctChar .. "'")
+                
+                -- Ketik huruf salah
+                local keyCode = Enum.KeyCode[wrongChar]
+                if keyCode then
+                    VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
+                    task.wait(0.05)
+                    VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
+                    task.wait(backspaceDelay + 0.1)  -- Jeda sadar typo
+                end
+                
+                -- Hapus huruf salah
+                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Backspace, false, game)
+                task.wait(backspaceDelay)
+                VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Backspace, false, game)
+                
+                typoCount = typoCount + 1
+                task.wait(0.1)  -- Jeda lanjut ngetik
+            end
+            
+            -- Ketik huruf yang benar
+            local char = word:sub(i, i):upper()
+            local keyCode = Enum.KeyCode[char]
+            
+            if keyCode then
+                -- Jeda antar huruf (lebih lambat dari mode cepat)
+                task.wait(math.random() * 0.15 + 0.1)  -- 0.1 - 0.25 detik
+                
+                VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
+                task.wait(0.05)
+                VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
+            end
+        end
+        
+        -- Jeda sebelum enter
+        task.wait(math.random() * 0.2 + 0.1)  -- 0.1 - 0.3 detik
+        
+    else
+        -- MODE CEPAT (seperti biasa)
+        for i = 1, #word do
+            local char = word:sub(i, i):upper()
+            local keyCode = Enum.KeyCode[char]
+            
+            if keyCode then
+                VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
+                task.wait(0.01)
+                VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
+                task.wait(typeDelay + math.random() * (enterDelay - typeDelay))
+            end
+        end
+    end
+    
+    if autoEnterEnabled then
+        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
+        task.wait(0.03)
+        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
+    end
+end
+
+-- ==============================================
 -- BUILD MAIN TAB
 -- ==============================================
 local order = 1
@@ -827,10 +947,10 @@ order = order + 1
 autoFeaturesContent[2] = createToggleButton("Auto Submit", mainContainer, true, function(state) autoEnterEnabled = state end, order)
 order = order + 1
 
-autoFeaturesContent[3] = createToggleButton("Human Mode [UPDATED]", mainContainer, false, function(state) 
+autoFeaturesContent[3] = createToggleButton("Human Mode [Typo 1-2x]", mainContainer, false, function(state) 
     humanModeEnabled = state 
     if state then
-        print("👤 Human Mode AKTIF - Fitur: Pause, Typo, Kelebihan huruf, Ejekan")
+        print("👤 Human Mode AKTIF - Bisa typo 1-2 huruf")
     else
         print("⚡ Mode Cepat AKTIF")
     end
@@ -1712,211 +1832,6 @@ createTPButton("Claim Bambu", "rbxassetid://6023426935", function()
     end
 end, tpOrder)
 tpOrder = tpOrder + 1
-
--- ==============================================
--- HUMAN MODE FUNCTIONS
--- ==============================================
-local function humanPause()
-    if not humanModeEnabled then return end
-    
-    if math.random() < humanPauseChance then
-        local pauseTime = math.random(10, 30) / 10
-        print("⏸️ Human Mode: Pause " .. pauseTime .. " detik")
-        task.wait(pauseTime)
-    end
-end
-
-local function humanMidPause()
-    if not humanModeEnabled then return end
-    
-    if math.random() < humanPauseChance then
-        local pauseTime = math.random(5, 20) / 10
-        print("⏸️ Human Mode: Mid-pause " .. pauseTime .. " detik")
-        task.wait(pauseTime)
-    end
-end
-
-local function humanExtraLetter(word, typedSoFar)
-    if not humanModeEnabled then return typedSoFar end
-    
-    if math.random() < 0.2 and #typedSoFar < #word then
-        local extraLetters = math.random(1, 2)
-        print("⌨️ Human Mode: Kelebihan " .. extraLetters .. " huruf")
-        
-        for i = 1, extraLetters do
-            if #typedSoFar + i <= #word then
-                local char = word:sub(typedSoFar:len() + i, typedSoFar:len() + i):upper()
-                local keyCode = Enum.KeyCode[char]
-                if keyCode then
-                    VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
-                    task.wait(0.05)
-                    VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
-                    task.wait(backspaceDelay)
-                end
-            end
-        end
-        
-        typedSoFar = typedSoFar .. word:sub(typedSoFar:len() + 1, typedSoFar:len() + extraLetters)
-        
-        print("⌨️ Human Mode: Sadar kelebihan, menghapus...")
-        task.wait(math.random() * 0.3 + 0.2)
-        
-        for i = 1, extraLetters do
-            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Backspace, false, game)
-            task.wait(backspaceDelay)
-            VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Backspace, false, game)
-            typedSoFar = typedSoFar:sub(1, -2)
-        end
-        
-        task.wait(math.random() * 0.2 + 0.1)
-    end
-    
-    return typedSoFar
-end
-
-local function humanTypo(word, typedSoFar)
-    if not humanModeEnabled then return typedSoFar end
-    
-    if math.random() < humanTypoChance and #typedSoFar < #word then
-        local nextChar = word:sub(typedSoFar:len() + 1, typedSoFar:len() + 1)
-        local wrongChar = string.char(math.random(97, 122)):upper()
-        
-        while wrongChar == nextChar:upper() do
-            wrongChar = string.char(math.random(97, 122)):upper()
-        end
-        
-        print("⌨️ Human Mode: Typo '" .. wrongChar .. "' harusnya '" .. nextChar:upper() .. "'")
-        
-        local keyCode = Enum.KeyCode[wrongChar]
-        if keyCode then
-            VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
-            task.wait(0.05)
-            VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
-            task.wait(math.random() * 0.3 + 0.2)
-        end
-        
-        print("⌨️ Human Mode: Sadar typo, menghapus...")
-        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Backspace, false, game)
-        task.wait(backspaceDelay)
-        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Backspace, false, game)
-        
-        task.wait(math.random() * 0.2 + 0.1)
-    end
-    
-    return typedSoFar
-end
-
-local function humanEjekan(word, typedSoFar)
-    if not humanModeEnabled then return typedSoFar end
-    
-    if math.random() < humanEjekChance and #typedSoFar > 1 then
-        local ejek = ejekanList[math.random(1, #ejekanList)]
-        print("😈 Human Mode: Ejekan '" .. ejek .. "'")
-        
-        for i = 1, #ejek do
-            local char = ejek:sub(i, i):upper()
-            local keyCode = Enum.KeyCode[char]
-            if keyCode then
-                VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
-                task.wait(0.05)
-                VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
-                task.wait(backspaceDelay)
-            end
-        end
-        
-        local totalToDelete = #ejek + #typedSoFar
-        print("😈 Human Mode: Hapus semua...")
-        
-        for i = 1, totalToDelete do
-            VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Backspace, false, game)
-            task.wait(backspaceDelay)
-            VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Backspace, false, game)
-        end
-        
-        typedSoFar = ""
-        task.wait(math.random() * 0.5 + 0.3)
-        print("😈 Human Mode: Nulis ulang dari awal")
-    end
-    
-    return typedSoFar
-end
-
--- Typing function dengan HUMAN MODE
-local function typeWord(word, length)
-    if not IsRunning then return end
-    
-    wordLength = length or #word
-    
-    if humanModeEnabled then
-        print("👤 Human Mode Aktif - Kata: " .. word)
-        
-        humanPause()
-        
-        local typedSoFar = ""
-        local i = 1
-        
-        while i <= #word do
-            if not IsRunning then return end
-            
-            if i > 1 and math.random() < 0.1 then
-                humanMidPause()
-            end
-            
-            typedSoFar = humanExtraLetter(word, typedSoFar)
-            if typedSoFar:len() >= i then
-                i = typedSoFar:len() + 1
-                continue
-            end
-            
-            typedSoFar = humanTypo(word, typedSoFar)
-            if typedSoFar:len() >= i then
-                i = typedSoFar:len() + 1
-                continue
-            end
-            
-            typedSoFar = humanEjekan(word, typedSoFar)
-            if typedSoFar:len() == 0 then
-                i = 1
-                continue
-            end
-            
-            local char = word:sub(i, i):upper()
-            local keyCode = Enum.KeyCode[char]
-            
-            if keyCode then
-                task.wait(math.random() * 0.2 + 0.1)
-                
-                VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
-                task.wait(0.05)
-                VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
-                
-                typedSoFar = typedSoFar .. char
-                i = i + 1
-            end
-        end
-        
-        task.wait(math.random() * 0.3 + 0.2)
-        
-    else
-        for i = 1, #word do
-            local char = word:sub(i, i):upper()
-            local keyCode = Enum.KeyCode[char]
-            
-            if keyCode then
-                VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
-                task.wait(0.01)
-                VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
-                task.wait(typeDelay + math.random() * (enterDelay - typeDelay))
-            end
-        end
-    end
-    
-    if autoEnterEnabled then
-        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Return, false, game)
-        task.wait(0.03)
-        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Return, false, game)
-    end
-end
 
 -- Auto type function
 local function autoType()
