@@ -77,31 +77,6 @@ local noclipConnection
 local antiAfkEnabled = false
 local antiAfkConnection
 
--- AUTO JOIN VARIABLES
-local autoJoinEnabled = false
-local selectedJoinTable = "Table_2P_1"
-local autoJoinConnection = nil
-local autoJoinLoop = nil
-
--- Available Tables
-local availableTables = {
-    "Table_2P_1",
-    "Table_2P_2",
-    "Table_2P_3",
-    "Table_2P_4",
-    "Table_2P_5",
-    "Table_2P_6",
-    "Table_2P_7",
-    "Table_4P_1",
-    "Table_4P_2",
-    "Table_4P_3",
-    "Table_8P"
-}
-
--- Remote Join/Leave
-local JoinRemote = ReplicatedStorage:FindFirstChild("Remotes") and ReplicatedStorage.Remotes:FindFirstChild("JoinTable")
-local LeaveRemote = ReplicatedStorage:FindFirstChild("Remotes") and ReplicatedStorage.Remotes:FindFirstChild("LeaveTable")
-
 -- Word categories
 local wordCategories = {
     IF = {},
@@ -748,125 +723,135 @@ local function createToggleButton(text, parent, defaultState, callback, order)
     return frame
 end
 
--- Fungsi untuk membuat input delay dengan efek neon
-local function createDelayInput(label, defaultValue, callback, order)
+-- ==============================================
+-- FUNGSI SLIDER BAR UNTUK DELAY SETTINGS
+-- ==============================================
+local function createSlider(text, parent, min, max, defaultValue, callback, order)
     local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
+    frame.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT + 10)
     frame.LayoutOrder = order
     frame.BackgroundColor3 = Color3.fromRGB(16, 15, 24)
     frame.BorderSizePixel = 0
-    frame.Parent = mainContainer
+    frame.Parent = parent
     
     local frameCorner = Instance.new("UICorner")
     frameCorner.CornerRadius = UDim.new(0, 8)
     frameCorner.Parent = frame
     
-    -- Neon stroke
     local frameStroke = Instance.new("UIStroke")
     frameStroke.Color = THEME.mid
     frameStroke.Thickness = 1
     frameStroke.Transparency = 0.6
     frameStroke.Parent = frame
     
-    local labelText = Instance.new("TextLabel")
-    labelText.Size = UDim2.new(0, 100, 1, 0)
-    labelText.Position = UDim2.new(0, 10, 0, 0)
-    labelText.BackgroundTransparency = 1
-    labelText.Text = label
-    labelText.TextColor3 = Color3.fromRGB(210, 200, 230)
-    labelText.Font = Enum.Font.GothamBold
-    labelText.TextSize = TEXT_SIZE_NORMAL
-    labelText.TextXAlignment = Enum.TextXAlignment.Left
-    labelText.Parent = frame
+    -- Label
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(0, 100, 0, 20)
+    label.Position = UDim2.new(0, 10, 0, 5)
+    label.BackgroundTransparency = 1
+    label.Text = text
+    label.TextColor3 = Color3.fromRGB(210, 200, 230)
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = TEXT_SIZE_NORMAL
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = frame
     
-    local textBox = Instance.new("TextBox")
-    textBox.Size = UDim2.new(0, 80, 0, 28)
-    textBox.Position = UDim2.new(1, -90, 0.5, -14)
-    textBox.BackgroundColor3 = Color3.fromRGB(30, 25, 45)
-    textBox.Text = tostring(defaultValue)
-    textBox.TextColor3 = THEME.logText
-    textBox.Font = Enum.Font.GothamBold
-    textBox.TextSize = TEXT_SIZE_NORMAL
-    textBox.PlaceholderText = "0.00"
-    textBox.PlaceholderColor3 = Color3.fromRGB(100, 90, 120)
-    textBox.Parent = frame
+    -- Value Display
+    local valueLabel = Instance.new("TextLabel")
+    valueLabel.Size = UDim2.new(0, 40, 0, 20)
+    valueLabel.Position = UDim2.new(1, -45, 0, 5)
+    valueLabel.BackgroundTransparency = 1
+    valueLabel.Text = string.format("%.2fs", defaultValue)
+    valueLabel.TextColor3 = THEME.accent
+    valueLabel.Font = Enum.Font.GothamBold
+    valueLabel.TextSize = TEXT_SIZE_NORMAL
+    valueLabel.TextXAlignment = Enum.TextXAlignment.Right
+    valueLabel.Parent = frame
     
-    local textBoxCorner = Instance.new("UICorner")
-    textBoxCorner.CornerRadius = UDim.new(0, 6)
-    textBoxCorner.Parent = textBox
+    -- Slider Background
+    local sliderBg = Instance.new("Frame")
+    sliderBg.Size = UDim2.new(1, -20, 0, 8)
+    sliderBg.Position = UDim2.new(0, 10, 0, 30)
+    sliderBg.BackgroundColor3 = Color3.fromRGB(40, 35, 55)
+    sliderBg.BorderSizePixel = 0
+    sliderBg.Parent = frame
     
-    -- Neon stroke untuk textbox
-    local textBoxStroke = Instance.new("UIStroke")
-    textBoxStroke.Color = THEME.primary
-    textBoxStroke.Thickness = 1
-    textBoxStroke.Transparency = 0.5
-    textBoxStroke.Parent = textBox
+    local sliderBgCorner = Instance.new("UICorner")
+    sliderBgCorner.CornerRadius = UDim.new(1, 0)
+    sliderBgCorner.Parent = sliderBg
     
-    textBox.FocusLost:Connect(function(enterPressed)
-        if enterPressed then
-            local value = tonumber(textBox.Text)
-            if value then
-                callback(value)
-                textBoxStroke.Color = THEME.accent
-                textBoxStroke.Thickness = 2
-                task.wait(0.2)
-                textBoxStroke.Color = THEME.primary
-                textBoxStroke.Thickness = 1
-            else
-                textBox.Text = tostring(defaultValue)
-            end
+    -- Slider Fill
+    local sliderFill = Instance.new("Frame")
+    sliderFill.Size = UDim2.new((defaultValue - min) / (max - min), 0, 1, 0)
+    sliderFill.BackgroundColor3 = THEME.accent
+    sliderFill.BorderSizePixel = 0
+    sliderFill.Parent = sliderBg
+    
+    local sliderFillCorner = Instance.new("UICorner")
+    sliderFillCorner.CornerRadius = UDim.new(1, 0)
+    sliderFillCorner.Parent = sliderFill
+    
+    -- Slider Button (Dragger)
+    local sliderBtn = Instance.new("TextButton")
+    sliderBtn.Size = UDim2.new(0, 16, 0, 16)
+    sliderBtn.Position = UDim2.new((defaultValue - min) / (max - min), -8, 0.5, -8)
+    sliderBtn.BackgroundColor3 = Color3.new(1, 1, 1)
+    sliderBtn.Text = ""
+    sliderBtn.ZIndex = 10
+    sliderBtn.Parent = sliderBg
+    
+    local sliderBtnCorner = Instance.new("UICorner")
+    sliderBtnCorner.CornerRadius = UDim.new(1, 0)
+    sliderBtnCorner.Parent = sliderBtn
+    
+    local sliderBtnStroke = Instance.new("UIStroke")
+    sliderBtnStroke.Color = THEME.accent
+    sliderBtnStroke.Thickness = 2
+    sliderBtnStroke.Parent = sliderBtn
+    
+    -- Logic Slider
+    local dragging = false
+    
+    local function updateSlider(input)
+        if not dragging then return end
+        
+        local mousePos = input.Position
+        local sliderPos = sliderBg.AbsolutePosition.X
+        local sliderWidth = sliderBg.AbsoluteSize.X
+        
+        local relativeX = math.clamp(mousePos.X - sliderPos, 0, sliderWidth)
+        local percent = relativeX / sliderWidth
+        
+        -- Hitung nilai berdasarkan range min-max
+        local value = min + (percent * (max - min))
+        value = math.floor(value * 100) / 100  -- 2 desimal
+        
+        -- Update UI
+        sliderFill.Size = UDim2.new(percent, 0, 1, 0)
+        sliderBtn.Position = UDim2.new(percent, -8, 0.5, -8)
+        valueLabel.Text = string.format("%.2fs", value)
+        
+        -- Panggil callback
+        callback(value)
+    end
+    
+    sliderBtn.MouseButton1Down:Connect(function()
+        dragging = true
+    end)
+    
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            dragging = false
+        end
+    end)
+    
+    UserInputService.InputChanged:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            updateSlider(input)
         end
     end)
     
     return frame
-end
-
--- ==============================================
--- FUNGSI AUTO JOIN
--- ==============================================
-local function joinSelectedTable()
-    if JoinRemote then
-        local success, err = pcall(function()
-            JoinRemote:FireServer(selectedJoinTable)
-        end)
-        if success then
-            print("✅ Auto Join: Mencoba join ke " .. selectedJoinTable)
-        end
-    end
-end
-
-local function toggleAutoJoin(state)
-    autoJoinEnabled = state
-    
-    if autoJoinEnabled then
-        -- Loop auto join tiap 2 detik
-        autoJoinLoop = task.spawn(function()
-            while autoJoinEnabled and IsRunning do
-                joinSelectedTable()
-                task.wait(2)
-            end
-        end)
-        
-        -- Auto join saat respawn
-        autoJoinConnection = LocalPlayer.CharacterAdded:Connect(function()
-            if autoJoinEnabled then
-                task.wait(2)
-                joinSelectedTable()
-            end
-        end)
-        
-        print("✅ Auto Join AKTIF - Target: " .. selectedJoinTable)
-    else
-        if autoJoinLoop then
-            task.cancel(autoJoinLoop)
-            autoJoinLoop = nil
-        end
-        if autoJoinConnection then
-            autoJoinConnection:Disconnect()
-            autoJoinConnection = nil
-        end
-        print("❌ Auto Join NONAKTIF")
-    end
 end
 
 -- ==============================================
@@ -883,10 +868,10 @@ order = order + 1
 autoFeaturesContent[2] = createToggleButton("Auto Submit", mainContainer, true, function(state) autoEnterEnabled = state end, order)
 order = order + 1
 
-autoFeaturesContent[3] = createToggleButton("Human Mode", mainContainer, false, function(state) 
+autoFeaturesContent[3] = createToggleButton("Human Mode [10% Typo]", mainContainer, false, function(state) 
     humanModeEnabled = state 
     if state then
-        print("👤 Human Mode AKTIF")
+        print("👤 Human Mode AKTIF - 10% Typo")
     else
         print("⚡ Mode Cepat AKTIF")
     end
@@ -960,288 +945,7 @@ autoHeader.MouseButton1Click:Connect(function()
 end)
 
 -- ==============================================
--- AUTO JOIN SECTION
--- ==============================================
-local autoJoinHeader = Instance.new("TextButton")
-autoJoinHeader.Size = UDim2.new(1, 0, 0, 35)
-autoJoinHeader.LayoutOrder = order
-autoJoinHeader.BackgroundColor3 = Color3.fromRGB(20, 16, 36)
-autoJoinHeader.Text = ""
-autoJoinHeader.AutoButtonColor = false
-autoJoinHeader.Parent = mainContainer
-order = order + 1
-
-local autoJoinHeaderCorner = Instance.new("UICorner")
-autoJoinHeaderCorner.CornerRadius = UDim.new(0, 8)
-autoJoinHeaderCorner.Parent = autoJoinHeader
-
-local autoJoinHeaderStroke = Instance.new("UIStroke")
-autoJoinHeaderStroke.Color = THEME.mid
-autoJoinHeaderStroke.Thickness = 1
-autoJoinHeaderStroke.Transparency = 0.5
-autoJoinHeaderStroke.Parent = autoJoinHeader
-
-local autoJoinIcon = Instance.new("TextLabel")
-autoJoinIcon.Size = UDim2.new(0, 18, 0, 18)
-autoJoinIcon.Position = UDim2.new(0, 10, 0.5, -9)
-autoJoinIcon.BackgroundTransparency = 1
-autoJoinIcon.Text = "🎮"
-autoJoinIcon.TextColor3 = THEME.accent
-autoJoinIcon.Font = Enum.Font.GothamBold
-autoJoinIcon.TextSize = 16
-autoJoinIcon.Parent = autoJoinHeader
-
-local autoJoinTitle = Instance.new("TextLabel")
-autoJoinTitle.Size = UDim2.new(1, -80, 1, 0)
-autoJoinTitle.Position = UDim2.new(0, 35, 0, 0)
-autoJoinTitle.BackgroundTransparency = 1
-autoJoinTitle.Text = "AUTO JOIN TABLE"
-autoJoinTitle.TextColor3 = THEME.logText
-autoJoinTitle.Font = Enum.Font.GothamBold
-autoJoinTitle.TextSize = 13
-autoJoinTitle.TextXAlignment = Enum.TextXAlignment.Left
-autoJoinTitle.Parent = autoJoinHeader
-
-local autoJoinArrow = Instance.new("TextLabel")
-autoJoinArrow.Size = UDim2.new(0, 20, 0, 20)
-autoJoinArrow.Position = UDim2.new(1, -25, 0.5, -10)
-autoJoinArrow.BackgroundTransparency = 1
-autoJoinArrow.Text = "▼"
-autoJoinArrow.TextColor3 = THEME.accent
-autoJoinArrow.Font = Enum.Font.GothamBold
-autoJoinArrow.TextSize = 14
-autoJoinArrow.Parent = autoJoinHeader
-
--- CONTENT AUTO JOIN
-local autoJoinContent = {}
-
--- Toggle Button Auto Join
-local autoJoinToggleFrame = Instance.new("Frame")
-autoJoinToggleFrame.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
-autoJoinToggleFrame.LayoutOrder = order
-autoJoinToggleFrame.BackgroundColor3 = Color3.fromRGB(16, 15, 24)
-autoJoinToggleFrame.BorderSizePixel = 0
-autoJoinToggleFrame.Parent = mainContainer
-order = order + 1
-
-table.insert(autoJoinContent, autoJoinToggleFrame)
-
-local autoJoinToggleCorner = Instance.new("UICorner")
-autoJoinToggleCorner.CornerRadius = UDim.new(0, 8)
-autoJoinToggleCorner.Parent = autoJoinToggleFrame
-
-local autoJoinToggleStroke = Instance.new("UIStroke")
-autoJoinToggleStroke.Color = THEME.mid
-autoJoinToggleStroke.Thickness = 1
-autoJoinToggleStroke.Transparency = 0.6
-autoJoinToggleStroke.Parent = autoJoinToggleFrame
-
-local autoJoinToggleLabel = Instance.new("TextLabel")
-autoJoinToggleLabel.Size = UDim2.new(1, -60, 1, 0)
-autoJoinToggleLabel.Position = UDim2.new(0, 10, 0, 0)
-autoJoinToggleLabel.BackgroundTransparency = 1
-autoJoinToggleLabel.Text = "Auto Join Table"
-autoJoinToggleLabel.TextColor3 = Color3.fromRGB(210, 200, 230)
-autoJoinToggleLabel.Font = Enum.Font.GothamBold
-autoJoinToggleLabel.TextSize = TEXT_SIZE_NORMAL
-autoJoinToggleLabel.TextXAlignment = Enum.TextXAlignment.Left
-autoJoinToggleLabel.Parent = autoJoinToggleFrame
-
-local autoJoinToggle = Instance.new("Frame")
-autoJoinToggle.Size = UDim2.new(0, 44, 0, 22)
-autoJoinToggle.Position = UDim2.new(1, -50, 0.5, -11)
-autoJoinToggle.BackgroundColor3 = Color3.fromRGB(180, 40, 50)
-autoJoinToggle.BorderSizePixel = 0
-autoJoinToggle.Parent = autoJoinToggleFrame
-
-local autoJoinToggleCorner2 = Instance.new("UICorner")
-autoJoinToggleCorner2.CornerRadius = UDim.new(1, 0)
-autoJoinToggleCorner2.Parent = autoJoinToggle
-
-local autoJoinToggleGlow = Instance.new("UIStroke")
-autoJoinToggleGlow.Color = Color3.fromRGB(255, 40, 50)
-autoJoinToggleGlow.Thickness = 2
-autoJoinToggleGlow.Transparency = 0.5
-autoJoinToggleGlow.Parent = autoJoinToggle
-
-local autoJoinKnob = Instance.new("Frame")
-autoJoinKnob.Size = UDim2.new(0, 16, 0, 16)
-autoJoinKnob.Position = UDim2.new(0, 3, 0.5, -8)
-autoJoinKnob.BackgroundColor3 = Color3.new(1, 1, 1)
-autoJoinKnob.BorderSizePixel = 0
-autoJoinKnob.Parent = autoJoinToggle
-
-local autoJoinKnobCorner = Instance.new("UICorner")
-autoJoinKnobCorner.CornerRadius = UDim.new(1, 0)
-autoJoinKnobCorner.Parent = autoJoinKnob
-
-local autoJoinBtn = Instance.new("TextButton")
-autoJoinBtn.Size = UDim2.new(1, 0, 1, 0)
-autoJoinBtn.BackgroundTransparency = 1
-autoJoinBtn.Text = ""
-autoJoinBtn.Parent = autoJoinToggleFrame
-
-autoJoinBtn.MouseButton1Click:Connect(function()
-    playClickSound()
-    autoJoinEnabled = not autoJoinEnabled
-    toggleAutoJoin(autoJoinEnabled)
-    
-    if autoJoinEnabled then
-        autoJoinToggle.BackgroundColor3 = Color3.fromRGB(30, 180, 110)
-        autoJoinToggleGlow.Color = Color3.fromRGB(30, 255, 110)
-        autoJoinKnob.Position = UDim2.new(1, -19, 0.5, -8)
-    else
-        autoJoinToggle.BackgroundColor3 = Color3.fromRGB(180, 40, 50)
-        autoJoinToggleGlow.Color = Color3.fromRGB(255, 40, 50)
-        autoJoinKnob.Position = UDim2.new(0, 3, 0.5, -8)
-    end
-end)
-
--- Dropdown Button Pilih Table
-local tableListBtn = Instance.new("TextButton")
-tableListBtn.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
-tableListBtn.LayoutOrder = order
-order = order + 1
-tableListBtn.BackgroundColor3 = Color3.fromRGB(65, 20, 145)
-tableListBtn.Text = "PILIH TABLE ▼"
-tableListBtn.TextColor3 = Color3.fromRGB(220, 220, 255)
-tableListBtn.Font = Enum.Font.Gotham  
-tableListBtn.TextSize = TEXT_SIZE_NORMAL
-tableListBtn.Parent = mainContainer
-
-table.insert(autoJoinContent, tableListBtn)
-
-local tableBtnCorner = Instance.new("UICorner")
-tableBtnCorner.CornerRadius = UDim.new(0, 8)
-tableBtnCorner.Parent = tableListBtn
-
-local tableBtnStroke = Instance.new("UIStroke")
-tableBtnStroke.Color = THEME.mid
-tableBtnStroke.Thickness = 1
-tableBtnStroke.Transparency = 0.3
-tableBtnStroke.Parent = tableListBtn
-
--- Dropdown Frame
-local tableDropdown = Instance.new("Frame")
-tableDropdown.Size = UDim2.new(1, 0, 0, 0)
-tableDropdown.LayoutOrder = order
-order = order + 1
-tableDropdown.BackgroundColor3 = Color3.fromRGB(14, 13, 22)
-tableDropdown.ClipsDescendants = true
-tableDropdown.BorderSizePixel = 0
-tableDropdown.Parent = mainContainer
-
-table.insert(autoJoinContent, tableDropdown)
-
-local tableDropdownStroke = Instance.new("UIStroke")
-tableDropdownStroke.Color = THEME.mid
-tableDropdownStroke.Thickness = 1
-tableDropdownStroke.Transparency = 0.4
-tableDropdownStroke.Parent = tableDropdown
-
-local tableCategoryHeight = IsMobile and 30 or 28
-local tableDropdownOpen = false
-
--- Selected Table Label
-local selectedTableLabel = Instance.new("TextLabel")
-selectedTableLabel.Size = UDim2.new(1, -20, 0, 20)
-selectedTableLabel.Position = UDim2.new(0, 10, 0, 5)
-selectedTableLabel.BackgroundTransparency = 1
-selectedTableLabel.Text = "Selected: " .. selectedJoinTable
-selectedTableLabel.TextColor3 = THEME.accent
-selectedTableLabel.Font = Enum.Font.GothamBold
-selectedTableLabel.TextSize = TEXT_SIZE_NORMAL
-selectedTableLabel.TextXAlignment = Enum.TextXAlignment.Left
-selectedTableLabel.Parent = tableDropdown
-
-local function updateTableButtons()
-    for _, child in pairs(tableDropdown:GetChildren()) do
-        if child:IsA("TextButton") then
-            child:Destroy()
-        end
-    end
-    
-    for i, tableName in ipairs(availableTables) do
-        local isSelected = tableName == selectedJoinTable
-        
-        local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(1, -10, 0, tableCategoryHeight)
-        btn.Position = UDim2.new(0, 5, 0, 25 + (i - 1) * tableCategoryHeight + 2)
-        btn.BackgroundColor3 = isSelected and Color3.fromRGB(80, 30, 170) or Color3.fromRGB(28, 25, 42)
-        btn.Text = ""
-        btn.Parent = tableDropdown
-        
-        local btnCorner = Instance.new("UICorner")
-        btnCorner.CornerRadius = UDim.new(0, 5)
-        btnCorner.Parent = btn
-        
-        local tableLabel = Instance.new("TextLabel")
-        tableLabel.Size = UDim2.new(1, -20, 1, 0)
-        tableLabel.Position = UDim2.new(0, 10, 0, 0)
-        tableLabel.BackgroundTransparency = 1
-        tableLabel.Text = tableName
-        tableLabel.TextColor3 = isSelected and Color3.new(1, 1, 1) or Color3.fromRGB(160, 150, 190)
-        tableLabel.Font = Enum.Font.GothamBold
-        tableLabel.TextSize = TEXT_SIZE_NORMAL
-        tableLabel.TextXAlignment = Enum.TextXAlignment.Left
-        tableLabel.Parent = btn
-        
-        if isSelected then
-            local btnStroke = Instance.new("UIStroke")
-            btnStroke.Color = THEME.accent
-            btnStroke.Thickness = 1
-            btnStroke.Transparency = 0.2
-            btnStroke.Parent = btn
-        end
-        
-        btn.MouseButton1Click:Connect(function()
-            playClickSound()
-            selectedJoinTable = tableName
-            selectedTableLabel.Text = "Selected: " .. selectedJoinTable
-            updateTableButtons()
-            tableDropdownOpen = false
-            tableListBtn.Text = "PILIH TABLE ▼"
-            tableDropdown:TweenSize(UDim2.new(1, 0, 0, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Quart, 0.3, true)
-            print("📋 Table dipilih: " .. selectedJoinTable)
-        end)
-    end
-end
-
-tableListBtn.MouseButton1Click:Connect(function()
-    playClickSound()
-    tableDropdownOpen = not tableDropdownOpen
-    tableListBtn.Text = tableDropdownOpen and "PILIH TABLE ▲" or "PILIH TABLE ▼"
-    
-    local dropdownHeight = #availableTables * tableCategoryHeight + 25
-    tableDropdown:TweenSize(
-        UDim2.new(1, 0, 0, tableDropdownOpen and dropdownHeight or 0),
-        Enum.EasingDirection.Out,
-        Enum.EasingStyle.Quart,
-        0.3,
-        true
-    )
-    
-    updateTableButtons()
-end)
-
--- Atur visibility AUTO JOIN
-local autoJoinExpanded = true
-for _, item in ipairs(autoJoinContent) do
-    item.Visible = autoJoinExpanded
-end
-
-autoJoinHeader.MouseButton1Click:Connect(function()
-    playClickSound()
-    autoJoinExpanded = not autoJoinExpanded
-    autoJoinArrow.Text = autoJoinExpanded and "▼" or "▶"
-    
-    for _, item in ipairs(autoJoinContent) do
-        item.Visible = autoJoinExpanded
-    end
-end)
-
--- ==============================================
--- SECTION 3: INFORMATION
+-- SECTION 2: INFORMATION (AWALAN DAN SEARCH)
 -- ==============================================
 local infoHeader = Instance.new("TextButton")
 infoHeader.Size = UDim2.new(1, 0, 0, 35)
@@ -1424,7 +1128,7 @@ infoHeader.MouseButton1Click:Connect(function()
 end)
 
 -- ==============================================
--- KATA SULIT SECTION
+-- KATA SULIT SECTION (DENGAN JUMLAH KATA)
 -- ==============================================
 local kataSulitHeader = Instance.new("TextButton")
 kataSulitHeader.Size = UDim2.new(1, 0, 0, 35)
@@ -1457,7 +1161,7 @@ local kataTitle = Instance.new("TextLabel")
 kataTitle.Size = UDim2.new(1, -80, 1, 0)
 kataTitle.Position = UDim2.new(0, 35, 0, 0)
 kataTitle.BackgroundTransparency = 1
-kataTitle.Text = "SEMUA KATA SULIT"
+kataTitle.Text = "KATA SULIT"
 kataTitle.TextColor3 = THEME.logText
 kataTitle.Font = Enum.Font.GothamBold
 kataTitle.TextSize = 13
@@ -1474,51 +1178,137 @@ kataArrow.Font = Enum.Font.GothamBold
 kataArrow.TextSize = 14
 kataArrow.Parent = kataSulitHeader
 
--- Kata Sulit Dropdown Button
-local kataSulitBtn = Instance.new("TextButton")
-kataSulitBtn.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
-kataSulitBtn.LayoutOrder = order
-order = order + 1
-kataSulitBtn.BackgroundColor3 = Color3.fromRGB(65, 20, 145)
-kataSulitBtn.Text = "SET KATA SULIT ▼"
-kataSulitBtn.TextColor3 = Color3.fromRGB(220, 220, 255)
-kataSulitBtn.Font = Enum.Font.Gotham  
-kataSulitBtn.TextSize = TEXT_SIZE_NORMAL
-kataSulitBtn.Parent = mainContainer
+-- KATA SULIT CONTENT
+local kataContent = {}
 
-local kataBtnCorner = Instance.new("UICorner")
-kataBtnCorner.CornerRadius = UDim.new(0, 8)
-kataBtnCorner.Parent = kataSulitBtn
-
-local kataBtnStroke = Instance.new("UIStroke")
-kataBtnStroke.Color = THEME.mid
-kataBtnStroke.Thickness = 1
-kataBtnStroke.Transparency = 0.3
-kataBtnStroke.Parent = kataSulitBtn
-
--- Kata Sulit Dropdown Content
-local kataDropdown = Instance.new("Frame")
-kataDropdown.Size = UDim2.new(1, 0, 0, 0)
-kataDropdown.LayoutOrder = order
-order = order + 1
-kataDropdown.BackgroundColor3 = Color3.fromRGB(14, 13, 22)
-kataDropdown.ClipsDescendants = true
-kataDropdown.BorderSizePixel = 0
-kataDropdown.Parent = mainContainer
-
-local kataDropdownStroke = Instance.new("UIStroke")
-kataDropdownStroke.Color = THEME.mid
-kataDropdownStroke.Thickness = 1
-kataDropdownStroke.Transparency = 0.4
-kataDropdownStroke.Parent = kataDropdown
-
-local categoryHeight = IsMobile and 30 or 28
-local dropdownOpen = false
+-- Buat toggle untuk setiap kategori dengan jumlah kata
 local categories = {"IF", "X", "NG", "AI", "CY", "UI", "KS", "LY", "RS", "NS", "SEMUA KATA SULIT"}
+local kataToggles = {}
 
+for i, cat in ipairs(categories) do
+    local toggleFrame = Instance.new("Frame")
+    toggleFrame.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT)
+    toggleFrame.LayoutOrder = order + i
+    toggleFrame.BackgroundColor3 = Color3.fromRGB(16, 15, 24)
+    toggleFrame.BorderSizePixel = 0
+    toggleFrame.Parent = mainContainer
+    toggleFrame.Visible = true
+    table.insert(kataContent, toggleFrame)
+    
+    local frameCorner = Instance.new("UICorner")
+    frameCorner.CornerRadius = UDim.new(0, 8)
+    frameCorner.Parent = toggleFrame
+    
+    local frameStroke = Instance.new("UIStroke")
+    frameStroke.Color = THEME.mid
+    frameStroke.Thickness = 1
+    frameStroke.Transparency = 0.6
+    frameStroke.Parent = toggleFrame
+    
+    -- Nama kategori + jumlah kata
+    local label = Instance.new("TextLabel")
+    label.Size = UDim2.new(1, -60, 1, 0)
+    label.Position = UDim2.new(0, 10, 0, 0)
+    label.BackgroundTransparency = 1
+    label.Text = cat
+    label.TextColor3 = Color3.fromRGB(210, 200, 230)
+    label.Font = Enum.Font.GothamBold
+    label.TextSize = TEXT_SIZE_NORMAL
+    label.TextXAlignment = Enum.TextXAlignment.Left
+    label.Parent = toggleFrame
+    
+    -- Jumlah kata
+    local countLabel = Instance.new("TextLabel")
+    countLabel.Size = UDim2.new(0, 50, 1, 0)
+    countLabel.Position = UDim2.new(1, -100, 0, 0)
+    countLabel.BackgroundTransparency = 1
+    countLabel.Text = "(0)"
+    countLabel.TextColor3 = THEME.accent
+    countLabel.Font = Enum.Font.Gotham
+    countLabel.TextSize = TEXT_SIZE_SMALL
+    countLabel.TextXAlignment = Enum.TextXAlignment.Right
+    countLabel.Parent = toggleFrame
+    
+    -- Toggle switch
+    local toggle = Instance.new("Frame")
+    toggle.Size = UDim2.new(0, 44, 0, 22)
+    toggle.Position = UDim2.new(1, -50, 0.5, -11)
+    toggle.BackgroundColor3 = Color3.fromRGB(180, 40, 50)
+    toggle.BorderSizePixel = 0
+    toggle.Parent = toggleFrame
+    
+    local toggleCorner = Instance.new("UICorner")
+    toggleCorner.CornerRadius = UDim.new(1, 0)
+    toggleCorner.Parent = toggle
+    
+    local toggleGlow = Instance.new("UIStroke")
+    toggleGlow.Color = Color3.fromRGB(255, 40, 50)
+    toggleGlow.Thickness = 2
+    toggleGlow.Transparency = 0.5
+    toggleGlow.Parent = toggle
+    
+    local knob = Instance.new("Frame")
+    knob.Size = UDim2.new(0, 16, 0, 16)
+    knob.Position = UDim2.new(0, 3, 0.5, -8)
+    knob.BackgroundColor3 = Color3.new(1, 1, 1)
+    knob.BorderSizePixel = 0
+    knob.Parent = toggle
+    
+    local knobCorner = Instance.new("UICorner")
+    knobCorner.CornerRadius = UDim.new(1, 0)
+    knobCorner.Parent = knob
+    
+    local btn = Instance.new("TextButton")
+    btn.Size = UDim2.new(1, 0, 1, 0)
+    btn.BackgroundTransparency = 1
+    btn.Text = ""
+    btn.Parent = toggleFrame
+    
+    local state = false
+    
+    btn.MouseButton1Click:Connect(function()
+        state = not state
+        toggle.BackgroundColor3 = state and Color3.fromRGB(30, 180, 110) or Color3.fromRGB(180, 40, 50)
+        toggleGlow.Color = state and Color3.fromRGB(30, 255, 110) or Color3.fromRGB(255, 40, 50)
+        knob.Position = state and UDim2.new(1, -19, 0.5, -8) or UDim2.new(0, 3, 0.5, -8)
+        playClickSound()
+        categoryToggles[cat] = state
+    end)
+    
+    kataToggles[cat] = {
+        frame = toggleFrame,
+        countLabel = countLabel,
+        toggle = toggle,
+        knob = knob,
+        state = state
+    }
+end
+
+order = order + #categories
+
+-- Fungsi update jumlah kata
+local function updateKataCounts()
+    for cat, data in pairs(kataToggles) do
+        if cat == "SEMUA KATA SULIT" then
+            local total = 0
+            for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "LY", "RS", "NS"}) do
+                total = total + #wordCategories[c]
+            end
+            data.countLabel.Text = "(" .. total .. ")"
+        else
+            data.countLabel.Text = "(" .. #wordCategories[cat] .. ")"
+        end
+    end
+end
+
+-- Panggil update setelah loading
+task.spawn(function()
+    task.wait(3)
+    updateKataCounts()
+end)
+
+-- Atur visibility KATA SULIT
 local kataExpanded = true
-local kataContent = {kataSulitBtn, kataDropdown}
-
 for _, item in ipairs(kataContent) do
     item.Visible = kataExpanded
 end
@@ -1533,133 +1323,98 @@ kataSulitHeader.MouseButton1Click:Connect(function()
     end
 end)
 
-local function getCategoryCount(cat)
-    if cat == "SEMUA KATA SULIT" then
-        local total = 0
-        for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "LY", "RS", "NS"}) do
-            total = total + #wordCategories[c]
-        end
-        return total
-    else
-        return #wordCategories[cat]
-    end
+-- ==============================================
+-- DELAY SETTINGS SECTION (DENGAN SLIDER BAR)
+-- ==============================================
+local delayHeader = Instance.new("TextButton")
+delayHeader.Size = UDim2.new(1, 0, 0, 35)
+delayHeader.LayoutOrder = order
+delayHeader.BackgroundColor3 = Color3.fromRGB(20, 16, 36)
+delayHeader.Text = ""
+delayHeader.AutoButtonColor = false
+delayHeader.Parent = mainContainer
+order = order + 1
+
+local delayHeaderCorner = Instance.new("UICorner")
+delayHeaderCorner.CornerRadius = UDim.new(0, 8)
+delayHeaderCorner.Parent = delayHeader
+
+local delayHeaderStroke = Instance.new("UIStroke")
+delayHeaderStroke.Color = THEME.mid
+delayHeaderStroke.Thickness = 1
+delayHeaderStroke.Transparency = 0.5
+delayHeaderStroke.Parent = delayHeader
+
+local delayIcon = Instance.new("ImageLabel")
+delayIcon.Size = UDim2.new(0, 18, 0, 18)
+delayIcon.Position = UDim2.new(0, 10, 0.5, -9)
+delayIcon.BackgroundTransparency = 1
+delayIcon.Image = "rbxassetid://6023426925"
+delayIcon.ImageColor3 = THEME.accent
+delayIcon.Parent = delayHeader
+
+local delayTitle = Instance.new("TextLabel")
+delayTitle.Size = UDim2.new(1, -80, 1, 0)
+delayTitle.Position = UDim2.new(0, 35, 0, 0)
+delayTitle.BackgroundTransparency = 1
+delayTitle.Text = "DELAY SETTINGS"
+delayTitle.TextColor3 = THEME.logText
+delayTitle.Font = Enum.Font.GothamBold
+delayTitle.TextSize = 13
+delayTitle.TextXAlignment = Enum.TextXAlignment.Left
+delayTitle.Parent = delayHeader
+
+local delayArrow = Instance.new("TextLabel")
+delayArrow.Size = UDim2.new(0, 20, 0, 20)
+delayArrow.Position = UDim2.new(1, -25, 0.5, -10)
+delayArrow.BackgroundTransparency = 1
+delayArrow.Text = "▼"
+delayArrow.TextColor3 = THEME.accent
+delayArrow.Font = Enum.Font.GothamBold
+delayArrow.TextSize = 14
+delayArrow.Parent = delayHeader
+
+-- CONTENT DELAY (DENGAN SLIDER)
+local delayContent = {}
+
+-- Slider Write Delay (0.05 - 0.5)
+local writeSlider = createSlider("Write Delay", mainContainer, 0.05, 0.5, typeDelay, function(value)
+    typeDelay = value
+    enterDelay = value
+end, order)
+order = order + 1
+table.insert(delayContent, writeSlider)
+
+-- Slider Turn Delay (1.0 - 5.0)
+local turnSlider = createSlider("Turn Delay", mainContainer, 1.0, 5.0, turnDelay, function(value)
+    turnDelay = value
+end, order)
+order = order + 1
+table.insert(delayContent, turnSlider)
+
+-- Slider Backspace Delay (0.05 - 0.3)
+local backspaceSlider = createSlider("Backspace Delay", mainContainer, 0.05, 0.3, backspaceDelay, function(value)
+    backspaceDelay = value
+    deleteDelay = value
+end, order)
+order = order + 1
+table.insert(delayContent, backspaceSlider)
+
+-- Atur visibility DELAY
+local delayExpanded = true
+for _, item in ipairs(delayContent) do
+    item.Visible = delayExpanded
 end
 
-local function updateCategoryButtons()
-    for _, child in pairs(kataDropdown:GetChildren()) do
-        if child:IsA("TextButton") then
-            child:Destroy()
-        end
-    end
-    
-    for i, cat in ipairs(categories) do
-        local isAllOn = cat == "SEMUA KATA SULIT" and categoryToggles["SEMUA KATA SULIT"]
-        local isOn = cat == "SEMUA KATA SULIT" and categoryToggles["SEMUA KATA SULIT"] or categoryToggles[cat]
-        local count = getCategoryCount(cat)
-        
-        local btn = Instance.new("TextButton")
-        btn.Size = UDim2.new(1, -10, 0, categoryHeight)
-        btn.Position = UDim2.new(0, 5, 0, (i - 1) * categoryHeight + 2)
-        btn.BackgroundColor3 = isOn and Color3.fromRGB(80, 30, 170) or Color3.fromRGB(28, 25, 42)
-        btn.Text = ""
-        btn.Parent = kataDropdown
-        
-        local btnCorner = Instance.new("UICorner")
-        btnCorner.CornerRadius = UDim.new(0, 5)
-        btnCorner.Parent = btn
-        
-        -- Nama kategori
-        local catLabel = Instance.new("TextLabel")
-        catLabel.Size = UDim2.new(0, 80, 1, 0)
-        catLabel.Position = UDim2.new(0, 10, 0, 0)
-        catLabel.BackgroundTransparency = 1
-        catLabel.Text = cat
-        catLabel.TextColor3 = isOn and Color3.new(1, 1, 1) or Color3.fromRGB(160, 150, 190)
-        catLabel.Font = Enum.Font.GothamBold
-        catLabel.TextSize = TEXT_SIZE_NORMAL
-        catLabel.TextXAlignment = Enum.TextXAlignment.Left
-        catLabel.Parent = btn
-        
-        -- Jumlah kata
-        local countLabel = Instance.new("TextLabel")
-        countLabel.Size = UDim2.new(0, 50, 1, 0)
-        countLabel.Position = UDim2.new(1, -55, 0, 0)
-        countLabel.BackgroundTransparency = 1
-        countLabel.Text = "(" .. count .. ")"
-        countLabel.TextColor3 = isOn and THEME.accent or Color3.fromRGB(120, 100, 150)
-        countLabel.Font = Enum.Font.Gotham
-        countLabel.TextSize = TEXT_SIZE_SMALL
-        countLabel.TextXAlignment = Enum.TextXAlignment.Right
-        countLabel.Parent = btn
-        
-        if isOn then
-            local btnStroke = Instance.new("UIStroke")
-            btnStroke.Color = THEME.accent
-            btnStroke.Thickness = 1
-            btnStroke.Transparency = 0.2
-            btnStroke.Parent = btn
-        end
-        
-        btn.MouseButton1Click:Connect(function()
-            playClickSound()
-            
-            if cat == "SEMUA KATA SULIT" then
-                local newState = not categoryToggles["SEMUA KATA SULIT"]
-                categoryToggles["SEMUA KATA SULIT"] = newState
-                if newState then
-                    for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "LY", "RS", "NS"}) do
-                        categoryToggles[c] = false
-                    end
-                end
-            else
-                categoryToggles[cat] = not categoryToggles[cat]
-                local anyOn = false
-                for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "LY", "RS", "NS"}) do
-                    if categoryToggles[c] then
-                        anyOn = true
-                        break
-                    end
-                end
-                if not anyOn then
-                    categoryToggles["SEMUA KATA SULIT"] = false
-                end
-            end
-            
-            updateCategoryButtons()
-        end)
-    end
-end
-
-kataSulitBtn.MouseButton1Click:Connect(function()
+delayHeader.MouseButton1Click:Connect(function()
     playClickSound()
-    dropdownOpen = not dropdownOpen
-    kataSulitBtn.Text = dropdownOpen and "SET KATA SULIT ▲" or "SET KATA SULIT ▼"
+    delayExpanded = not delayExpanded
+    delayArrow.Text = delayExpanded and "▼" or "▶"
     
-    kataDropdown:TweenSize(
-        UDim2.new(1, 0, 0, dropdownOpen and #categories * categoryHeight + 5 or 0),
-        Enum.EasingDirection.Out,
-        Enum.EasingStyle.Quart,
-        0.3,
-        true
-    )
-    
-    updateCategoryButtons()
+    for _, item in ipairs(delayContent) do
+        item.Visible = delayExpanded
+    end
 end)
-
--- ==============================================
--- DELAY SETTINGS SECTION (SLIDER HUMAN MODE DIHAPUS)
--- ==============================================
-local delaySettingsContent = {}
-
-delaySettingsContent[1] = createDelayInput("Write Delay", typeDelay, function(v) typeDelay = v; enterDelay = v end, order)
-order = order + 1
-delaySettingsContent[2] = createDelayInput("Turn Delay", turnDelay, function(v) turnDelay = v end, order)
-order = order + 1
-delaySettingsContent[3] = createDelayInput("Backspace Delay", backspaceDelay, function(v) backspaceDelay = v; deleteDelay = v end, order)
-order = order + 1
-
-createCollapsibleHeader("DELAY SETTINGS", "rbxassetid://6023426925", mainContainer, delaySettingsContent, order)
-order = order + 4
 
 -- ==============================================
 -- BUILD UTILITY TAB (dengan ANTI AFK)
@@ -1861,19 +1616,17 @@ antiAfkBtn.Parent = antiAfkFrame
 
 local function toggleAntiAfk(state)
     if state then
-        -- Aktifkan Anti AFK pake VirtualUser
         antiAfkConnection = LocalPlayer.Idled:Connect(function()
             game:GetService("VirtualUser"):CaptureController()
             game:GetService("VirtualUser"):ClickButton2(Vector2.new())
         end)
         print("✅ Anti-AFK ON")
     else
-        -- Matikan Anti AFK
         if antiAfkConnection then
             antiAfkConnection:Disconnect()
             antiAfkConnection = nil
-            print("❌ Anti-AFK OFF")
         end
+        print("❌ Anti-AFK OFF")
     end
 end
 
@@ -2061,50 +1814,43 @@ local function typeWord(word, length)
     if humanModeEnabled then
         -- HUMAN MODE DENGAN TYPO 10%
         local typoCount = 0
-        local maxTypo = math.random(1, 2)  -- Random typo 1 atau 2 kali
-        local typoChance = 0.1  -- 10% chance typo
+        local maxTypo = math.random(1, 2)
+        local typoChance = 0.1
         
         for i = 1, #word do
             if not IsRunning then return end
             
-            -- Cek apakah akan typo (10% chance)
             if typoCount < maxTypo and math.random() < typoChance then
-                -- Bikin typo (1 huruf salah)
                 local wrongChar = string.char(math.random(97, 122)):upper()
                 local correctChar = word:sub(i, i):upper()
                 
-                -- Pastikan wrongChar berbeda dari correctChar
                 while wrongChar == correctChar do
                     wrongChar = string.char(math.random(97, 122)):upper()
                 end
                 
                 print("⌨️ Human Mode: Typo '" .. wrongChar .. "' harusnya '" .. correctChar .. "'")
                 
-                -- Ketik huruf salah
                 local keyCode = Enum.KeyCode[wrongChar]
                 if keyCode then
                     VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
                     task.wait(0.05)
                     VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
-                    task.wait(backspaceDelay + 0.1)  -- Jeda sadar typo
+                    task.wait(backspaceDelay + 0.1)
                 end
                 
-                -- Hapus huruf salah
                 VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Backspace, false, game)
                 task.wait(backspaceDelay)
                 VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Backspace, false, game)
                 
                 typoCount = typoCount + 1
-                task.wait(0.1)  -- Jeda lanjut ngetik
+                task.wait(0.1)
             end
             
-            -- Ketik huruf yang benar
             local char = word:sub(i, i):upper()
             local keyCode = Enum.KeyCode[char]
             
             if keyCode then
-                -- Jeda antar huruf (lebih lambat)
-                task.wait(math.random() * 0.15 + 0.1)  -- 0.1 - 0.25 detik
+                task.wait(math.random() * 0.15 + 0.1)
                 
                 VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
                 task.wait(0.05)
@@ -2112,11 +1858,9 @@ local function typeWord(word, length)
             end
         end
         
-        -- Jeda sebelum enter
-        task.wait(math.random() * 0.2 + 0.1)  -- 0.1 - 0.3 detik
+        task.wait(math.random() * 0.2 + 0.1)
         
     else
-        -- MODE CEPAT (seperti biasa)
         for i = 1, #word do
             local char = word:sub(i, i):upper()
             local keyCode = Enum.KeyCode[char]
@@ -2334,6 +2078,7 @@ task.spawn(function()
                     end
                 end
                 print("🔥 Category " .. cat .. " Loaded! (" .. #wordCategories[cat] .. " kata)")
+                updateKataCounts()
             end
         end)
     end
@@ -2429,4 +2174,4 @@ end
 -- Show main tab by default
 switchTab(mainContainer, mainTab)
 
-print("✅ Anixly Loaded")
+print("✅ Anixly Loaded - Dengan Slider Delay!")
