@@ -225,15 +225,13 @@ end)
 -- Window Controls
 local controlSize = IsMobile and 18 or 26
 
--- Minimize Button
-local MinimizeBtn = Instance.new("TextButton")
+-- Minimize Button (PAKE ICON)
+local MinimizeBtn = Instance.new("ImageButton")
 MinimizeBtn.Size = UDim2.new(0, controlSize, 0, controlSize)
 MinimizeBtn.Position = UDim2.new(1, -(controlSize * 2 + 10), 0.5, -controlSize / 2)
 MinimizeBtn.BackgroundColor3 = Color3.fromRGB(250, 190, 0)
-MinimizeBtn.Text = "-"
-MinimizeBtn.TextColor3 = Color3.fromRGB(30, 20, 0)
-MinimizeBtn.Font = Enum.Font.GothamBold
-MinimizeBtn.TextSize = IsMobile and 14 or 16
+MinimizeBtn.Image = "rbxassetid://6023426926"  -- ICON minimize (garis bawah)
+MinimizeBtn.ImageColor3 = Color3.fromRGB(30, 20, 0)
 MinimizeBtn.Parent = Header
 
 local MinCorner = Instance.new("UICorner")
@@ -806,7 +804,7 @@ local function createDelayInput(label, defaultValue, callback, order)
 end
 
 -- ==============================================
--- FUNGSI SLIDER BAR UNTUK TYPO CHANCE
+-- FUNGSI SLIDER BAR UNTUK TYPO CHANCE (10%-50%)
 -- ==============================================
 local function createSlider(label, min, max, defaultValue, callback, order)
     local frame = Instance.new("Frame")
@@ -864,7 +862,7 @@ local function createSlider(label, min, max, defaultValue, callback, order)
     
     -- Slider Fill
     local sliderFill = Instance.new("Frame")
-    sliderFill.Size = UDim2.new(defaultValue/100, 0, 1, 0)
+    sliderFill.Size = UDim2.new((defaultValue - min) / (max - min), 0, 1, 0)
     sliderFill.BackgroundColor3 = THEME.accent
     sliderFill.BorderSizePixel = 0
     sliderFill.Parent = sliderBg
@@ -876,7 +874,7 @@ local function createSlider(label, min, max, defaultValue, callback, order)
     -- Slider Button (Dragger)
     local sliderBtn = Instance.new("TextButton")
     sliderBtn.Size = UDim2.new(0, 16, 0, 16)
-    sliderBtn.Position = UDim2.new(defaultValue/100, -8, 0.5, -8)
+    sliderBtn.Position = UDim2.new((defaultValue - min) / (max - min), -8, 0.5, -8)
     sliderBtn.BackgroundColor3 = Color3.new(1, 1, 1)
     sliderBtn.Text = ""
     sliderBtn.ZIndex = 10
@@ -891,8 +889,32 @@ local function createSlider(label, min, max, defaultValue, callback, order)
     sliderBtnStroke.Thickness = 2
     sliderBtnStroke.Parent = sliderBtn
     
-    -- Logic Slider
+    -- Logic Slider (DIPERBAIKI)
     local dragging = false
+    local function updateSlider(input)
+        if not dragging then return end
+        
+        -- Hitung posisi mouse relatif ke sliderBg
+        local mousePos = input.Position
+        local sliderPos = sliderBg.AbsolutePosition.X
+        local sliderWidth = sliderBg.AbsoluteSize.X
+        
+        -- Batasi posisi dalam range slider
+        local relativeX = math.clamp(mousePos.X - sliderPos, 0, sliderWidth)
+        local percent = relativeX / sliderWidth
+        
+        -- Hitung nilai berdasarkan range min-max (10-50)
+        local value = math.floor(min + (percent * (max - min)))
+        value = math.clamp(value, min, max)
+        
+        -- Update UI
+        sliderFill.Size = UDim2.new((value - min) / (max - min), 0, 1, 0)
+        sliderBtn.Position = UDim2.new((value - min) / (max - min), -8, 0.5, -8)
+        valueLabel.Text = value .. "%"
+        
+        -- Panggil callback dengan nilai baru
+        callback(value)
+    end
     
     sliderBtn.MouseButton1Down:Connect(function()
         dragging = true
@@ -905,24 +927,8 @@ local function createSlider(label, min, max, defaultValue, callback, order)
     end)
     
     UserInputService.InputChanged:Connect(function(input)
-        if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local mousePos = UserInputService:GetMouseLocation()
-            local sliderPos = sliderBg.AbsolutePosition.X
-            local sliderWidth = sliderBg.AbsoluteSize.X
-            
-            local relativeX = math.clamp(mousePos.X - sliderPos, 0, sliderWidth)
-            local percent = relativeX / sliderWidth
-            local value = math.floor(percent * 100)
-            
-            value = math.clamp(value, min, max)
-            
-            -- Update UI
-            sliderFill.Size = UDim2.new(value/100, 0, 1, 0)
-            sliderBtn.Position = UDim2.new(value/100, -8, 0.5, -8)
-            valueLabel.Text = value .. "%"
-            
-            -- Panggil callback dengan nilai baru
-            callback(value)
+        if input.UserInputType == Enum.UserInputType.MouseMovement then
+            updateSlider(input)
         end
     end)
     
@@ -1513,7 +1519,7 @@ kataSulitBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ==============================================
--- DELAY SETTINGS SECTION (DENGAN SLIDER TYPO)
+-- DELAY SETTINGS SECTION (DENGAN SLIDER TYPO 10-50%)
 -- ==============================================
 local delaySettingsContent = {}
 
@@ -1524,8 +1530,8 @@ order = order + 1
 delaySettingsContent[3] = createDelayInput("Backspace Delay", backspaceDelay, function(v) backspaceDelay = v; deleteDelay = v end, order)
 order = order + 1
 
--- SLIDER UNTUK TYPO CHANCE (1-100%)
-local typoSlider = createSlider("Typo Chance", 1, 100, humanTypoChance, function(value)
+-- SLIDER UNTUK TYPO CHANCE (10%-50%)
+local typoSlider = createSlider("Typo Chance", 10, 50, humanTypoChance, function(value)
     humanTypoChance = value
     if humanModeEnabled then
         print("🎯 Typo chance diubah ke " .. value .. "%")
@@ -2219,4 +2225,4 @@ end
 -- Show main tab by default
 switchTab(mainContainer, mainTab)
 
-print("✅ Anixly Loaded - Slider Typo siap!")
+print("✅ Anixly Loaded")
