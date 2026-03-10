@@ -1,5 +1,5 @@
 --[[
-    Anixly - Sambung kata
+    Anixly - Sambung kata (Delay Settings Hidden)
 ]]
 
 -- Services
@@ -63,15 +63,17 @@ local COMPONENT_HEIGHT = IsMobile and 32 or 36
 local TEXT_SIZE_NORMAL = IsMobile and 10 or 12
 local TEXT_SIZE_LARGE = IsMobile and 13 or 15
 
+-- ===== DELAY SETTINGS (HIDDEN - ATUR DI SINI) =====
+local typeDelay = 0.12      -- Jeda antar huruf (detik)
+local enterDelay = 0.15     -- Jeda sebelum enter
+local turnDelay = 2.0       -- Jeda sebelum mulai ngetik
+local backspaceDelay = 0.10 -- Jeda hapus huruf
+local deleteDelay = 0.12    -- Jeda hapus tambahan
+
 -- Variables
 local autoTypeEnabled = false
 local autoEnterEnabled = true
 local humanModeEnabled = false
-local typeDelay = 0.12
-local enterDelay = 0.15
-local turnDelay = 2.0
-local backspaceDelay = 0.10
-local deleteDelay = 0.12
 local noclipEnabled = false
 local noclipConnection
 local antiAfkEnabled = false
@@ -163,7 +165,7 @@ local MainCorner = Instance.new("UICorner")
 MainCorner.CornerRadius = UDim.new(0, 16)
 MainCorner.Parent = MainFrame
 
--- Header (sama kayak sebelumnya)
+-- Header
 local Header = Instance.new("Frame")
 Header.Name = "Header"
 Header.Size = UDim2.new(1, 0, 0, HEADER_HEIGHT)
@@ -421,10 +423,6 @@ local mainContainer = createTabContainer()
 local utilContainer = createTabContainer()
 local tpContainer = createTabContainer()
 
-setupContainerLayout(mainContainer)
-setupContainerLayout(utilContainer)
-setupContainerLayout(tpContainer)
-
 local function setupContainerLayout(container)
     local layout = Instance.new("UIListLayout")
     layout.Padding = UDim.new(0, IsMobile and 5 or 7)
@@ -437,6 +435,10 @@ local function setupContainerLayout(container)
     padding.PaddingBottom = UDim.new(0, 10)
     padding.Parent = container
 end
+
+setupContainerLayout(mainContainer)
+setupContainerLayout(utilContainer)
+setupContainerLayout(tpContainer)
 
 -- Sidebar Tab Buttons
 local tabButtons = {}
@@ -683,145 +685,7 @@ local function createToggleButton(text, parent, defaultState, callback, order)
 end
 
 -- ==============================================
--- SLIDER DELAY (DIPERBAIKI - BISA DIGESER)
--- ==============================================
-local function createSlider(text, parent, min, max, defaultValue, callback, order)
-    local frame = Instance.new("Frame")
-    frame.Size = UDim2.new(1, 0, 0, COMPONENT_HEIGHT + 10)
-    frame.LayoutOrder = order
-    frame.BackgroundColor3 = Color3.fromRGB(16, 15, 24)
-    frame.BorderSizePixel = 0
-    frame.Parent = parent
-    
-    local frameCorner = Instance.new("UICorner")
-    frameCorner.CornerRadius = UDim.new(0, 8)
-    frameCorner.Parent = frame
-    
-    local frameStroke = Instance.new("UIStroke")
-    frameStroke.Color = THEME.mid
-    frameStroke.Thickness = 1
-    frameStroke.Transparency = 0.6
-    frameStroke.Parent = frame
-    
-    -- Label
-    local label = Instance.new("TextLabel")
-    label.Size = UDim2.new(0, 100, 0, 20)
-    label.Position = UDim2.new(0, 10, 0, 5)
-    label.BackgroundTransparency = 1
-    label.Text = text
-    label.TextColor3 = Color3.fromRGB(210, 200, 230)
-    label.Font = Enum.Font.GothamBold
-    label.TextSize = TEXT_SIZE_NORMAL
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.Parent = frame
-    
-    -- Value Display
-    local valueLabel = Instance.new("TextLabel")
-    valueLabel.Size = UDim2.new(0, 40, 0, 20)
-    valueLabel.Position = UDim2.new(1, -45, 0, 5)
-    valueLabel.BackgroundTransparency = 1
-    valueLabel.Text = string.format("%.2fs", defaultValue)
-    valueLabel.TextColor3 = THEME.accent
-    valueLabel.Font = Enum.Font.GothamBold
-    valueLabel.TextSize = TEXT_SIZE_NORMAL
-    valueLabel.TextXAlignment = Enum.TextXAlignment.Right
-    valueLabel.Parent = frame
-    
-    -- Slider Background
-    local sliderBg = Instance.new("Frame")
-    sliderBg.Size = UDim2.new(1, -20, 0, 8)
-    sliderBg.Position = UDim2.new(0, 10, 0, 30)
-    sliderBg.BackgroundColor3 = Color3.fromRGB(40, 35, 55)
-    sliderBg.BorderSizePixel = 0
-    sliderBg.Parent = frame
-    
-    local sliderBgCorner = Instance.new("UICorner")
-    sliderBgCorner.CornerRadius = UDim.new(1, 0)
-    sliderBgCorner.Parent = sliderBg
-    
-    -- Slider Fill
-    local sliderFill = Instance.new("Frame")
-    sliderFill.Size = UDim2.new((defaultValue - min) / (max - min), 0, 1, 0)
-    sliderFill.BackgroundColor3 = THEME.accent
-    sliderFill.BorderSizePixel = 0
-    sliderFill.Parent = sliderBg
-    
-    local sliderFillCorner = Instance.new("UICorner")
-    sliderFillCorner.CornerRadius = UDim.new(1, 0)
-    sliderFillCorner.Parent = sliderFill
-    
-    -- Slider Button (Dragger)
-    local sliderBtn = Instance.new("TextButton")
-    sliderBtn.Size = UDim2.new(0, 16, 0, 16)
-    sliderBtn.Position = UDim2.new((defaultValue - min) / (max - min), -8, 0.5, -8)
-    sliderBtn.BackgroundColor3 = Color3.new(1, 1, 1)
-    sliderBtn.Text = ""
-    sliderBtn.ZIndex = 10
-    sliderBtn.Parent = sliderBg
-    
-    local sliderBtnCorner = Instance.new("UICorner")
-    sliderBtnCorner.CornerRadius = UDim.new(1, 0)
-    sliderBtnCorner.Parent = sliderBtn
-    
-    local sliderBtnStroke = Instance.new("UIStroke")
-    sliderBtnStroke.Color = THEME.accent
-    sliderBtnStroke.Thickness = 2
-    sliderBtnStroke.Parent = sliderBtn
-    
-    -- Logic Slider (DIPERBAIKI)
-    local dragging = false
-    
-    local function updateSlider(input)
-        if not dragging then return end
-        
-        local mousePos = input.Position
-        local sliderPos = sliderBg.AbsolutePosition.X
-        local sliderWidth = sliderBg.AbsoluteSize.X
-        
-        local relativeX = math.clamp(mousePos.X - sliderPos, 0, sliderWidth)
-        local percent = relativeX / sliderWidth
-        
-        -- Hitung nilai
-        local value = min + (percent * (max - min))
-        value = math.floor(value * 100) / 100  -- 2 desimal
-        
-        -- Update UI
-        sliderFill.Size = UDim2.new(percent, 0, 1, 0)
-        sliderBtn.Position = UDim2.new(percent, -8, 0.5, -8)
-        valueLabel.Text = string.format("%.2fs", value)
-        
-        -- Panggil callback
-        callback(value)
-    end
-    
-    sliderBtn.MouseButton1Down:Connect(function()
-        dragging = true
-    end)
-    
-    -- Input ended
-    UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = false
-        end
-    end)
-    
-    -- Input changed
-    UserInputService.InputChanged:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseMovement then
-            updateSlider(input)
-        end
-    end)
-    
-    -- Tambahin juga untuk touch (mobile)
-    sliderBtn.TouchLongPress:Connect(function()
-        dragging = true
-    end)
-    
-    return frame
-end
-
--- ==============================================
--- BUILD MAIN TAB
+-- BUILD MAIN TAB (TANPA DELAY SETTINGS)
 -- ==============================================
 local order = 1
 
@@ -1092,7 +956,7 @@ infoHeader.MouseButton1Click:Connect(function()
 end)
 
 -- ==============================================
--- KATA SULIT DROPDOWN (kayak yang lama)
+-- KATA SULIT DROPDOWN
 -- ==============================================
 local kataSulitHeader = Instance.new("TextButton")
 kataSulitHeader.Size = UDim2.new(1, 0, 0, 35)
@@ -1311,101 +1175,6 @@ kataSulitBtn.MouseButton1Click:Connect(function()
     )
     
     updateCategoryButtons()
-end)
-
--- ==============================================
--- DELAY SETTINGS (DENGAN SLIDER YANG BENER)
--- ==============================================
-local delayHeader = Instance.new("TextButton")
-delayHeader.Size = UDim2.new(1, 0, 0, 35)
-delayHeader.LayoutOrder = order
-delayHeader.BackgroundColor3 = Color3.fromRGB(20, 16, 36)
-delayHeader.Text = ""
-delayHeader.AutoButtonColor = false
-delayHeader.Parent = mainContainer
-order = order + 1
-
-local delayHeaderCorner = Instance.new("UICorner")
-delayHeaderCorner.CornerRadius = UDim.new(0, 8)
-delayHeaderCorner.Parent = delayHeader
-
-local delayHeaderStroke = Instance.new("UIStroke")
-delayHeaderStroke.Color = THEME.mid
-delayHeaderStroke.Thickness = 1
-delayHeaderStroke.Transparency = 0.5
-delayHeaderStroke.Parent = delayHeader
-
-local delayIcon = Instance.new("ImageLabel")
-delayIcon.Size = UDim2.new(0, 18, 0, 18)
-delayIcon.Position = UDim2.new(0, 10, 0.5, -9)
-delayIcon.BackgroundTransparency = 1
-delayIcon.Image = "rbxassetid://6023426925"
-delayIcon.ImageColor3 = THEME.accent
-delayIcon.Parent = delayHeader
-
-local delayTitle = Instance.new("TextLabel")
-delayTitle.Size = UDim2.new(1, -80, 1, 0)
-delayTitle.Position = UDim2.new(0, 35, 0, 0)
-delayTitle.BackgroundTransparency = 1
-delayTitle.Text = "DELAY SETTINGS"
-delayTitle.TextColor3 = THEME.logText
-delayTitle.Font = Enum.Font.GothamBold
-delayTitle.TextSize = 13
-delayTitle.TextXAlignment = Enum.TextXAlignment.Left
-delayTitle.Parent = delayHeader
-
-local delayArrow = Instance.new("TextLabel")
-delayArrow.Size = UDim2.new(0, 20, 0, 20)
-delayArrow.Position = UDim2.new(1, -25, 0.5, -10)
-delayArrow.BackgroundTransparency = 1
-delayArrow.Text = "▼"
-delayArrow.TextColor3 = THEME.accent
-delayArrow.Font = Enum.Font.GothamBold
-delayArrow.TextSize = 14
-delayArrow.Parent = delayHeader
-
--- CONTENT DELAY
-local delayContent = {}
-
--- Slider Write Delay
-local writeSlider = createSlider("Write Delay", mainContainer, 0.05, 0.5, typeDelay, function(value)
-    typeDelay = value
-    enterDelay = value
-    print("✏️ Write Delay: " .. value .. "s")
-end, order)
-order = order + 1
-table.insert(delayContent, writeSlider)
-
--- Slider Turn Delay
-local turnSlider = createSlider("Turn Delay", mainContainer, 1.0, 5.0, turnDelay, function(value)
-    turnDelay = value
-    print("⏱️ Turn Delay: " .. value .. "s")
-end, order)
-order = order + 1
-table.insert(delayContent, turnSlider)
-
--- Slider Backspace Delay
-local backspaceSlider = createSlider("Backspace Delay", mainContainer, 0.05, 0.3, backspaceDelay, function(value)
-    backspaceDelay = value
-    deleteDelay = value
-    print("⌫ Backspace Delay: " .. value .. "s")
-end, order)
-order = order + 1
-table.insert(delayContent, backspaceSlider)
-
--- Atur visibility DELAY
-local delayExpanded = true
-for _, item in ipairs(delayContent) do
-    item.Visible = delayExpanded
-end
-
-delayHeader.MouseButton1Click:Connect(function()
-    playClickSound()
-    delayExpanded = not delayExpanded
-    delayArrow.Text = delayExpanded and "▼" or "▶"
-    for _, item in ipairs(delayContent) do
-        item.Visible = delayExpanded
-    end
 end)
 
 -- ==============================================
@@ -2077,4 +1846,4 @@ end
 -- Show main tab by default
 switchTab(mainContainer, mainTab)
 
-print("✅ Anixly Loaded - Slider Delay Bisa Digeser!")
+print("✅ Anixly Loaded")
