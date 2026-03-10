@@ -1,5 +1,5 @@
 --[[
-    Anixly - Sambung kata (Delay Settings Hidden)
+    Anixly - Sambung kata (Fixed UI + Resize + Stable Human Mode)
 ]]
 
 -- Services
@@ -56,6 +56,10 @@ local THEME = {
 -- UI Sizes
 local UI_WIDTH = IsMobile and 300 or 460
 local UI_HEIGHT = IsMobile and 250 or 310
+local MIN_WIDTH = 300
+local MIN_HEIGHT = 250
+local MAX_WIDTH = 800
+local MAX_HEIGHT = 600
 local SIDEBAR_WIDTH = IsMobile and 85 or 105
 local HEADER_HEIGHT = IsMobile and 42 or 46
 local TEXT_SIZE_SMALL = IsMobile and 9 or 11
@@ -63,12 +67,12 @@ local COMPONENT_HEIGHT = IsMobile and 32 or 36
 local TEXT_SIZE_NORMAL = IsMobile and 10 or 12
 local TEXT_SIZE_LARGE = IsMobile and 13 or 15
 
--- ===== DELAY SETTINGS (HIDDEN - ATUR DI SINI) =====
+-- ===== DELAY SETTINGS =====
 local typeDelay = 0.12      -- Jeda antar huruf (detik)
-local enterDelay = 0.15     -- Jeda sebelum enter
-local turnDelay = 2.0       -- Jeda sebelum mulai ngetik
-local backspaceDelay = 0.10 -- Jeda hapus huruf
-local deleteDelay = 0.12    -- Jeda hapus tambahan
+local enterDelay = 0.15      -- Jeda sebelum enter
+local turnDelay = 1.5        -- Jeda sebelum mulai ngetik
+local backspaceDelay = 0.10  -- Jeda hapus huruf
+local deleteDelay = 0.12     -- Jeda hapus tambahan
 
 -- Variables
 local autoTypeEnabled = false
@@ -78,40 +82,26 @@ local noclipEnabled = false
 local noclipConnection
 local antiAfkEnabled = false
 local antiAfkConnection
+local isTyping = false
+local typingConnection = nil
 
 -- Word categories
 local wordCategories = {
-    IF = {},
-    X = {},
-    NG = {},
-    AI = {},
-    KS = {},
-    CY = {},
-    UI = {},
-    LY = {},
-    RS = {},
-    NS = {},
+    IF = {}, X = {}, NG = {}, AI = {}, KS = {}, CY = {}, UI = {}, LY = {}, RS = {}, NS = {},
+    AX = {}, LT = {}, TT = {}, OO = {},
     ["SEMUA KATA SULIT"] = {}
 }
 
 local categoryToggles = {
-    IF = false,
-    X = false,
-    NG = false,
-    AI = false,
-    KS = false,
-    CY = false,
-    UI = false,
-    LY = false,
-    RS = false,
-    NS = false,
+    IF = false, X = false, NG = false, AI = false, KS = false,
+    CY = false, UI = false, LY = false, RS = false, NS = false,
+    AX = false, LT = false, TT = false, OO = false,
     ["SEMUA KATA SULIT"] = false
 }
 
 local usedWords = {}
 local currentWord = ""
 local wordLength = 0
-local isTyping = false
 
 -- Common words
 local commonWords = {
@@ -252,9 +242,51 @@ CloseBtn.MouseButton1Click:Connect(function()
     IsRunning = false
 end)
 
+-- RESIZE HANDLE
+local ResizeHandle = Instance.new("TextButton")
+ResizeHandle.Name = "ResizeHandle"
+ResizeHandle.Size = UDim2.new(0, 20, 0, 20)
+ResizeHandle.Position = UDim2.new(1, -20, 1, -20)
+ResizeHandle.BackgroundColor3 = THEME.mid
+ResizeHandle.Text = "↘️"
+ResizeHandle.TextColor3 = Color3.new(1, 1, 1)
+ResizeHandle.Font = Enum.Font.GothamBold
+ResizeHandle.TextSize = 14
+ResizeHandle.ZIndex = 10
+ResizeHandle.Parent = MainFrame
+
+local ResizeCorner = Instance.new("UICorner")
+ResizeCorner.CornerRadius = UDim.new(0, 4)
+ResizeCorner.Parent = ResizeHandle
+
+-- Resize Logic
+local isResizing = false
+local resizeStartPos, startWidth, startHeight
+
+local function clampSize(width, height)
+    return math.clamp(width, MIN_WIDTH, MAX_WIDTH), math.clamp(height, MIN_HEIGHT, MAX_HEIGHT)
+end
+
+local function updateGlow()
+    GlowWrapper.Size = UDim2.new(0, MainFrame.Size.X.Offset + 4, 0, MainFrame.Size.Y.Offset + 4)
+    GlowWrapper.Position = UDim2.new(
+        MainFrame.Position.X.Scale, MainFrame.Position.X.Offset - 2,
+        MainFrame.Position.Y.Scale, MainFrame.Position.Y.Offset - 2
+    )
+end
+
+ResizeHandle.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        isResizing = true
+        resizeStartPos = input.Position
+        startWidth = MainFrame.Size.X.Offset
+        startHeight = MainFrame.Size.Y.Offset
+    end
+end)
+
 -- Mini Icon
 local MiniIcon = Instance.new("TextButton")
-MiniIcon.Name = "AnixlyMiniIcon"
+MiniIcon.Name = "MiniIcon"
 MiniIcon.Size = UDim2.new(0, IsMobile and 45 or 60, 0, IsMobile and 45 or 60)
 MiniIcon.Position = UDim2.new(0, 10, 0.5, -30)
 MiniIcon.BackgroundColor3 = THEME.headerBg
@@ -263,7 +295,6 @@ MiniIcon.TextColor3 = Color3.new(1, 1, 1)
 MiniIcon.Font = Enum.Font.GothamBold
 MiniIcon.TextSize = IsMobile and 30 or 40
 MiniIcon.Visible = false
-MiniIcon.BorderSizePixel = 0
 MiniIcon.Parent = ScreenGui
 
 local MiniCorner = Instance.new("UICorner")
@@ -285,6 +316,7 @@ MinimizeBtn.MouseButton1Click:Connect(function()
     playClickSound()
     MainFrame.Visible = false
     GlowWrapper.Visible = false
+    ResizeHandle.Visible = false
     MiniIcon.Visible = true
     miniDragDist = 0
 end)
@@ -305,6 +337,7 @@ MiniIcon.InputEnded:Connect(function(input)
             playClickSound()
             MainFrame.Visible = true
             GlowWrapper.Visible = true
+            ResizeHandle.Visible = true
             MiniIcon.Visible = false
         end
         miniDragDist = 0
@@ -320,6 +353,7 @@ MiniIcon.MouseButton1Click:Connect(function()
     playClickSound()
     MainFrame.Visible = true
     GlowWrapper.Visible = true
+    ResizeHandle.Visible = true
     MiniIcon.Visible = false
     miniDragDist = 0
 end)
@@ -341,21 +375,32 @@ dragButton.InputBegan:Connect(function(input)
     dragStartPos = MainFrame.Position
 end)
 
+-- Input handling untuk drag & resize
 UserInputService.InputChanged:Connect(function(input)
     if not (input.UserInputType == Enum.UserInputType.MouseMovement or input.UserInputType == Enum.UserInputType.Touch) then return end
+    
+    -- RESIZE
+    if isResizing then
+        local delta = input.Position - resizeStartPos
+        local newW, newH = clampSize(startWidth + delta.X, startHeight + delta.Y)
+        MainFrame.Size = UDim2.new(0, newW, 0, newH)
+        updateGlow()
+        ResizeHandle.Position = UDim2.new(1, -20, 1, -20)
+        return
+    end
+    
+    -- DRAG MAIN WINDOW
     if dragStart then
         local delta = input.Position - dragStart
-        local newPos = UDim2.new(
+        MainFrame.Position = UDim2.new(
             dragStartPos.X.Scale, dragStartPos.X.Offset + delta.X,
             dragStartPos.Y.Scale, dragStartPos.Y.Offset + delta.Y
         )
-        MainFrame.Position = newPos
-        GlowWrapper.Position = UDim2.new(
-            newPos.X.Scale, newPos.X.Offset - 2,
-            newPos.Y.Scale, newPos.Y.Offset - 2
-        )
+        updateGlow()
         return
     end
+    
+    -- DRAG MINI ICON
     if isDraggingMini then
         local delta = input.Position - dragStartPos
         miniDragDist = delta.Magnitude
@@ -363,6 +408,13 @@ UserInputService.InputChanged:Connect(function(input)
             miniStartPos.X.Scale, miniStartPos.X.Offset + delta.X,
             miniStartPos.Y.Scale, miniStartPos.Y.Offset + delta.Y
         )
+    end
+end)
+
+UserInputService.InputEnded:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1 or input.UserInputType == Enum.UserInputType.Touch then
+        dragStart = nil
+        isResizing = false
     end
 end)
 
@@ -406,7 +458,7 @@ contentArea.Position = UDim2.new(0, contentOffset, 0, HEADER_HEIGHT + 4)
 contentArea.BackgroundTransparency = 1
 contentArea.Parent = MainFrame
 
--- Tab Containers
+-- Tab Containers (FIXED SCROLLING)
 local function createTabContainer()
     local container = Instance.new("ScrollingFrame")
     container.Size = UDim2.new(1, 0, 1, 0)
@@ -415,6 +467,10 @@ local function createTabContainer()
     container.ScrollBarThickness = IsMobile and 3 or 2
     container.ScrollBarImageColor3 = THEME.accent
     container.AutomaticCanvasSize = Enum.AutomaticSize.Y
+    container.CanvasSize = UDim2.new(0, 0, 0, 0)
+    container.ScrollingEnabled = true
+    container.ScrollBarImageTransparency = 0.5
+    container.VerticalScrollBarPosition = Enum.VerticalScrollBarPosition.Right
     container.Parent = contentArea
     return container
 end
@@ -428,6 +484,12 @@ local function setupContainerLayout(container)
     layout.Padding = UDim.new(0, IsMobile and 5 or 7)
     layout.SortOrder = Enum.SortOrder.LayoutOrder
     layout.Parent = container
+    
+    -- Update canvas size when layout changes
+    layout:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+        container.CanvasSize = UDim2.new(0, 0, 0, layout.AbsoluteContentSize.Y + 10)
+    end)
+    
     local padding = Instance.new("UIPadding")
     padding.PaddingLeft = UDim.new(0, 5)
     padding.PaddingRight = UDim.new(0, 5)
@@ -595,8 +657,6 @@ local function createCollapsibleHeader(title, iconId, container, contentList, or
             item.Visible = expanded
         end
         task.wait(0.05)
-        local canvasSize = container.CanvasSize
-        container.CanvasSize = UDim2.new(0, 0, 0, canvasSize.Y.Offset)
     end)
     
     return header
@@ -685,7 +745,7 @@ local function createToggleButton(text, parent, defaultState, callback, order)
 end
 
 -- ==============================================
--- BUILD MAIN TAB (TANPA DELAY SETTINGS)
+-- BUILD MAIN TAB
 -- ==============================================
 local order = 1
 
@@ -698,7 +758,7 @@ order = order + 1
 autoFeaturesContent[2] = createToggleButton("Auto Submit", mainContainer, true, function(state) autoEnterEnabled = state end, order)
 order = order + 1
 
-autoFeaturesContent[3] = createToggleButton("Human Mode [10% Typo]", mainContainer, false, function(state) 
+autoFeaturesContent[3] = createToggleButton("Human Mode [🧠]", mainContainer, false, function(state) 
     humanModeEnabled = state 
     if state then
         print("👤 Human Mode AKTIF - 10% Typo")
@@ -774,7 +834,7 @@ autoHeader.MouseButton1Click:Connect(function()
 end)
 
 -- ==============================================
--- INFORMATION SECTION (AWALAN DAN SEARCH)
+-- INFORMATION SECTION
 -- ==============================================
 local infoHeader = Instance.new("TextButton")
 infoHeader.Size = UDim2.new(1, 0, 0, 35)
@@ -1046,7 +1106,7 @@ kataDropdownStroke.Parent = kataDropdown
 
 local categoryHeight = IsMobile and 30 or 28
 local dropdownOpen = false
-local categories = {"IF", "X", "NG", "AI", "CY", "UI", "KS", "LY", "RS", "NS", "SEMUA KATA SULIT"}
+local categories = {"IF", "X", "NG", "AI", "CY", "UI", "KS", "RS", "NS", "AX", "LT", "TT", "LY", "OO", "SEMUA KATA SULIT"}
 
 local kataExpanded = true
 local kataContent = {kataSulitBtn, kataDropdown}
@@ -1067,7 +1127,7 @@ end)
 local function getCategoryCount(cat)
     if cat == "SEMUA KATA SULIT" then
         local total = 0
-        for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "LY", "RS", "NS"}) do
+        for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "RS", "NS", "AX", "LT", "TT", "LY", "OO"}) do
             total = total + #wordCategories[c]
         end
         return total
@@ -1137,14 +1197,14 @@ local function updateCategoryButtons()
                 local newState = not categoryToggles["SEMUA KATA SULIT"]
                 categoryToggles["SEMUA KATA SULIT"] = newState
                 if newState then
-                    for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "LY", "RS", "NS"}) do
+                    for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "RS", "NS", "AX", "LT", "TT", "LY", "OO"}) do
                         categoryToggles[c] = false
                     end
                 end
             else
                 categoryToggles[cat] = not categoryToggles[cat]
                 local anyOn = false
-                for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "LY", "RS", "NS"}) do
+                for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "RS", "NS", "AX", "LT", "TT", "LY", "OO"}) do
                     if categoryToggles[c] then
                         anyOn = true
                         break
@@ -1178,7 +1238,7 @@ kataSulitBtn.MouseButton1Click:Connect(function()
 end)
 
 -- ==============================================
--- BUILD UTILITY TAB (dengan ANTI AFK)
+-- BUILD UTILITY TAB
 -- ==============================================
 local utilOrder = 1
 
@@ -1554,7 +1614,7 @@ createTPButton("Claim Bambu", "rbxassetid://6023426935", function()
 end, tpOrder)
 
 -- ==============================================
--- TYPING FUNCTION
+-- STABLE HUMAN MODE TYPING FUNCTION
 -- ==============================================
 local function typeWord(word, length)
     if not IsRunning then return end
@@ -1566,6 +1626,9 @@ local function typeWord(word, length)
         local typoChance = 0.1
         
         for i = 1, #word do
+            if not IsRunning then return end
+            
+            -- Cek typo
             if typoCount < maxTypo and math.random() < typoChance then
                 local wrongChar = string.char(math.random(97, 122)):upper()
                 local correctChar = word:sub(i, i):upper()
@@ -1578,20 +1641,25 @@ local function typeWord(word, length)
                     VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
                     task.wait(0.05)
                     VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
-                    task.wait(backspaceDelay + 0.1)
+                    task.wait(backspaceDelay)
                 end
                 
+                -- Hapus huruf salah
                 VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Backspace, false, game)
                 task.wait(backspaceDelay)
                 VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Backspace, false, game)
+                
                 typoCount = typoCount + 1
                 task.wait(0.1)
             end
             
+            -- Ketik huruf bener
             local char = word:sub(i, i):upper()
             local keyCode = Enum.KeyCode[char]
             if keyCode then
+                -- Jeda antar huruf
                 task.wait(math.random() * 0.15 + 0.1)
+                
                 VirtualInputManager:SendKeyEvent(true, keyCode, false, game)
                 task.wait(0.05)
                 VirtualInputManager:SendKeyEvent(false, keyCode, false, game)
@@ -1599,7 +1667,10 @@ local function typeWord(word, length)
         end
         task.wait(math.random() * 0.2 + 0.1)
     else
+        -- Mode cepat
         for i = 1, #word do
+            if not IsRunning then return end
+            
             local char = word:sub(i, i):upper()
             local keyCode = Enum.KeyCode[char]
             if keyCode then
@@ -1618,10 +1689,20 @@ local function typeWord(word, length)
     end
 end
 
--- Auto type function
+-- Auto type function dengan state management yang lebih baik
+local isTyping = false
+local typingQueue = false
+
 local function autoType()
-    if not autoTypeEnabled or not IsRunning or isTyping then return end
+    if not autoTypeEnabled or not IsRunning or isTyping then 
+        if autoTypeEnabled and not isTyping then
+            typingQueue = true
+        end
+        return 
+    end
+    
     isTyping = true
+    typingQueue = false
     
     local playerGui = LocalPlayer:WaitForChild("PlayerGui")
     local matchUI = playerGui:FindFirstChild("MatchUI", true)
@@ -1633,6 +1714,7 @@ local function autoType()
                 local text = (obj.Text:gsub("%s+", "")):lower()
                 if #text >= 1 and #text <= 4 then
                     awalan = text
+                    break
                 end
             end
         end
@@ -1652,7 +1734,7 @@ local function autoType()
                     end
                 end
             elseif enabled and cat == "SEMUA KATA SULIT" then
-                for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "LY", "RS", "NS"}) do
+                for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "RS", "NS", "AX", "LT", "TT", "LY", "OO"}) do
                     for _, word in ipairs(wordCategories[c]) do
                         if word:sub(1, #awalan) == awalan and not usedWords[word] and #word > #awalan then
                             table.insert(specialCandidates, word)
@@ -1690,6 +1772,10 @@ local function autoType()
     
     task.wait(0.5)
     isTyping = false
+    
+    if typingQueue and autoTypeEnabled then
+        task.spawn(autoType)
+    end
 end
 
 -- Fungsi pencarian kata
@@ -1717,10 +1803,10 @@ local function searchWords(prefix)
     
     if #results > 0 then
         local total = #results
-        if total > 50 then
+        if total > 100 then
             local display = {}
-            for i = 1, 50 do table.insert(display, results[i]) end
-            resultLabel.Text = "Hasil (" .. total .. " kata, tampil 50): " .. table.concat(display, ", ")
+            for i = 1, 100 do table.insert(display, results[i]) end
+            resultLabel.Text = "Hasil (" .. total .. " kata, tampil 100): " .. table.concat(display, ", ")
         else
             resultLabel.Text = "Hasil (" .. total .. " kata): " .. table.concat(results, ", ")
         end
@@ -1768,13 +1854,17 @@ task.spawn(function()
         X = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/X.txt",
         NG = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/NG.txt",
         AI = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/AI.txt",
-        ["SEMUA KATA SULIT"] = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/sulit.txt",        
         CY = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/CY.txt",
         UI = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/UI.txt",
         KS = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/KS.txt", 
         LY = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/LY.txt",
         RS = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/RS.txt",
-        NS = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/NS.txt"
+        NS = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/NS.txt", 
+        AX = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/AX.txt", 
+        LT = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/LT.txt",
+        TT = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/TT.txt",
+        OO = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/OO.txt",
+        ["SEMUA KATA SULIT"] = "https://raw.githubusercontent.com/Niightcorporation/Sk-Alya/refs/heads/main/sulit.txt"
     }
     
     for cat, url in pairs(urls) do
@@ -1794,7 +1884,7 @@ task.spawn(function()
     end
 end)
 
--- Remote handler
+-- Remote handler dengan error handling
 local remotes = ReplicatedStorage:FindFirstChild("Remotes")
 if remotes then
     local matchRemote = remotes:FindFirstChild("MatchUI")
@@ -1814,14 +1904,15 @@ if remotes then
             if not IsRunning then return end
             
             if event == "StartTurn" or event == "YourTurn" then
-                if not isTyping then
-                    task.wait(turnDelay + math.random() * (turnDelay - turnDelay))
+                if not isTyping and autoTypeEnabled then
+                    task.wait(turnDelay + math.random() * (turnDelay * 0.2))
                     autoType()
                 end
                 
             elseif event == "Eliminated" or event == "EndMatch" or event == "HideMatchUI" then
                 awalanLabel.Text = "AWALAN: -"
                 kataLabel.Text = "-"
+                usedWords = {} -- Reset used words untuk match baru
                 
             elseif event == "Mistake" and autoTypeEnabled then
                 local playerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -1832,10 +1923,14 @@ if remotes then
                     if submitBtn and submitBtn.Visible and submitBtn.BackgroundTransparency < 0.6 then
                         if currentWord ~= "" then usedWords[currentWord] = true end
                         print("⚠️ Anixly: Salah! Menghapus & Cari Baru...")
-                        isTyping = true
-                        clearWord()
-                        isTyping = false
-                        autoType()
+                        
+                        if not isTyping then
+                            isTyping = true
+                            clearWord()
+                            isTyping = false
+                            task.wait(0.3)
+                            autoType()
+                        end
                     end
                 end
             end
@@ -1846,4 +1941,4 @@ end
 -- Show main tab by default
 switchTab(mainContainer, mainTab)
 
-print("✅ Anixly Loaded")
+print("✅ Anixly Loaded)
