@@ -16,7 +16,6 @@ local SoundService = game:GetService("SoundService")
 
 local LocalPlayer = Players.LocalPlayer
 local IsMobile = UserInputService.TouchEnabled
-local placeId = game.PlaceId 131623223084840  -- Target Place ID
 
 -- Anti Re-Execute
 local ScriptName = "Anixly_alya"
