@@ -4,24 +4,23 @@ repeat task.wait() until game:IsLoaded()
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
-local Games = {
-    [130342654546662] = {
-        name = "sambung-kata",
-        url = "https://raw.githubusercontent.com/Niightcorporation/Alyaa/refs/heads/main/Anixly.lua"
-    }
+local gameS = {
+    130342654546662,
+    131623223084840
 }
 
 local placeId = game.PlaceId
-local gameData = Games[placeId]
+local gameS = false
 
-if gameData then
-    loadstring(game:HttpGet(gameData.url))()
-else
-    local supported = ""
-    for id,data in pairs(Games) do
-        supported = supported .. "\n• " .. data.name .. " (ID: " .. id .. ")"
+for _, id in ipairs(gameS) do
+    if id == placeId then
+        isgameS = true
+        break
     end
-
-    player:Kick("Game not supported!\n\nSupported Games:" .. supported .. "\n\nCurrent Place ID: " .. placeId)
 end
+
+if isgameS then
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/Niightcorporation/Alyaa/refs/heads/main/Anixly.lua"))()
+else
+    player:Kick("Game not supported!\n\nPlace ID: " .. placeId)
 end
