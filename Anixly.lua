@@ -16,6 +16,7 @@ local SoundService = game:GetService("SoundService")
 
 local LocalPlayer = Players.LocalPlayer
 local IsMobile = UserInputService.TouchEnabled
+local placeId = game.PlaceId 131623223084840  -- Target Place ID
 
 -- Anti Re-Execute
 local ScriptName = "Anixly_alya"
@@ -80,6 +81,7 @@ local antiAfkEnabled = false
 local antiAfkConnection
 local isTyping = false
 local typingQueue = false
+local lastAwalan = ""  -- Untuk track perubahan awalan
 
 -- Word categories
 local wordCategories = {
@@ -532,75 +534,6 @@ tpTab.MouseButton1Click:Connect(function()
     playClickSound()
     switchTab(tpContainer, tpTab)
 end)
-
--- Fungsi createCollapsibleHeader
-local function createCollapsibleHeader(title, iconId, container, contentList, order)
-    local header = Instance.new("TextButton")
-    header.Size = UDim2.new(1, 0, 0, 35)
-    header.LayoutOrder = order
-    header.BackgroundColor3 = Color3.fromRGB(20, 16, 36)
-    header.Text = ""
-    header.AutoButtonColor = false
-    header.Parent = container
-    
-    local headerCorner = Instance.new("UICorner")
-    headerCorner.CornerRadius = UDim.new(0, 8)
-    headerCorner.Parent = header
-    
-    local headerStroke = Instance.new("UIStroke")
-    headerStroke.Color = THEME.mid
-    headerStroke.Thickness = 1
-    headerStroke.Transparency = 0.5
-    headerStroke.Parent = header
-    
-    local icon = Instance.new("ImageLabel")
-    icon.Size = UDim2.new(0, 18, 0, 18)
-    icon.Position = UDim2.new(0, 10, 0.5, -9)
-    icon.BackgroundTransparency = 1
-    icon.Image = iconId
-    icon.ImageColor3 = THEME.accent
-    icon.Parent = header
-    
-    local titleLabel = Instance.new("TextLabel")
-    titleLabel.Size = UDim2.new(1, -80, 1, 0)
-    titleLabel.Position = UDim2.new(0, 35, 0, 0)
-    titleLabel.BackgroundTransparency = 1
-    titleLabel.Text = title
-    titleLabel.TextColor3 = THEME.logText
-    titleLabel.Font = Enum.Font.GothamBold
-    titleLabel.TextSize = 13
-    titleLabel.TextXAlignment = Enum.TextXAlignment.Left
-    titleLabel.Parent = header
-    
-    local arrow = Instance.new("TextLabel")
-    arrow.Size = UDim2.new(0, 20, 0, 20)
-    arrow.Position = UDim2.new(1, -25, 0.5, -10)
-    arrow.BackgroundTransparency = 1
-    arrow.Text = "▼"
-    arrow.TextColor3 = THEME.accent
-    arrow.Font = Enum.Font.GothamBold
-    arrow.TextSize = 14
-    arrow.Parent = header
-    
-    local expanded = true
-    local content = contentList
-    
-    for _, item in ipairs(content) do
-        item.Visible = expanded
-    end
-    
-    header.MouseButton1Click:Connect(function()
-        playClickSound()
-        expanded = not expanded
-        arrow.Text = expanded and "▼" or "▶"
-        for _, item in ipairs(content) do
-            item.Visible = expanded
-        end
-        task.wait(0.05)
-    end)
-    
-    return header
-end
 
 -- Toggle Button
 local function createToggleButton(text, parent, defaultState, callback, order)
@@ -1547,7 +1480,7 @@ createTPButton("Claim Bambu", "rbxassetid://6023426935", function()
     local player = game.Players.LocalPlayer
     local character = player.Character or player.CharacterAdded:Wait()
     local target = workspace:FindFirstChild("ClaimBambuPart")
-    if target and character:FindFirstChild("HumanoidRootPart") then
+    if target and character and character:FindFirstChild("HumanoidRootPart") then
         character.HumanoidRootPart.CFrame = target.CFrame + Vector3.new(0, 3, 0)
         print("✅ Teleport ke ClaimBambuPart")
     end
@@ -1605,8 +1538,23 @@ local function typeWord(word, length)
     end
 end
 
--- Auto type function dengan state management
+-- Fungsi hapus kata dengan backspace
+local function clearWord()
+    local len = wordLength + 1
+    for _ = 1, len do
+        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Backspace, false, game)
+        task.wait(backspaceDelay + math.random() * (deleteDelay - backspaceDelay))
+        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Backspace, false, game)
+    end
+    wordLength = 0
+    task.wait(0.1)
+end
+
+-- Auto type function dengan state management dan anti-stuck
 local function autoType()
+    -- Anti-stuck: timeout 5 detik
+    local startTime = tick()
+    
     if not autoTypeEnabled or not IsRunning or isTyping then 
         if autoTypeEnabled and not isTyping then
             typingQueue = true
@@ -1621,66 +1569,100 @@ local function autoType()
     local matchUI = playerGui:FindFirstChild("MatchUI", true)
     local awalan = ""
     
-    if matchUI then
-        for _, obj in pairs(matchUI:GetDescendants()) do
-            if (obj.Name == "WordServer" or obj.Name == "Word") and obj:IsA("TextLabel") and obj.Visible then
-                local text = (obj.Text:gsub("%s+", "")):lower()
-                if #text >= 1 and #text <= 4 then
-                    awalan = text
-                    break
+    -- Timeout untuk mencari awalan
+    while not awalan and (tick() - startTime < 5) do
+        if matchUI then
+            for _, obj in pairs(matchUI:GetDescendants()) do
+                if (obj.Name == "WordServer" or obj.Name == "Word") and obj:IsA("TextLabel") and obj.Visible then
+                    local text = (obj.Text:gsub("%s+", "")):lower()
+                    if #text >= 1 and #text <= 4 then
+                        awalan = text
+                        break
+                    end
+                end
+            end
+        end
+        if not awalan then
+            task.wait(0.1)
+        end
+    end
+    
+    -- Kalau timeout, reset
+    if not awalan then
+        isTyping = false
+        return
+    end
+    
+    -- Track perubahan awalan
+    if awalan ~= lastAwalan then
+        print("🔄 Awalan berubah: " .. awalan:upper() .. " (sebelumnya: " .. lastAwalan:upper() .. ")")
+        lastAwalan = awalan
+    end
+    
+    awalanLabel.Text = "AWALAN: " .. awalan:upper()
+    
+    local candidates = {}
+    local specialCandidates = {}
+    
+    for cat, enabled in pairs(categoryToggles) do
+        if enabled and cat ~= "SEMUA KATA SULIT" then
+            for _, word in ipairs(wordCategories[cat]) do
+                if word:sub(1, #awalan) == awalan and not usedWords[word] and #word > #awalan then
+                    table.insert(specialCandidates, word)
+                end
+            end
+        elseif enabled and cat == "SEMUA KATA SULIT" then
+            for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "RS", "NS", "AX", "LT", "TT", "LY"}) do
+                for _, word in ipairs(wordCategories[c]) do
+                    if word:sub(1, #awalan) == awalan and not usedWords[word] and #word > #awalan then
+                        table.insert(specialCandidates, word)
+                    end
                 end
             end
         end
     end
     
-    if awalan ~= "" then
-        awalanLabel.Text = "AWALAN: " .. awalan:upper()
+    if #specialCandidates > 0 then
+        candidates = specialCandidates
+    end
+    
+    if #candidates == 0 then
+        for _, word in ipairs(commonWords) do
+            if word:sub(1, #awalan) == awalan and not usedWords[word] and #word > #awalan then
+                table.insert(candidates, word)
+            end
+        end
+    end
+    
+    if #candidates > 0 then
+        -- Coba maksimal 3 kali kalau kata yang dipilih ternyata sudah dipakai
+        local maxAttempts = 3
+        local chosen = nil
         
-        local candidates = {}
-        local specialCandidates = {}
-        
-        for cat, enabled in pairs(categoryToggles) do
-            if enabled and cat ~= "SEMUA KATA SULIT" then
-                for _, word in ipairs(wordCategories[cat]) do
-                    if word:sub(1, #awalan) == awalan and not usedWords[word] and #word > #awalan then
-                        table.insert(specialCandidates, word)
-                    end
-                end
-            elseif enabled and cat == "SEMUA KATA SULIT" then
-                for _, c in ipairs({"IF", "X", "NG", "AI", "CY", "UI", "KS", "RS", "NS", "AX", "LT", "TT", "LY"}) do
-                    for _, word in ipairs(wordCategories[c]) do
-                        if word:sub(1, #awalan) == awalan and not usedWords[word] and #word > #awalan then
-                            table.insert(specialCandidates, word)
-                        end
-                    end
-                end
+        for attempt = 1, maxAttempts do
+            local candidate = candidates[math.random(1, #candidates)]
+            if not usedWords[candidate] then
+                chosen = candidate
+                break
             end
         end
         
-        if #specialCandidates > 0 then
-            candidates = specialCandidates
+        -- Kalau semua kata sudah dipakai, reset usedWords?
+        if not chosen then
+            print("⚠️ Semua kata sudah dipakai, reset blacklist...")
+            usedWords = {}
+            chosen = candidates[math.random(1, #candidates)]
         end
         
-        if #candidates == 0 then
-            for _, word in ipairs(commonWords) do
-                if word:sub(1, #awalan) == awalan and not usedWords[word] and #word > #awalan then
-                    table.insert(candidates, word)
-                end
-            end
-        end
+        kataLabel.Text = chosen:upper()
+        currentWord = chosen
         
-        if #candidates > 0 then
-            local chosen = candidates[math.random(1, #candidates)]
-            kataLabel.Text = chosen:upper()
-            currentWord = chosen
-            
-            typeWord(chosen:sub(#awalan + 1), #chosen)
-            usedWords[chosen] = true
-            
-            task.wait(1)
-            awalanLabel.Text = "AWALAN: -"
-            kataLabel.Text = "-"
-        end
+        typeWord(chosen:sub(#awalan + 1), #chosen)
+        usedWords[chosen] = true
+        
+        task.wait(1)
+        awalanLabel.Text = "AWALAN: -"
+        kataLabel.Text = "-"
     end
     
     task.wait(0.5)
@@ -1796,22 +1778,11 @@ task.spawn(function()
     end
 end)
 
--- Remote handler dengan error handling
+-- Remote handler dengan error handling dan anti-stuck
 local remotes = ReplicatedStorage:FindFirstChild("Remotes")
 if remotes then
     local matchRemote = remotes:FindFirstChild("MatchUI")
     if matchRemote then
-        local function clearWord()
-            local len = wordLength + 1
-            for _ = 1, len do
-                VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.Backspace, false, game)
-                task.wait(backspaceDelay + math.random() * (deleteDelay - backspaceDelay))
-                VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.Backspace, false, game)
-            end
-            wordLength = 0
-            task.wait(0.1)
-        end
-        
         matchRemote.OnClientEvent:Connect(function(event)
             if not IsRunning then return end
             
@@ -1825,6 +1796,7 @@ if remotes then
                 awalanLabel.Text = "AWALAN: -"
                 kataLabel.Text = "-"
                 usedWords = {} -- Reset used words untuk match baru
+                lastAwalan = "" -- Reset last awalan
                 
             elseif event == "Mistake" and autoTypeEnabled then
                 local playerGui = LocalPlayer:WaitForChild("PlayerGui")
@@ -1833,15 +1805,44 @@ if remotes then
                 if matchUI then
                     local submitBtn = matchUI:FindFirstChild("WordSubmit", true)
                     if submitBtn and submitBtn.Visible and submitBtn.BackgroundTransparency < 0.6 then
-                        if currentWord ~= "" then usedWords[currentWord] = true end
-                        print("⚠️ Anixly: Salah! Menghapus & Cari Baru...")
                         
-                        if not isTyping then
-                            isTyping = true
-                            clearWord()
-                            isTyping = false
+                        -- Blacklist kata yang salah
+                        if currentWord ~= "" then 
+                            usedWords[currentWord] = true 
+                            print("❌ Kata salah: " .. currentWord .. " - Dimasukkan blacklist")
+                        end
+                        
+                        -- Reset state
+                        isTyping = true
+                        
+                        -- Hapus kata yang salah
+                        clearWord()
+                        
+                        -- Delay lebih lama sebelum coba lagi
+                        task.wait(0.5)
+                        
+                        -- BACA ULANG AWALAN! (ini penting)
+                        local newAwalan = ""
+                        for _, obj in pairs(matchUI:GetDescendants()) do
+                            if (obj.Name == "WordServer" or obj.Name == "Word") and obj:IsA("TextLabel") and obj.Visible then
+                                newAwalan = (obj.Text:gsub("%s+", "")):lower()
+                                break
+                            end
+                        end
+                        
+                        -- Reset isTyping
+                        isTyping = false
+                        
+                        -- Cari kata dengan awalan BARU
+                        if newAwalan ~= "" and newAwalan ~= lastAwalan then
+                            print("🔄 Awalan berubah: " .. newAwalan .. ", mencari kata baru...")
+                            lastAwalan = newAwalan
                             task.wait(0.3)
-                            autoType()
+                            autoType()  -- Cari dengan awalan baru
+                        elseif newAwalan ~= "" then
+                            print("⚠️ Awalan sama, coba kata lain...")
+                            task.wait(0.3)
+                            autoType()  -- Cari dengan awalan sama (tapi kata berbeda karena blacklist)
                         end
                     end
                 end
@@ -1853,4 +1854,4 @@ end
 -- Show main tab by default
 switchTab(mainContainer, mainTab)
 
-print("✅ Anixly Loaded")
+print("✅ Anixly Loaded - Sambung kata")
