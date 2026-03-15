@@ -5,7 +5,7 @@ local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
 local Games = {
-    [131623223084840] = {  -- <-- GANTI DENGAN PLACE ID YANG BENAR
+    [130342654546662] = {
         name = "sambung-kata",
         url = "https://raw.githubusercontent.com/Niightcorporation/Alyaa/refs/heads/main/Anixly.lua"
     }
