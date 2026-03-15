@@ -5,7 +5,7 @@ local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
 local Games = {
-    [130342654546662] = {
+    [131623223084840] = {  -- <-- GANTI DENGAN PLACE ID YANG BENAR
         name = "sambung-kata",
         url = "https://raw.githubusercontent.com/Niightcorporation/Alyaa/refs/heads/main/Anixly.lua"
     }
@@ -18,10 +18,10 @@ if gameData then
     loadstring(game:HttpGet(gameData.url))()
 else
     local supported = ""
-    for _,data in pairs(Games) do
-        supported = supported .. "\n• " .. data.name
+    for id,data in pairs(Games) do
+        supported = supported .. "\n• " .. data.name .. " (ID: " .. id .. ")"
     end
 
-    player:Kick("Game not supported!\n\nSupported Games:" .. supported)
+    player:Kick("Game not supported!\n\nSupported Games:" .. supported .. "\n\nCurrent Place ID: " .. placeId)
 end
 end
