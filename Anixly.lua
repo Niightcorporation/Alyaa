@@ -1,3 +1,6 @@
+--]]  
+-- Anixly - Sambung kata  
+--]]
 
 -- Services
 local Players = game:GetService("Players")
@@ -2904,4 +2907,4 @@ end
 -- Show main tab by default
 switchTab(mainContainer, mainTab)
 
-print("✅ Anixly V2.0 Loaded - With Tuyul Mode, Anti Admin, & Nyawa Feature")
+print("✅ Anixly V2.0 Loaded")
