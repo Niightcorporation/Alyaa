@@ -17,18 +17,19 @@ local SoundService = game:GetService("SoundService")
 local LocalPlayer = Players.LocalPlayer
 local IsMobile = UserInputService.TouchEnabled
 
--- Anti Re-Execute
+-- Anti Re-Execute (FIX)
 local ScriptName = "Anixly_alya"
-if _G[ScriptName] then
+if type(_G[ScriptName]) == "function" then
     _G[ScriptName]()
 end
 
 local IsRunning = true
 _G[ScriptName] = function()
     IsRunning = false
-    if CoreGui:FindFirstChild("AnixlyHub") then
+    if CoreGui and CoreGui:FindFirstChild("AnixlyHub") then
         CoreGui.AnixlyHub:Destroy()
     end
+    _G[ScriptName] = nil
 end
 
 -- Input Helpers
