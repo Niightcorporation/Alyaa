@@ -4,23 +4,25 @@ repeat task.wait() until game:IsLoaded()
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
-local gameS = {
+local supportedIds = { 
     130342654546662,
     131623223084840
 }
 
 local placeId = game.PlaceId
-local gameS = false
+local isSupported = false  
 
-for _, id in ipairs(gameS) do
+for _, id in ipairs(supportedIds) do
     if id == placeId then
-        isgameS = true
+        isSupported = true
         break
     end
 end
 
-if isgameS then
+if isSupported then
     loadstring(game:HttpGet("https://raw.githubusercontent.com/Niightcorporation/Alyaa/refs/heads/main/Anixly.lua"))()
 else
     player:Kick("Game not supported!\n\nPlace ID: " .. placeId)
+end
+
 end
